@@ -4,3 +4,13 @@ pycln
 isort
 sphinx_rtd_theme
 sphinx-automodapi
+sqlalchemy==2.0.29
+pydantic
+pytest
+pytest-cov
+polars
+pandas
+pyspark
+delta-spark
+snowflake-snowpark-python
+sqlalchemy-bigquery @ git+https://github.com/Flexron/python-bigquery-sqlalchemy.git
