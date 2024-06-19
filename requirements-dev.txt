@@ -1,0 +1,6 @@
+pre-commit
+black
+pycln
+isort
+sphinx_rtd_theme
+sphinx-automodapi

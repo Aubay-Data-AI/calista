@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages]
+find = { namespaces = false }
+
+[project]
+name = "calista"
+version = "0.1.0"
+authors = []
+readme = "README.md"
+requires-python = ">=3.9.5"
+dependencies = [
+    "pandas",
+    "pyarrow",
+    "pydantic",
+    "overrides",
+    "schema",
+    "python-dotenv",
+    "polars"
+]
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent"
+]
+
+[project.optional-dependencies]
+spark = ["pyspark", "delta-spark"]
+snowflake = ["snowflake-snowpark-python"]
+bigquery = ["sqlalchemy-bigquery @ git+https://github.com/Flexron/python-bigquery-sqlalchemy.git"]
+
+[project.urls]
+Repository = "https://github.com/Flexron/FIAQ"
+
+[tool.pytest.ini_options]
+pythonpath = [
+  "."
+]
+addopts = "--cov fiaq --cov-report term-missing"
+
+[tool.pycln]
+all = true

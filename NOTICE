@@ -1,0 +1,11 @@
+Calista
+Copyright 2024 Aubay.
+
+This product includes software developed at Aubay Data & IA
+(https://data.aubay.com/).
+
+
+python-bigquery-sqlalchemy:
+-----
+This product contains a modified portion of 'python-bigquery-sqlalchemy' developed by googleapis.
+(https://github.com/googleapis/python-bigquery-sqlalchemy).

@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "test-calista",
+  "private_key_id": "47a4ab54cd292735801bb437b8c06c4cd396a682",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCwtpHnCFXoVb9p\n+79GRE5caedgposYT0Ccx6ANZsmJ49evecechCjgSJFWKL+/yPY/FM26V7FS9PQ5\nVQ/yXUWC+uSXY7kKOUCsSfBe/PVytz7P+GNlYMPiwn673Gm7yTSXqMgwvX5M7ryz\nlHIsx22KukOyImj1smb16bDWMg5XKuyub0zmtQKS00E2iPN+JpitEzBfZfCna/tH\n5vW09ZoQYuMgB8Aczfpfl/GW3/xyoesH8uc8TTzw9Q1mXCPrqn/GN1mJy76aQALr\nB0kTjojDVMRIWdldwuVM3lZhBoqyXKgG6jEs4lkNSG/KW0nUHs/Bh2QOyv2l87fn\nSEaEXiyXAgMBAAECggEABYXISBcbmVfsr6MY6MbV/vPvw+1Zp8XVuBm/3p2ivVt1\nFNxkuwmhK7AUUrG2dqxaIlP606wpD4ftGEmYZrOmGA32Xy6LFbyRLGypagMdg3a0\nmfi0jxbzOof50tKZCHjuSI1cgyFvx3dwRyK/OrdQPznLR4ZS6tddwvKJI0GwXMHV\nOayILMb5DymroFLPOYh0RoElOXi4UeBpv09SI34jU09kl59Y8X9fNgadnHXQlehr\noIYGvkWFptUuuJFAvzpzDhlUu2bG6Mzc7+E3Wpo1Fqmu8gcoGc4NI7imVuYBR/h1\nEsHRBYA0gpYFTL/yh4a5DMs9/sTcQINfMy1ZcJUGKQKBgQDW1DCtuG5R6Wu/EQBc\nC/RXZfbjsG6UZ+CyxoDyUmo5UJAnwM8geE4BAWsJ+t5m44yIxNPfIncC3n1Zoum6\nV5VKXMb+L13F1TdDipc+t2cp/5HALan5EgWCKSmN/kGlQgnBPTcXGovuaunyF1nb\n55d1aNLrYqwofdhBVf88eOv1rQKBgQDSlF5+4GNZ9FNkr2XmhdMJG7jARt+REBSt\ng+PJpPgyVuIwgTVf4XTMCR0cplhXHaTulLHPOnZL9IIdSZDaZz1wMkT89vZQ9Y8p\n9HrHQygkEhszoxNRQc+NvIHwfjliLuEC2THICaYtbreSDEWjxY2w78Pakyh44l+Z\n9fEX361L0wKBgCNGOiv8MZkfk8KOvxleGSPUqUJfsPiLSfjw4TFo2OpKUTFF1nzF\nZEGEAxhjaetJB8VZVFS6KwJ8l+aE+o3PXcMVEtOf4WzfgrCDbCwvHzBlN4Bvvw4X\nqHHj4l/fVNYWztU9APO5NyrRwVIwBWA3WcY8jQ17aTtI1p57yWobjNsNAoGAbe5g\nynGPzDUdl/FtDAQO4LFlKJOXQN6ZPOAeeXUy0OzEljfNymkjlSSo2v0IHyptoNNl\nY96MRSi3CF0QTsQYscq8cybl/evDuk5UDlRDz1jYdIOMoR3vIXooh4kNofEBLICA\nWYKYCx3CnW7kqBOI3ba9kwzB0yGycOiQ3Tq6+FsCgYAdDm1mmlzkr7gBTwOxQhyC\nNl9KUYi+sCDdIm+sRjHxQtUoGgeotbVStQHYRwGZsv9+efS7WRoipBWc42gOVYQg\nDYogdtujEmS3DcI58j1VIKYUT1Ecu/m3aZOqZ7+ze9xv/GeLNd1ecsXFDkN1/kOS\nWvV9pIj8hdrbK3IXJXt4Kw==\n-----END PRIVATE KEY-----\n",
+  "client_email": "cs-calista@test-calista.iam.gserviceaccount.com",
+  "client_id": "116375187233665234409",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/cs-calista%40test-calista.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
