@@ -370,51 +370,56 @@ class Pandas_Engine(LazyEngine):
 
 
 class Pandas_AggregateDataset(AggregateDataset):
-
     @staticmethod
     def sum(
-            agg_func: aggregateCond.SumBy,
-            agg_col_name: str,
-            keys: List[str],
-            engine: Pandas_Engine) -> dict[ColumnName: str, Series]:
+        agg_func: aggregateCond.SumBy,
+        agg_col_name: str,
+        keys: List[str],
+        engine: Pandas_Engine,
+    ) -> dict[ColumnName:str, Series]:
         return {agg_col_name: (agg_func.col_name, "sum")}
 
     @staticmethod
     def count(
-            agg_func: aggregateCond.SumBy,
-            agg_col_name: str,
-            keys: List[str],
-            engine: Pandas_Engine) -> dict[ColumnName: str, Series]:
+        agg_func: aggregateCond.SumBy,
+        agg_col_name: str,
+        keys: List[str],
+        engine: Pandas_Engine,
+    ) -> dict[ColumnName:str, Series]:
         return {agg_col_name: (agg_func.col_name, "count")}
 
     @staticmethod
     def mean(
-            agg_func: aggregateCond.SumBy,
-            agg_col_name: str,
-            keys: List[str],
-            engine: Pandas_Engine) -> dict[ColumnName: str, Series]:
+        agg_func: aggregateCond.SumBy,
+        agg_col_name: str,
+        keys: List[str],
+        engine: Pandas_Engine,
+    ) -> dict[ColumnName:str, Series]:
         return {agg_col_name: (agg_func.col_name, "mean")}
 
     @staticmethod
     def min(
-            agg_func: aggregateCond.SumBy,
-            agg_col_name: str,
-            keys: List[str],
-            engine: Pandas_Engine) -> dict[ColumnName: str, Series]:
+        agg_func: aggregateCond.SumBy,
+        agg_col_name: str,
+        keys: List[str],
+        engine: Pandas_Engine,
+    ) -> dict[ColumnName:str, Series]:
         return {agg_col_name: (agg_func.col_name, "min")}
 
     @staticmethod
     def max(
-            agg_func: aggregateCond.SumBy,
-            agg_col_name: str,
-            keys: List[str],
-            engine: Pandas_Engine) -> dict[ColumnName: str, Series]:
+        agg_func: aggregateCond.SumBy,
+        agg_col_name: str,
+        keys: List[str],
+        engine: Pandas_Engine,
+    ) -> dict[ColumnName:str, Series]:
         return {agg_col_name: (agg_func.col_name, "max")}
 
     @staticmethod
     def median(
-            agg_func: aggregateCond.SumBy,
-            agg_col_name: str,
-            keys: List[str],
-            engine: Pandas_Engine) -> dict[ColumnName: str, Series]:
+        agg_func: aggregateCond.SumBy,
+        agg_col_name: str,
+        keys: List[str],
+        engine: Pandas_Engine,
+    ) -> dict[ColumnName:str, Series]:
         return {agg_col_name: (agg_func.col_name, "median")}

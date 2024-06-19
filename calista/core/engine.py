@@ -19,11 +19,9 @@ from typing import Any, Dict, List, TypeVar
 
 import numpy as np
 
-import calista.core._aggregate_conditions as aggregate_cond
 import calista.core._conditions as cond
 import calista.core.rules as R
-from calista.core._aggregate_conditions import AggregateCondition
-from calista.core._conditions import AndCondition, Condition, OrCondition
+from calista.core._conditions import Condition
 from calista.core.metrics import Metrics
 from calista.core.types_alias import ColumnName, PythonType, RuleName
 

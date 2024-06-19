@@ -116,7 +116,9 @@ class TestPandasTable:
         outlier_rule = R.GetOutliersForContinuousVar(col_name="SALAIRE")
         expected_outlier_values = []
 
-        outlier_values = pandas_table._engine.get_outliers_for_continuous_var(outlier_rule)
+        outlier_values = pandas_table._engine.get_outliers_for_continuous_var(
+            outlier_rule
+        )
         assert outlier_values == expected_outlier_values
 
     def test_outliers_discrete_var(self, pandas_table):

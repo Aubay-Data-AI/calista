@@ -323,27 +323,56 @@ class Polars_Engine(LazyEngine):
 
 
 class Polars_AggregateDataset(AggregateDataset):
-
     @staticmethod
-    def sum(agg_func: aggregateCond.SumBy, agg_col_name: str, keys: List[str], engine: Polars_Engine) -> Expr:
+    def sum(
+        agg_func: aggregateCond.SumBy,
+        agg_col_name: str,
+        keys: List[str],
+        engine: Polars_Engine,
+    ) -> Expr:
         return pl.sum(agg_func.col_name).alias(agg_col_name)
 
     @staticmethod
-    def count(agg_func: aggregateCond.CountBy, agg_col_name: str, keys: List[str], engine: Polars_Engine) -> Expr:
+    def count(
+        agg_func: aggregateCond.CountBy,
+        agg_col_name: str,
+        keys: List[str],
+        engine: Polars_Engine,
+    ) -> Expr:
         return pl.count(agg_func.col_name).alias(agg_col_name)
 
     @staticmethod
-    def mean(agg_func: aggregateCond.MeanBy, agg_col_name: str, keys: List[str], engine: Polars_Engine) -> Expr:
+    def mean(
+        agg_func: aggregateCond.MeanBy,
+        agg_col_name: str,
+        keys: List[str],
+        engine: Polars_Engine,
+    ) -> Expr:
         return pl.mean(agg_func.col_name).alias(agg_col_name)
 
     @staticmethod
-    def min(agg_func: aggregateCond.MinBy, agg_col_name: str, keys: List[str], engine: Polars_Engine) -> Expr:
+    def min(
+        agg_func: aggregateCond.MinBy,
+        agg_col_name: str,
+        keys: List[str],
+        engine: Polars_Engine,
+    ) -> Expr:
         return pl.min(agg_func.col_name).alias(agg_col_name)
 
     @staticmethod
-    def max(agg_func: aggregateCond.MaxBy, agg_col_name: str, keys: List[str], engine: Polars_Engine) -> Expr:
+    def max(
+        agg_func: aggregateCond.MaxBy,
+        agg_col_name: str,
+        keys: List[str],
+        engine: Polars_Engine,
+    ) -> Expr:
         return pl.max(agg_func.col_name).alias(agg_col_name)
 
     @staticmethod
-    def median(agg_func: aggregateCond.MedianBy, agg_col_name: str, keys: List[str], engine: Polars_Engine) -> Expr:
+    def median(
+        agg_func: aggregateCond.MedianBy,
+        agg_col_name: str,
+        keys: List[str],
+        engine: Polars_Engine,
+    ) -> Expr:
         return pl.median(agg_func.col_name).alias(agg_col_name)

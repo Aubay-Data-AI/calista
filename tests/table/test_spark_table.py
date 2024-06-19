@@ -6,7 +6,6 @@ import pytest
 
 import calista.core.functions as F
 import calista.core.rules as R
-from calista.core.catalogue import PythonTypes
 from calista.core.metrics import Metrics
 from calista.table import CalistaTable
 
@@ -111,7 +110,9 @@ class TestSparkTable:
         outlier_rule = R.GetOutliersForContinuousVar(col_name="SALAIRE")
         expected_outlier_values = []
 
-        outlier_values = spark_table._engine.get_outliers_for_continuous_var(outlier_rule)
+        outlier_values = spark_table._engine.get_outliers_for_continuous_var(
+            outlier_rule
+        )
         assert outlier_values == expected_outlier_values
 
     def test_outliers_discrete_var(self, spark_table):

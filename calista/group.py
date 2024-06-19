@@ -1,11 +1,10 @@
 from copy import deepcopy
 
-from calista.core._aggregate_conditions import AggregateCondition, Median
+from calista.core._aggregate_conditions import AggregateCondition
 from calista.core._conditions import AndCondition, Condition, NotCondition, OrCondition
 from calista.core.engine import GenericColumnType, GenericGroupedTableObject
 from calista.core.metrics import Metrics
 from calista.core.utils import import_engine
-from calista.engines.bigquery import BigqueryEngine
 
 
 def _get_agg_colname(agg_cond: AggregateCondition):
@@ -49,9 +48,7 @@ class GroupedTable:
                     func_agg_name = func_agg.__class__.__name__.lower()
                     if agg_col_name not in seen:
                         agg_cols_expr.append(
-                            getattr(
-                                self._aggregate_dataset_utils, func_agg_name
-                            )(
+                            getattr(self._aggregate_dataset_utils, func_agg_name)(
                                 func_agg,
                                 agg_col_name,
                                 self._agg_keys,

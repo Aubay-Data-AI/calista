@@ -1,12 +1,10 @@
 from datetime import datetime
 from functools import reduce
 
-import pandas as pd
 import pytest
 
 import calista.core.functions as F
 import calista.core.rules as R
-from calista.core.catalogue import PythonTypes
 from calista.core.metrics import Metrics
 
 
@@ -110,7 +108,9 @@ class TestSnowflakeTable:
         outlier_rule = R.GetOutliersForContinuousVar(col_name="SALAIRE")
         expected_outlier_values = []
 
-        outlier_values = snowflake_table._engine.get_outliers_for_continuous_var(outlier_rule)
+        outlier_values = snowflake_table._engine.get_outliers_for_continuous_var(
+            outlier_rule
+        )
         assert outlier_values == expected_outlier_values
 
     def test_outliers_discrete_var(self, snowflake_table):

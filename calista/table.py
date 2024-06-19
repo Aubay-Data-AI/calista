@@ -15,16 +15,9 @@
 
 from __future__ import annotations
 
-import re
 from typing import Any, Dict, List, Optional
 
-import numpy as np
-import pandas as pd
-
-from calista.core import functions as F
-from calista.core import rules as R
 from calista.core._conditions import AndCondition, Condition, NotCondition, OrCondition
-from calista.core.catalogue import PythonTypes
 from calista.core.engine import GenericColumnType
 from calista.core.metrics import Metrics
 from calista.core.types_alias import RuleName
@@ -292,4 +285,3 @@ class CalistaTable:
             )
 
         return type_format
-

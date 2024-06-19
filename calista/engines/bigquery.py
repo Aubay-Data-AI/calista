@@ -13,33 +13,28 @@
 # limitations under the License.
 
 
-from typing import Any, Dict, List, TypeVar
+from typing import List, TypeVar
 
 from sqlalchemy import (
     VARCHAR,
     ColumnExpressionArgument,
-    MetaData,
     case,
-    create_engine,
     func,
     select,
 )
 from sqlalchemy.sql import text
-from sqlalchemy.sql.functions import _FunctionGenerator
 
 import calista.core._aggregate_conditions as aggregateCond
 import calista.core._conditions as cond
 import calista.core.rules as R
-from calista.core.aggregates import AggregateDataset
 from calista.core.catalogue import PythonTypes
 from calista.core.types_alias import ColumnName, PythonType
-from calista.engines.sql import SqlEngine, SqlAggregateDataset
+from calista.engines.sql import SqlAggregateDataset, SqlEngine
 
 GenericAggExpr = TypeVar("GenericAggExpr")
 
 
 class BigqueryEngine(SqlEngine):
-
     def get_schema(self) -> dict[ColumnName:str, PythonType:str]:
         mapping_type = {
             "INTEGER": PythonTypes.INTEGER,
@@ -102,7 +97,6 @@ class BigqueryEngine(SqlEngine):
 
 
 class BigqueryAggregateDataset(SqlAggregateDataset):
-
     @staticmethod
     def median(
         agg_func: aggregateCond.MedianBy,

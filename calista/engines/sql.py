@@ -410,57 +410,56 @@ class SqlEngine(Database):
 
 
 class SqlAggregateDataset(AggregateDataset):
-
     @staticmethod
     def sum(
-            agg_func: aggregateCond.SumBy,
-            agg_col_name: str,
-            keys: List[str],
-            engine: SqlEngine
+        agg_func: aggregateCond.SumBy,
+        agg_col_name: str,
+        keys: List[str],
+        engine: SqlEngine,
     ) -> ColumnExpressionArgument:
         return func.sum(engine.dataset.c[agg_func.col_name]).label(agg_col_name)
 
     @staticmethod
     def count(
-            agg_func: aggregateCond.CountBy,
-            agg_col_name: str,
-            keys: List[str],
-            engine: SqlEngine
+        agg_func: aggregateCond.CountBy,
+        agg_col_name: str,
+        keys: List[str],
+        engine: SqlEngine,
     ) -> ColumnExpressionArgument:
         return func.count(engine.dataset.c[agg_func.col_name]).label(agg_col_name)
 
     @staticmethod
     def mean(
-            agg_func: aggregateCond.MeanBy,
-            agg_col_name: str,
-            keys: List[str],
-            engine: SqlEngine
+        agg_func: aggregateCond.MeanBy,
+        agg_col_name: str,
+        keys: List[str],
+        engine: SqlEngine,
     ) -> ColumnExpressionArgument:
         return func.avg(engine.dataset.c[agg_func.col_name]).label(agg_col_name)
 
     @staticmethod
     def min(
-            agg_func: aggregateCond.MinBy,
-            agg_col_name: str,
-            keys: List[str],
-            engine: SqlEngine
+        agg_func: aggregateCond.MinBy,
+        agg_col_name: str,
+        keys: List[str],
+        engine: SqlEngine,
     ) -> ColumnExpressionArgument:
         return func.min(engine.dataset.c[agg_func.col_name]).label(agg_col_name)
 
     @staticmethod
     def max(
-            agg_func: aggregateCond.MaxBy,
-            agg_col_name: str,
-            keys: List[str],
-            engine: SqlEngine
+        agg_func: aggregateCond.MaxBy,
+        agg_col_name: str,
+        keys: List[str],
+        engine: SqlEngine,
     ) -> ColumnExpressionArgument:
         return func.max(engine.dataset.c[agg_func.col_name]).label(agg_col_name)
 
     @staticmethod
     def median(
-            agg_func: aggregateCond.MedianBy,
-            agg_col_name: str,
-            keys: List[str],
-            engine: SqlEngine
+        agg_func: aggregateCond.MedianBy,
+        agg_col_name: str,
+        keys: List[str],
+        engine: SqlEngine,
     ) -> ColumnExpressionArgument:
         return func.median(engine.dataset.c[agg_func.col_name]).label(agg_col_name)

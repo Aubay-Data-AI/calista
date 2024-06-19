@@ -169,4 +169,3 @@ tests/table/parameters.py
 tests/table/*.json
 
 .DS_Store
-

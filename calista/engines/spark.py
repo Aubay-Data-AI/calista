@@ -339,43 +339,55 @@ class SparkEngine(LazyEngine):
 
 class SparkAggregateDataset(AggregateDataset):
     @staticmethod
-    def sum(agg_func: aggregateCond.SumBy,
-            agg_col_name: str,
-            keys: List[str],
-            engine: SparkEngine) -> Column:
+    def sum(
+        agg_func: aggregateCond.SumBy,
+        agg_col_name: str,
+        keys: List[str],
+        engine: SparkEngine,
+    ) -> Column:
         return F.sum(agg_func.col_name).alias(agg_col_name)
 
     @staticmethod
-    def count(agg_func: aggregateCond.CountBy,
-              agg_col_name: str,
-              keys: List[str],
-              engine: SparkEngine) -> Column:
+    def count(
+        agg_func: aggregateCond.CountBy,
+        agg_col_name: str,
+        keys: List[str],
+        engine: SparkEngine,
+    ) -> Column:
         return F.count(agg_func.col_name).alias(agg_col_name)
 
     @staticmethod
-    def mean(agg_func: aggregateCond.MeanBy,
-             agg_col_name: str,
-             keys: List[str],
-             engine: SparkEngine) -> Column:
+    def mean(
+        agg_func: aggregateCond.MeanBy,
+        agg_col_name: str,
+        keys: List[str],
+        engine: SparkEngine,
+    ) -> Column:
         return F.mean(agg_func.col_name).alias(agg_col_name)
 
     @staticmethod
-    def min(agg_func: aggregateCond.MinBy,
-            agg_col_name: str,
-            keys: List[str],
-            engine: SparkEngine) -> Column:
+    def min(
+        agg_func: aggregateCond.MinBy,
+        agg_col_name: str,
+        keys: List[str],
+        engine: SparkEngine,
+    ) -> Column:
         return F.min(agg_func.col_name).alias(agg_col_name)
 
     @staticmethod
-    def max(agg_func: aggregateCond.MaxBy,
-            agg_col_name: str,
-            keys: List[str],
-            engine: SparkEngine) -> Column:
+    def max(
+        agg_func: aggregateCond.MaxBy,
+        agg_col_name: str,
+        keys: List[str],
+        engine: SparkEngine,
+    ) -> Column:
         return F.max(agg_func.col_name).alias(agg_col_name)
 
     @staticmethod
-    def median(agg_func: aggregateCond.MedianBy,
-               agg_col_name: str,
-               keys: List[str],
-               engine: SparkEngine) -> Column:
+    def median(
+        agg_func: aggregateCond.MedianBy,
+        agg_col_name: str,
+        keys: List[str],
+        engine: SparkEngine,
+    ) -> Column:
         return F.median(agg_func.col_name).alias(agg_col_name)

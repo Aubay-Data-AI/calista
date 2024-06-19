@@ -10,4 +10,3 @@ At its heart, Calista provides a cohesive set of classes and methods that consol
 The current implementation has been developed in Python 3.10. For now, you can execute data quality checks using the following engines or platforms: spark, pandas, polars, snowflake, bigquery, postgre.
 
 Whether you're orchestrating data pipelines or conducting data quality assessments, Calista equips you with the tools needed to navigate the complex terrain of data quality checks with ease and efficiency.
-

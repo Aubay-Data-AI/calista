@@ -341,27 +341,56 @@ class SnowflakeEngine(Database):
 
 
 class SnowflakeAggregateDataset(AggregateDataset):
-
     @staticmethod
-    def sum(agg_func: aggregateCond.MedianBy, agg_col_name: str, keys: List[str], engine: SnowflakeEngine) -> Column:
+    def sum(
+        agg_func: aggregateCond.MedianBy,
+        agg_col_name: str,
+        keys: List[str],
+        engine: SnowflakeEngine,
+    ) -> Column:
         return F.sum(agg_func.col_name).alias(agg_col_name)
 
     @staticmethod
-    def count(agg_func: aggregateCond.MedianBy, agg_col_name: str, keys: List[str], engine: SnowflakeEngine) -> Column:
+    def count(
+        agg_func: aggregateCond.MedianBy,
+        agg_col_name: str,
+        keys: List[str],
+        engine: SnowflakeEngine,
+    ) -> Column:
         return F.count(agg_func.col_name).alias(agg_col_name)
 
     @staticmethod
-    def mean(agg_func: aggregateCond.MedianBy, agg_col_name: str, keys: List[str], engine: SnowflakeEngine) -> Column:
+    def mean(
+        agg_func: aggregateCond.MedianBy,
+        agg_col_name: str,
+        keys: List[str],
+        engine: SnowflakeEngine,
+    ) -> Column:
         return F.mean(agg_func.col_name).alias(agg_col_name)
 
     @staticmethod
-    def min(agg_func: aggregateCond.MedianBy, agg_col_name: str, keys: List[str], engine: SnowflakeEngine) -> Column:
+    def min(
+        agg_func: aggregateCond.MedianBy,
+        agg_col_name: str,
+        keys: List[str],
+        engine: SnowflakeEngine,
+    ) -> Column:
         return F.min(agg_func.col_name).alias(agg_col_name)
 
     @staticmethod
-    def max(agg_func: aggregateCond.MedianBy, agg_col_name: str, keys: List[str], engine: SnowflakeEngine) -> Column:
+    def max(
+        agg_func: aggregateCond.MedianBy,
+        agg_col_name: str,
+        keys: List[str],
+        engine: SnowflakeEngine,
+    ) -> Column:
         return F.max(agg_func.col_name).alias(agg_col_name)
 
     @staticmethod
-    def median(agg_func: aggregateCond.MedianBy, agg_col_name: str, keys: List[str], engine: SnowflakeEngine) -> Column:
+    def median(
+        agg_func: aggregateCond.MedianBy,
+        agg_col_name: str,
+        keys: List[str],
+        engine: SnowflakeEngine,
+    ) -> Column:
         return F.median(agg_func.col_name).alias(agg_col_name)
