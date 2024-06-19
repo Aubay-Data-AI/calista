@@ -42,15 +42,6 @@ class Polars_Engine(LazyEngine):
         "<=": "__le__",
     }
 
-    mapping_aggregate_func: dict[str, Expr] = {
-        "sum": pl.sum,
-        "count": pl.count,
-        "mean": pl.mean,
-        "median": pl.median,
-        "max": pl.max,
-        "min": pl.min,
-    }
-
     def __init__(self, config: Dict[str, Any] = None):
         self.dataset = None
         self._config = config

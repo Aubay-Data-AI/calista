@@ -43,15 +43,6 @@ class SparkEngine(LazyEngine):
         "<=": "__le__",
     }
 
-    mapping_aggregate_func: dict[str, Column] = {
-        "sum": F.sum,
-        "count": F.count,
-        "mean": F.mean,
-        "median": F.median,
-        "min": F.min,
-        "max": F.max,
-    }
-
     def __init__(self, config: Dict[str, Any] = None):
         self.spark = SparkSession.builder.getOrCreate()
         self.dataset = None
@@ -314,14 +305,6 @@ class SparkEngine(LazyEngine):
 
     def is_positive(self, condition: cond.IsPositive) -> Column:
         return F.col(condition.col_name).rlike(r"^[+]?[0-9]\d*(\.\d+)?$")
-
-    # from here, every function is related to aggregate conditions
-    def generate_agg_col_expr(
-        self, agg_cond: aggregateCond.AggregateCondition, agg_col_name: str
-    ) -> Column:
-        return self.mapping_aggregate_func[agg_cond.agg_ope](agg_cond.col_name).alias(
-            agg_col_name
-        )
 
     def aggregate_dataset(
         self, keys: list[str], agg_cols_expr: list[Column]

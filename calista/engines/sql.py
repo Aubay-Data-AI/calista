@@ -56,26 +56,18 @@ class SqlEngine(Database):
         "<=": "__le__",
     }
 
-    mapping_aggregate_func: dict[str, ColumnExpressionArgument] = {
-        "sum": func.sum,
-        "count": func.count,
-        "mean": func.avg,
-        "median": func.median,
-        "max": func.max,
-        "min": func.min,
-    }
-
     def __init__(self, config: Dict[str, Any] = None):
         self.engine = create_engine(
             config["connection_string"], credentials_path=config["credentials_path"]
         )
-        # self.engine = create_engine(**config)
         self.metadata = MetaData()
         self.metadata.reflect(bind=self.engine)
         self.dataset = None
         self._config = config
 
-    def _load_from_database(self, table: str, schema: str, database: str) -> None:
+    def _load_from_database(
+        self, table: str, schema: str = None, database: str = None
+    ) -> None:
         try:
             self.dataset = self.metadata.tables[table]
         except KeyError:
@@ -392,14 +384,6 @@ class SqlEngine(Database):
     def is_positive(self, condition: cond.IsPositive) -> ColumnExpressionArgument:
         column_cast_string = self.dataset.c[condition.col_name].cast(String)
         return column_cast_string.regexp_match(r"^[+]?[0-9]\d*(\.\d+)?$")
-
-    # from here, every function is related to aggregate conditions
-    def generate_agg_col_expr(
-        self, agg_cond: aggregateCond.AggregateCondition, agg_col_name: str
-    ) -> ColumnExpressionArgument:
-        return self.mapping_aggregate_func[agg_cond.agg_ope](
-            self.dataset.c[agg_cond.col_name]
-        ).label(agg_col_name)
 
     def aggregate_dataset(
         self, keys: list[str], agg_cols_expr: list[ColumnExpressionArgument]

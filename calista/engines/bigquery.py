@@ -15,13 +15,7 @@
 
 from typing import List, TypeVar
 
-from sqlalchemy import (
-    VARCHAR,
-    ColumnExpressionArgument,
-    case,
-    func,
-    select,
-)
+from sqlalchemy import VARCHAR, ColumnExpressionArgument, case, func, select
 from sqlalchemy.sql import text
 
 import calista.core._aggregate_conditions as aggregateCond
@@ -78,7 +72,6 @@ class BigqueryEngine(SqlEngine):
         return subquery.c.count_column == 1
 
     def compute_percentile(self, rule: R.ComputePercentile) -> float:
-        query = select(func.percentile_cont(rule.col_name, rule.percentile))
         query = text(
             f"""
                         SELECT

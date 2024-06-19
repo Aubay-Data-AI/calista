@@ -378,22 +378,19 @@ class TestBigqueryTable:
             expected_dataset_row_count,
         )
 
-    # TODO: décommenter lorsque la médiane sera implémentée
-    # def test_compare_median_to_value(self, bigquery_table):
-    #     median_by_rule_name = "check_median_by_salary_by_sex_gt"
-    #     median_by_rule = F.median_gt_value(col_name="SALAIRE", value=60000)
-
-    #     expected_dataset_row_count = 3
-    #     expected_valid_row_count = 1
-
-    #     self.groupby_and_assert_rule(
-    #         bigquery_table,
-    #         "SEXE",
-    #         median_by_rule_name,
-    #         median_by_rule,
-    #         expected_valid_row_count,
-    #         expected_dataset_row_count,
-    #     )
+    def test_compare_median_to_value(self, bigquery_table):
+        median_by_rule_name = "check_median_by_salary_by_sex_gt"
+        median_by_rule = F.median_gt_value(col_name="SALAIRE", value=60000)
+        expected_dataset_row_count = 3
+        expected_valid_row_count = 1
+        self.groupby_and_assert_rule(
+            bigquery_table,
+            "SEXE",
+            median_by_rule_name,
+            median_by_rule,
+            expected_valid_row_count,
+            expected_dataset_row_count,
+        )
 
     def test_compare_max_to_value(self, bigquery_table):
         max_by_rule_name = "check_max_salary_by_sex_ge"
