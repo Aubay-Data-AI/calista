@@ -1,4 +1,5 @@
 pre-commit
+pyarrow
 black
 pycln
 isort

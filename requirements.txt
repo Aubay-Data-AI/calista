@@ -1,4 +1,5 @@
 sqlalchemy==2.0.29
+pyarrow
 pydantic
 pytest
 pytest-cov
