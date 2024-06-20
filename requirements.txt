@@ -8,4 +8,4 @@ pandas
 pyspark
 delta-spark
 snowflake-snowpark-python
-sqlalchemy-bigquery @ git+https://github.com/Flexron/python-bigquery-sqlalchemy.git
+sqlalchemy-bigquery-calista

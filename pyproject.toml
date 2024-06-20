@@ -29,7 +29,7 @@ classifiers = [
 [project.optional-dependencies]
 spark = ["pyspark", "delta-spark"]
 snowflake = ["snowflake-snowpark-python"]
-bigquery = ["sqlalchemy-bigquery @ git+https://github.com/Flexron/python-bigquery-sqlalchemy.git"]
+bigquery = ["sqlalchemy-bigquery-calista"]
 
 [project.urls]
 Repository = "https://github.com/Aubay-Data-AI/calista"
@@ -38,7 +38,7 @@ Repository = "https://github.com/Aubay-Data-AI/calista"
 pythonpath = [
   "."
 ]
-addopts = "--cov fiaq --cov-report term-missing"
+addopts = "--cov calista-enterprise --cov-report term-missing"
 
 [tool.pycln]
 all = true
