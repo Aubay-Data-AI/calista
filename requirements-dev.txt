@@ -3,8 +3,6 @@ pyarrow
 black
 pycln
 isort
-sphinx_rtd_theme
-sphinx-automodapi
 sqlalchemy==2.0.29
 pydantic
 pytest
