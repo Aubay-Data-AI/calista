@@ -32,7 +32,7 @@ snowflake = ["snowflake-snowpark-python"]
 bigquery = ["sqlalchemy-bigquery @ git+https://github.com/Flexron/python-bigquery-sqlalchemy.git"]
 
 [project.urls]
-Repository = "https://github.com/Flexron/FIAQ"
+Repository = "https://github.com/Aubay-Data-AI/calista"
 
 [tool.pytest.ini_options]
 pythonpath = [
