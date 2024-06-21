@@ -13,6 +13,7 @@ Table of contents
   - [Installing from PyPI](#installing-from-pypi)
   - [Getting Started](#getting-started)
     - [Example](#example)
+  - [Documentation](#documentation)
   - [License](#license)
 
 
@@ -82,6 +83,7 @@ valid_row_count : 2
 valid_row_count_pct : 66.66
 timestamp : 2024-04-23 10:00:59.449193
 ```
-
+## Documentation
+[Calista docs](https://calista.readthedocs.io/en/latest/)
 ## License
 Licensed under the Apache License

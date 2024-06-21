@@ -32,13 +32,6 @@ Pandas
 Pandas is a powerful Python library primarily used for data manipulation and analysis.
 Its key features include data structures like DataFrame and Series, which facilitate handling structured data effectively.
 
-Install Calista with the pandas engine:
-
-.. code-block:: bash
-
-    pip install calista[pandas]
-
-
 Load a table with Calista:
 
 .. code-block:: python
@@ -55,13 +48,6 @@ Polars
 Polars is a fast and efficient Rust library for data manipulation and analysis, with bindings available for Python.
 It offers similar functionalities to Pandas, such as DataFrame and Series structures, but with a focus on high-performance computing.
 It is optimized for large datasets, multithreading, and lazy evaluation.
-
-Install Calista with the polars engine:
-
-.. code-block:: bash
-
-    pip install calista[polars]
-
 
 Load a table with Calista:
 
