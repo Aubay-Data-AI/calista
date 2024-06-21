@@ -94,7 +94,7 @@ from an existing dataframe or a dictionary.
 Snowflake
 ^^^^^^^^^
 
-As this engine is developed in Snowpark, before computing a diagnostic, a configuration must be defined to connect to the Snowflake data warehouse.
+As this engine is developed in Snowpark, before computing a rule, a configuration must be defined to connect to the Snowflake data warehouse.
 Snowflake is a cloud-based data warehousing platform designed for storing, processing, and analyzing large volumes of data. It offers a scalable and elastic architecture, allowing users to efficiently manage data across multiple clouds.
 
 Install Calista with the snowflake engine:
@@ -123,7 +123,7 @@ Load a table with Calista:
 Bigquery
 ^^^^^^^^
 
-As this engine is developed in SQL, before computing a diagnostic, a configuration must be defined to connect to the BigQuery data warehouse.
+As this engine is developed in SQL, before computing a rule, a configuration must be defined to connect to the BigQuery data warehouse.
 BigQuery is a fully managed, serverless data warehouse provided by Google Cloud Platform. It's designed for storing and analyzing large datasets using SQL queries, with scalable compute and storage resources.
 
 Install Calista with the BigQuery engine:
