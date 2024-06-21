@@ -1,5 +1,24 @@
 Getting started
 ===============
+To use our framework, simply install it via pip. This command will install the framework along with the default engines pandas and polars:
+
+.. code-block:: python
+
+    pip install calista
+
+If you require support for another engines such as Snowflake, Spark, or BigQuery, use the following command and replace EngineName with the name of your desired engine:
+
+.. code-block:: python
+
+    pip install calista[EngineName]
+
+**Example:**
+if you want to have Snowflake and Spark, use the following command:
+
+.. code-block:: python
+
+    pip install calista[snowflake, Spark]
+
 
 To study the quality of your data with the framework ``Calista``, you have several engines at your disposal.
 Here's how to use them.
@@ -13,7 +32,18 @@ Pandas
 Pandas is a powerful Python library primarily used for data manipulation and analysis.
 Its key features include data structures like DataFrame and Series, which facilitate handling structured data effectively.
 
+Install Calista with the pandas engine:
+
+.. code-block:: bash
+
+    pip install calista[pandas]
+
+
+Load a table with Calista:
+
 .. code-block:: python
+
+    from calista import CalistaTable
 
     table = CalistaTable(engine="pandas") \
     .load_from_path(<path_to_your_file>, file_format=<your_file_format>)
@@ -26,7 +56,18 @@ Polars is a fast and efficient Rust library for data manipulation and analysis, 
 It offers similar functionalities to Pandas, such as DataFrame and Series structures, but with a focus on high-performance computing.
 It is optimized for large datasets, multithreading, and lazy evaluation.
 
+Install Calista with the polars engine:
+
+.. code-block:: bash
+
+    pip install calista[polars]
+
+
+Load a table with Calista:
+
 .. code-block:: python
+
+    from calista import CalistaTable
 
     table = CalistaTable(engine="polars") \
     .load_from_path(<path_to_your_file>, file_format=<your_file_format>)
@@ -39,7 +80,18 @@ Spark is a distributed computing framework designed for processing big data task
 The key advantages include its speed, fault tolerance, and support for various data sources and processing engines.
 It excels in iterative processing and real-time analytics, making it suitable for a wide range of big data applications.
 
+Install Calista with the spark engine:
+
+.. code-block:: bash
+
+    pip install calista[spark]
+
+
+Load a table with Calista:
+
 .. code-block:: python
+
+    from calista import CalistaTable
 
     table = CalistaTable(engine="spark") \
     .load_from_path(<path_to_your_file>, file_format=<your_file_format>)
@@ -59,7 +111,18 @@ Snowflake
 As this engine is developed in Snowpark, before computing a diagnostic, a configuration must be defined to connect to the Snowflake data warehouse.
 Snowflake is a cloud-based data warehousing platform designed for storing, processing, and analyzing large volumes of data. It offers a scalable and elastic architecture, allowing users to efficiently manage data across multiple clouds.
 
+Install Calista with the snowflake engine:
+
+.. code-block:: bash
+
+    pip install calista[snowflake]
+
+
+Load a table with Calista:
+
 .. code-block:: python
+
+    from calista import CalistaTable
 
     config = {
          "credentials": {
@@ -77,7 +140,18 @@ Bigquery
 As this engine is developed in SQL, before computing a diagnostic, a configuration must be defined to connect to the BigQuery data warehouse.
 BigQuery is a fully managed, serverless data warehouse provided by Google Cloud Platform. It's designed for storing and analyzing large datasets using SQL queries, with scalable compute and storage resources.
 
+Install Calista with the BigQuery engine:
+
+.. code-block:: bash
+
+    pip install calista[bigquery]
+
+
+Load a table with Calista:
+
 .. code-block:: python
+
+    from calista import CalistaTable
 
     connection_string = f'bigquery://<my-project>/<my-dataset>'
     credentials_path='<path_to_credentials>.json'
