@@ -13,6 +13,7 @@ Table of contents
   - [Installing from PyPI](#installing-from-pypi)
   - [Getting Started](#getting-started)
     - [Example](#example)
+  - [Documentation](#documentation)
   - [License](#license)
 
 
@@ -60,11 +61,9 @@ Here's an example using the Pandas Engine. Suppose youhave a dataset represented
 | 1         |           |2023-12-31 | 53000     |
 | 2         | Marié     |2018-12-31 | 28000     |
 
-You can load this table using CalistaTable with the Pandas engine and perform a diagnostic:
+You can load this table using CalistaTable with the Pandas engine:
 ```
 table_pandas = CalistaTable(engine="pandas").load(path="examples/demo_new_model.csv", file_format="parquet")
-
-diagnostic_pandas_result = table_pandas.diagnostic()
 ```
 
 You can define custom rules using __Calista__ to analyze specific conditions within your data:
@@ -82,6 +81,7 @@ valid_row_count : 2
 valid_row_count_pct : 66.66
 timestamp : 2024-04-23 10:00:59.449193
 ```
-
+## Documentation
+[Calista docs](https://calista.readthedocs.io/en/latest/)
 ## License
 Licensed under the Apache License
