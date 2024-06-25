@@ -48,7 +48,7 @@ To start using __Calista__, import the appropriate class:
 from calista import CalistaTable
 ```
 
-With __Calista__, you can easily analyze and diagnose your data quality, regardless of the underlying engine. The unified API streamlines your workflow and enables seamless integration across different environments.
+With __Calista__, you can easily analyze your data quality, regardless of the underlying engine. The unified API streamlines your workflow and enables seamless integration across different environments.
 
 
 ### Example
