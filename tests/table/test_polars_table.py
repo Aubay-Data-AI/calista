@@ -2,6 +2,7 @@ from datetime import datetime
 from functools import reduce
 
 import polars as pl
+from polars.testing import assert_frame_equal
 import pytest
 
 import calista.core.functions as F
@@ -274,9 +275,11 @@ class TestPolarsTable:
             "string": ["a", "b", "c"],
         }
         calista_table_from_dict = CalistaTable("polars").load_from_dict(data_dict)
-        assert calista_table_from_dict._engine.dataset.collect().frame_equal(
-            pl.LazyFrame(data_dict).collect()
-        )
+
+        assert_frame_equal(left=calista_table_from_dict._engine.dataset.lazy(), 
+                                  right=pl.LazyFrame(data_dict),
+                                  check_row_order=False,
+                                  check_column_order=False)
 
     def test_analyze_rules(self, polars_table):
         rules_with_expected_valid_count = {

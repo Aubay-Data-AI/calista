@@ -592,43 +592,6 @@ def is_negative(col_name: str) -> ConditionExpression:
     return cond.IsNegative(col_name=col_name)
 
 
-def compare_agg_column_to_value(
-    col_name: str, operator: str, agg_ope: str, value: Any
-) -> agg_cond.CompareAggColumnToValue:
-    """
-    Create a condition to compare an aggregation's column to a value.
-
-    Args:
-        col_name (str): The name of the column.
-        operator (str): A comparison operator : "=", "<", "<=", ">", ">=s"
-        agg_ope (str): An aggregation's operation : "sum", "count", "mean", "max", "min"
-        value (Any): The value to compare against.
-
-    Returns:
-        AggregateCondition: The aggregate condition to compare to a value.
-
-    Example
-    --------
-    >>> calista_table = CalistaTable(engine = "spark").create({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
-    >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
-    >>> my_rule = compare_agg_column_to_value(col_name="POINTS", operator= "=", agg_ope="sum", value=60)
-    >>> print(calista_table.groupBy("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
-    rule_name : My Rule Name
-    total_row_count : 2
-    valid_row_count : 1
-    valid_row_count_pct : 50.0
-    timestamp : 2024-01-01 00:00:00.000000
-
-    """
-    return agg_cond.CompareAggColumnToValue(
-        is_aggregate=True,
-        col_name=col_name,
-        operator=operator,
-        agg_ope=agg_ope,
-        value=value,
-    )
-
-
 #############################################################################
 ############### Comparison functions that use above functions ###############
 #############################################################################

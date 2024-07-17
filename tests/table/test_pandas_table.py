@@ -11,11 +11,6 @@ from calista.table import CalistaTable
 
 
 class TestPandasTable:
-    """
-    Ce test est différent car pour le diagnostic les types observés par Pandas
-    sont différents des autres engines (les colonnes de INT / DATE sont converties en
-    un autre type dès qu'il y a des valeurs nulles comme type None/NaN)
-    """
 
     expected_dataset_row_count = 100
 

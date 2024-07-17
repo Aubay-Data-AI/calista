@@ -60,7 +60,6 @@ class CalistaTable:
                 f"Je ne sais pas faire avec le moteur {engine} pour l'instant"
             )
         self._engine = import_engine(engine.lower())(config=config)
-        self._cached_diagnostic = None
 
     def load(
         self,
@@ -109,7 +108,6 @@ class CalistaTable:
             dataframe=dataframe,
             options=options,
         )
-        self._cached_diagnostic = None
         return self
 
     def load_from_dict(self, data: Dict[str, List]) -> CalistaTable:
@@ -139,7 +137,6 @@ class CalistaTable:
         +---+
         """
         self.load(data=data)
-        self._cached_diagnostic = None
         return self
 
     def load_from_path(
