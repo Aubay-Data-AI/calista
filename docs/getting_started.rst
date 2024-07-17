@@ -120,7 +120,7 @@ Load a table with Calista:
      table = CalistaTable(engine="snowflake", config=config) \
          .load_from_database(database=<your_database_name>, schema=<your_schema_name>, table=<your_table_name>)
 
-Bigquery
+BigQuery
 ^^^^^^^^
 
 As this engine is developed in SQL, before computing a rule, a configuration must be defined to connect to the BigQuery data warehouse.
@@ -158,18 +158,24 @@ Rules
 
 .. code-block:: python
 
+    from calista.core import functions as F
+
     my_rule = F.is_iban(col_name="IBAN") & F.is_float("SALAIRE") | ~F.is_iban(col_name="ADRESSE_IP_V4")
     print(table.analyze(rule_name=<your_rule_name>, condition=my_rule))
 
-| rule_name : your_rule_name
-| total_row_count : 100
-| valid_row_count : 100
-| valid_row_count_pct : 100.0
-| timestamp : 2024-05-06 16:19:13.221048
+.. code-block:: python
+
+    rule_name : your_rule_name
+    total_row_count : 100
+    valid_row_count : 100
+    valid_row_count_pct : 100.0
+    timestamp : 2024-05-06 16:19:13.221048
 
 * You can also compute several rules at the same time
 
 .. code-block:: python
+
+    from calista.core import functions as F
 
     rules = {
     "check_iban_quality": F.is_iban("IBAN"),
@@ -178,25 +184,26 @@ Rules
     }
     print(table.analyze_rules(rules))
 
+.. code-block:: python
 
-| [
-| Metrics(
-|        rule='check_iban_quality',
-|        total_row_count=100,
-|        valid_row_count=90,
-|        valid_row_count_pct=90.0,
-|        timestamp='2024-05-07 11:37:34.038035'
-|   ),
-|   Metrics(
-|       rule='check_CDI_ID_are_integer',
-|       total_row_count=100,
-|       valid_row_count=98,
-|       valid_row_count_pct=98.0,
-|       timestamp='2024-05-07 11:37:34.038035'),
-|   Metrics(
-|       rule='check_email_quality',
-|       total_row_count=100,
-|       valid_row_count=92,
-|       valid_row_count_pct=92.0,
-|       timestamp='2024-05-07 11:37:34.038035')
-| ]
+    [
+    Metrics(
+           rule='check_iban_quality',
+           total_row_count=100,
+           valid_row_count=90,
+           valid_row_count_pct=90.0,
+           timestamp='2024-05-07 11:37:34.038035'
+      ),
+      Metrics(
+          rule='check_CDI_ID_are_integer',
+          total_row_count=100,
+          valid_row_count=98,
+          valid_row_count_pct=98.0,
+          timestamp='2024-05-07 11:37:34.038035'),
+      Metrics(
+          rule='check_email_quality',
+          total_row_count=100,
+          valid_row_count=92,
+          valid_row_count_pct=92.0,
+          timestamp='2024-05-07 11:37:34.038035')
+    ]

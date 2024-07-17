@@ -63,11 +63,15 @@ Here's an example using the Pandas Engine. Suppose youhave a dataset represented
 
 You can load this table using CalistaTable with the Pandas engine:
 ```
+from calista import CalistaTable
+
 table_pandas = CalistaTable(engine="pandas").load(path="examples/demo_new_model.csv", file_format="parquet")
 ```
 
 You can define custom rules using __Calista__ to analyze specific conditions within your data:
 ```
+from calista.core import functions as F
+
 my_rule = F.is_not_null(col_name="status") & F.is_not_null("salary")
 
 print(table.analyze(rule_name="demo_new_model", condition=my_rule))
