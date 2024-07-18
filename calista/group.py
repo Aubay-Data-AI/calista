@@ -7,11 +7,6 @@ from calista.core.metrics import Metrics
 from calista.core.utils import import_engine
 
 
-def _get_agg_colname(agg_cond: AggregateCondition):
-    agg_func_name = agg_cond.get_func_agg().__class__.__name__.lower()
-    return f"{agg_func_name}_{agg_cond.col_name}"
-
-
 class GroupedTable:
     def __init__(self, engine, agg_keys) -> None:
         _dataset = engine.dataset
@@ -91,14 +86,6 @@ class GroupedTable:
 
         self._engine.dataset = self._evaluate_aggregates(condition)
         condition_as_check = condition.get_conditions_as_func_check()
-
-        # if isinstance(self._engine, BigqueryEngine):
-        #     agg_cols_expr = self._engine.get_agg_columns_expr(condition, self._agg_keys)
-        # else:
-        #     agg_cols_expr = self._engine.get_agg_columns_expr(condition)
-        # self._engine.dataset = self._engine.aggregate_dataset(
-        #     self._agg_keys, agg_cols_expr
-        # )
 
         return self._engine.execute_conditions(
             {rule_name: self._evaluate_condition(condition_as_check)}
