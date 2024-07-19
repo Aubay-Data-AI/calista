@@ -222,6 +222,11 @@ class CalistaTable:
         self._engine.show(n)
 
     def groupBy(self, *cols: str) -> GroupedTable:
+        for col in cols:
+            if col not in self.schema.keys():
+                raise Exception(
+                    f"Column '{col}' not found in {list(self.schema.keys())}"
+                )
         return GroupedTable(self._engine, cols)
 
     def _evaluate_condition(self, condition: Condition) -> GenericColumnType:

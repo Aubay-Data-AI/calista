@@ -489,3 +489,12 @@ class TestSparkTable:
             "Column 'DATE' not found in ['NOM', 'PRENOM', 'SEXE', 'DATE_ENTREE', 'CDI', 'IBAN', 'SECTEUR_ACTIVITE', 'ADRESSE', 'SITUATION_FAMILIALE', 'ADRESSE_IP_V4', 'ADRESSE_IP_V6', 'DATE_NAISSANCE', 'DATE_SORTIE', 'DATE_DERNIER_EA', 'DATE_DERNIERE_AUGMENTATION', 'CDD', 'EMAIL', 'TELEPHONE', 'SALAIRE', 'DEVISE', 'ID']"
             == str(combination_exception.value)
         )
+
+    def test_col_not_in_table_groupby(self, spark_table):
+        with pytest.raises(Exception) as combination_exception:
+            spark_table.groupBy("DATE")
+
+        assert (
+            "Column 'DATE' not found in ['NOM', 'PRENOM', 'SEXE', 'DATE_ENTREE', 'CDI', 'IBAN', 'SECTEUR_ACTIVITE', 'ADRESSE', 'SITUATION_FAMILIALE', 'ADRESSE_IP_V4', 'ADRESSE_IP_V6', 'DATE_NAISSANCE', 'DATE_SORTIE', 'DATE_DERNIER_EA', 'DATE_DERNIERE_AUGMENTATION', 'CDD', 'EMAIL', 'TELEPHONE', 'SALAIRE', 'DEVISE', 'ID']"
+            == str(combination_exception.value)
+        )
