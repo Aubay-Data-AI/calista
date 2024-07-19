@@ -311,14 +311,6 @@ class SparkEngine(LazyEngine):
     ) -> GroupedData:
         return self.dataset.groupby(*keys).agg(*agg_cols_expr)
 
-    def compare_agg_column_to_value(
-        self, aggregate_condition: aggregateCond.CompareAggColumnToValue
-    ) -> Column:
-        operator = self.mapping_operator.get(aggregate_condition.operator, None)
-        return getattr(F.col(self._get_agg_colname(aggregate_condition)), operator)(
-            aggregate_condition.value
-        )
-
 
 class SparkAggregateDataset(AggregateDataset):
     @staticmethod

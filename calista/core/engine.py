@@ -222,7 +222,7 @@ class LazyEngine(ABC):
     @abstractmethod
     def get_schema(
         self,
-    ) -> dict[ColumnName:str, PythonType:str]:
+    ) -> dict[ColumnName, PythonType]:
         """return a dict with col names as key and python types as values"""
         ...
 

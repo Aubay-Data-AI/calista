@@ -1,19 +1,8 @@
-from typing import Any, TypeAlias, Union
+from typing import Any
 
 from pydantic import computed_field
 
 from calista.core._conditions import CompareColumnToValue, Condition
-
-
-class CompareAggColumnToValue(Condition):
-    col_name: str
-    operator: str
-    agg_ope: str
-    value: Any
-
-
-# TODO: rendre dynamique la création
-AggregateCondition: TypeAlias = Union[CompareAggColumnToValue]
 
 
 class AggregateCondition(Condition):

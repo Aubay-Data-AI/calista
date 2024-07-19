@@ -17,10 +17,16 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
 
-from calista.core._conditions import AndCondition, Condition, NotCondition, OrCondition
+from calista.core._conditions import (
+    AndCondition,
+    CompareColumnToColumn,
+    Condition,
+    NotCondition,
+    OrCondition,
+)
 from calista.core.engine import GenericColumnType
 from calista.core.metrics import Metrics
-from calista.core.types_alias import RuleName
+from calista.core.types_alias import ColumnName, PythonType, RuleName
 from calista.core.utils import import_engine
 from calista.group import GroupedTable
 
@@ -60,7 +66,10 @@ class CalistaTable:
                 f"Je ne sais pas faire avec le moteur {engine} pour l'instant"
             )
         self._engine = import_engine(engine.lower())(config=config)
-        self._cached_diagnostic = None
+
+    @property
+    def schema(self) -> dict[ColumnName, PythonType]:
+        return self._engine.get_schema()
 
     def load(
         self,
@@ -109,7 +118,6 @@ class CalistaTable:
             dataframe=dataframe,
             options=options,
         )
-        self._cached_diagnostic = None
         return self
 
     def load_from_dict(self, data: Dict[str, List]) -> CalistaTable:
@@ -139,7 +147,6 @@ class CalistaTable:
         +---+
         """
         self.load(data=data)
-        self._cached_diagnostic = None
         return self
 
     def load_from_path(
@@ -215,6 +222,11 @@ class CalistaTable:
         self._engine.show(n)
 
     def groupBy(self, *cols: str) -> GroupedTable:
+        for col in cols:
+            if col not in self.schema.keys():
+                raise Exception(
+                    f"Column '{col}' not found in {list(self.schema.keys())}"
+                )
         return GroupedTable(self._engine, cols)
 
     def _evaluate_condition(self, condition: Condition) -> GenericColumnType:
@@ -228,6 +240,22 @@ class CalistaTable:
         if isinstance(condition, NotCondition):
             cond = self._evaluate_condition(condition.cond)
             return self._engine[condition](cond)
+
+        if isinstance(condition, CompareColumnToColumn):
+            if condition.col_left not in self.schema.keys():
+                raise Exception(
+                    f"Column '{condition.col_left}' not found in {list(self.schema.keys())}"
+                )
+            if condition.col_right not in self.schema.keys():
+                raise Exception(
+                    f"Column '{condition.col_right}' not found in {list(self.schema.keys())}"
+                )
+            return self._engine[condition](condition)
+
+        if condition.col_name not in self.schema.keys():
+            raise Exception(
+                f"Column '{condition.col_name}' not found in {list(self.schema.keys())}"
+            )
 
         return self._engine[condition](condition)
 

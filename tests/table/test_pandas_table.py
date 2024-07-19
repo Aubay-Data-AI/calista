@@ -11,11 +11,6 @@ from calista.table import CalistaTable
 
 
 class TestPandasTable:
-    """
-    Ce test est différent car pour le diagnostic les types observés par Pandas
-    sont différents des autres engines (les colonnes de INT / DATE sont converties en
-    un autre type dès qu'il y a des valeurs nulles comme type None/NaN)
-    """
 
     expected_dataset_row_count = 100
 
@@ -449,10 +444,56 @@ class TestPandasTable:
             expected_dataset_row_count,
         )
 
-    def test_agg_and_normal_cond_combination(self, pandas_table):
+    def test_agg_and_normal_cond_combination(self):
         with pytest.raises(Exception) as combination_exception:
             F.sum_gt_value(col_name="SALAIRE", value=20000) | F.is_iban("SALAIRE")
 
         assert "Cannot combine Condition with AggregateCondition" == str(
             combination_exception.value
+        )
+
+    def test_colname_not_in_table(self, pandas_table):
+        with pytest.raises(Exception) as combination_exception:
+            pandas_table.analyze("rule", F.is_iban("DATE"))
+
+        assert (
+            "Column 'DATE' not found in ['NOM', 'PRENOM', 'SEXE', 'DATE_ENTREE', 'CDI', 'IBAN', 'SECTEUR_ACTIVITE', 'ADRESSE', 'SITUATION_FAMILIALE', 'ADRESSE_IP_V4', 'ADRESSE_IP_V6', 'DATE_NAISSANCE', 'DATE_SORTIE', 'DATE_DERNIER_EA', 'DATE_DERNIERE_AUGMENTATION', 'CDD', 'EMAIL', 'TELEPHONE', 'SALAIRE', 'DEVISE', 'ID']"
+            == str(combination_exception.value)
+        )
+
+    def test_col_left_not_in_table_compare_col_to_col(self, pandas_table):
+        with pytest.raises(Exception) as combination_exception:
+            pandas_table.analyze(
+                "rule",
+                F.compare_column_to_column(
+                    col_left="DATE", operator="=", col_right="DATE_ENTREE"
+                ),
+            )
+
+        assert (
+            "Column 'DATE' not found in ['NOM', 'PRENOM', 'SEXE', 'DATE_ENTREE', 'CDI', 'IBAN', 'SECTEUR_ACTIVITE', 'ADRESSE', 'SITUATION_FAMILIALE', 'ADRESSE_IP_V4', 'ADRESSE_IP_V6', 'DATE_NAISSANCE', 'DATE_SORTIE', 'DATE_DERNIER_EA', 'DATE_DERNIERE_AUGMENTATION', 'CDD', 'EMAIL', 'TELEPHONE', 'SALAIRE', 'DEVISE', 'ID']"
+            == str(combination_exception.value)
+        )
+
+    def test_col_right_not_in_table_compare_col_to_col(self, pandas_table):
+        with pytest.raises(Exception) as combination_exception:
+            pandas_table.analyze(
+                "rule",
+                F.compare_column_to_column(
+                    col_left="DATE_ENTREE", operator="=", col_right="DATE"
+                ),
+            )
+
+        assert (
+            "Column 'DATE' not found in ['NOM', 'PRENOM', 'SEXE', 'DATE_ENTREE', 'CDI', 'IBAN', 'SECTEUR_ACTIVITE', 'ADRESSE', 'SITUATION_FAMILIALE', 'ADRESSE_IP_V4', 'ADRESSE_IP_V6', 'DATE_NAISSANCE', 'DATE_SORTIE', 'DATE_DERNIER_EA', 'DATE_DERNIERE_AUGMENTATION', 'CDD', 'EMAIL', 'TELEPHONE', 'SALAIRE', 'DEVISE', 'ID']"
+            == str(combination_exception.value)
+        )
+
+    def test_col_not_in_table_groupby(self, pandas_table):
+        with pytest.raises(Exception) as combination_exception:
+            pandas_table.groupBy("DATE")
+
+        assert (
+            "Column 'DATE' not found in ['NOM', 'PRENOM', 'SEXE', 'DATE_ENTREE', 'CDI', 'IBAN', 'SECTEUR_ACTIVITE', 'ADRESSE', 'SITUATION_FAMILIALE', 'ADRESSE_IP_V4', 'ADRESSE_IP_V6', 'DATE_NAISSANCE', 'DATE_SORTIE', 'DATE_DERNIER_EA', 'DATE_DERNIERE_AUGMENTATION', 'CDD', 'EMAIL', 'TELEPHONE', 'SALAIRE', 'DEVISE', 'ID']"
+            == str(combination_exception.value)
         )
