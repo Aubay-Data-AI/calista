@@ -73,6 +73,12 @@ class SqlEngine(Database):
         except KeyError:
             raise KeyError(f"This table doesn't exist: {table}")
 
+    def where(self, expression: ColumnExpressionArgument) -> Select:
+        return self.dataset.where(expression)
+
+    def filter(self, expression: ColumnExpressionArgument) -> Select:
+        return self.where(expression)
+
     def show(self, n: int = 10):
         stmt = select(self.dataset)
         with self.engine.connect() as conn:

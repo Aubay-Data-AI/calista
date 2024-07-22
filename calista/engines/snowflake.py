@@ -20,7 +20,7 @@ from typing import Any, Dict, List
 import snowflake.snowpark.column as C
 import snowflake.snowpark.functions as F
 import snowflake.snowpark.types as T
-from snowflake.snowpark import Column, RelationalGroupedDataFrame, Session
+from snowflake.snowpark import Column, RelationalGroupedDataFrame, Session, DataFrame
 from snowflake.snowpark.window import Window
 
 import calista.core._aggregate_conditions as aggregateCond
@@ -61,6 +61,12 @@ class SnowflakeEngine(Database):
     def _load_from_database(self, table: str, schema: str, database: str) -> None:
         self.snowflake.sql(f"USE {database}").collect()
         self.dataset = self.snowflake.table(f"{schema}.{table}")
+
+    def where(self, expression: Column) -> DataFrame:
+        return self.dataset.filter(expression)
+
+    def filter(self, expression: Column) -> DataFrame:
+        return self.where(expression)
 
     def show(self, n: int = 10) -> None:
         self.dataset.show(n)

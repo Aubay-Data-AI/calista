@@ -77,10 +77,13 @@ class CalistaTable:
         return GroupedTable(self._engine, cols)
 
     def where(self, condition: Condition) -> CalistaTable:
-        expr = self._evaluate_condition(condition)
-        dataset_filetred = self._engine.filter(expr)
+        if condition.is_aggregate:
+            raise Exception("Cannot apply filter for AggregateCondition")
 
-        new_engine = self._engine.create_new_instance_from_dataset(dataset_filetred)
+        expr = self._evaluate_condition(condition)
+        dataset_filtered = self._engine.filter(expr)
+
+        new_engine = self._engine.create_new_instance_from_dataset(dataset_filtered)
 
         return CalistaTable(new_engine)
 

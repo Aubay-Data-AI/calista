@@ -8,7 +8,7 @@ from polars.testing import assert_frame_equal
 import calista.core.functions as F
 import calista.core.rules as R
 from calista.core.metrics import Metrics
-from calista.table import CalistaTable
+from calista.table import CalistaEngine
 
 
 class TestPolarsTable:
@@ -274,7 +274,7 @@ class TestPolarsTable:
             "float": [4.0, 5.0, 6.0],
             "string": ["a", "b", "c"],
         }
-        calista_table_from_dict = CalistaTable("polars").load_from_dict(data_dict)
+        calista_table_from_dict = CalistaEngine("polars").load_from_dict(data_dict)
 
         assert_frame_equal(
             left=calista_table_from_dict._engine.dataset.lazy(),
@@ -322,7 +322,7 @@ class TestPolarsTable:
         expected_valid_row_count,
         expected_dataset_row_count,
     ):
-        computed_metrics = polars_table.groupBy(keys).analyze(rule_name, rule)
+        computed_metrics = polars_table.group_by(keys).analyze(rule_name, rule)
         expected_metrics = Metrics(
             rule=rule_name,
             total_row_count=expected_dataset_row_count,
@@ -498,7 +498,7 @@ class TestPolarsTable:
 
     def test_col_not_in_table_groupby(self, polars_table):
         with pytest.raises(Exception) as combination_exception:
-            polars_table.groupBy("DATE")
+            polars_table.group_by("DATE")
 
         assert (
             "Column 'DATE' not found in ['NOM', 'PRENOM', 'SEXE', 'DATE_ENTREE', 'CDI', 'IBAN', 'SECTEUR_ACTIVITE', 'ADRESSE', 'SITUATION_FAMILIALE', 'ADRESSE_IP_V4', 'ADRESSE_IP_V6', 'DATE_NAISSANCE', 'DATE_SORTIE', 'DATE_DERNIER_EA', 'DATE_DERNIERE_AUGMENTATION', 'CDD', 'EMAIL', 'TELEPHONE', 'SALAIRE', 'DEVISE', 'ID']"

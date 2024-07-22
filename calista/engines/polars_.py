@@ -18,7 +18,7 @@ from typing import Any, Dict, List
 
 import polars as pl
 import pyarrow.dataset as ds
-from polars import Expr
+from polars import Expr, LazyFrame
 from polars.lazyframe.group_by import LazyGroupBy
 
 import calista.core._aggregate_conditions as aggregateCond
@@ -71,6 +71,12 @@ class Polars_Engine(LazyEngine):
             self.dataset = pl.scan_ndjson(path)
         else:
             raise ValueError(f"I don't know how to read {lowered_file_format} yet.")
+
+    def where(self, expression: Expr) -> LazyFrame:
+        return self.dataset.filter(expression)
+
+    def filter(self, expression: Expr) -> LazyFrame:
+        return self.where(expression)
 
     def show(self, n: int = 10) -> None:
         print(self.dataset.head(n).collect())

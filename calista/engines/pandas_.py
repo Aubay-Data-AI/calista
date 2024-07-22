@@ -19,7 +19,7 @@ from typing import Any, Dict, List
 
 import numpy as np
 import pandas as pd
-from pandas import Series
+from pandas import Series, DataFrame
 from pandas.core.groupby import DataFrameGroupBy
 
 import calista.core._aggregate_conditions as aggregateCond
@@ -121,6 +121,12 @@ class Pandas_Engine(LazyEngine):
             self.dataset = self._read_json(path, options=options)
         else:
             raise ValueError(f"I don't know how to read {lowered_file_format} yet.")
+
+    def where(self, expression: Series) -> DataFrame:
+        return self.dataset[expression]
+
+    def filter(self, expression: Series) -> DataFrame:
+        return self.where(expression)
 
     def show(self, n: int = 10) -> None:
         print(self.dataset.head(n))

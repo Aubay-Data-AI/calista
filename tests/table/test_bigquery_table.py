@@ -317,7 +317,7 @@ class TestBigqueryTable:
         expected_valid_row_count,
         expected_dataset_row_count,
     ):
-        computed_metrics = bigquery_table.groupBy(keys).analyze(rule_name, rule)
+        computed_metrics = bigquery_table.group_by(keys).analyze(rule_name, rule)
         expected_metrics = Metrics(
             rule=rule_name,
             total_row_count=expected_dataset_row_count,
@@ -491,7 +491,7 @@ class TestBigqueryTable:
 
     def test_col_not_in_table_groupby(self, bigquery_table):
         with pytest.raises(Exception) as combination_exception:
-            bigquery_table.groupBy("DATE")
+            bigquery_table.group_by("DATE")
 
         assert (
             "Column 'DATE' not found in ['NOM', 'PRENOM', 'SEXE', 'DATE_ENTREE', 'CDI', 'IBAN', 'SECTEUR_ACTIVITE', 'ADRESSE', 'SITUATION_FAMILIALE', 'ADRESSE_IP_V4', 'ADRESSE_IP_V6', 'DATE_NAISSANCE', 'DATE_SORTIE', 'DATE_DERNIER_EA', 'DATE_DERNIERE_AUGMENTATION', 'CDD', 'EMAIL', 'TELEPHONE', 'SALAIRE', 'DEVISE', 'ID']"
