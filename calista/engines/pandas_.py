@@ -149,7 +149,7 @@ class Pandas_Engine(LazyEngine):
             "datetime64": PythonTypes.DATE,
         }
 
-        return self.dataset.dtypes.apply(lambda x: mapping_type[x.name]).to_dict()
+        return self.dataset.dtypes.apply(lambda x: mapping_type.get(x.name, PythonTypes.STRING)).to_dict()
 
     def count_records(self) -> int:
         return len(self.dataset)

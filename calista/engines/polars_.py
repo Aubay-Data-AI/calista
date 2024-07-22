@@ -112,18 +112,31 @@ class Polars_Engine(LazyEngine):
     def get_schema(self) -> dict[ColumnName:str, PythonType:str]:
         """return a dict with col names as key and python types as values"""
         mapping_type = {
-            "Int32": PythonTypes.INTEGER,
-            "Int64": PythonTypes.INTEGER,
-            "String": PythonTypes.STRING,
-            "Utf8": PythonTypes.STRING,
+			"Decimal": PythonTypes.DECIMAL,
+			"Float32": PythonTypes.FLOAT,
             "Float64": PythonTypes.FLOAT,
-            "Float32": PythonTypes.FLOAT,
+			"Int8": PythonTypes.INTEGER,
+			"Int32": PythonTypes.INTEGER,
+            "Int64": PythonTypes.INTEGER,
+			"UInt8": PythonTypes.INTEGER,
+			"UInt16": PythonTypes.INTEGER,
+			"UInt32": PythonTypes.INTEGER,
+			"UInt64": PythonTypes.INTEGER,
             "Date": PythonTypes.DATE,
-            "Time": PythonTypes.TIMESTAMP,
-            "Boolean": PythonTypes.BOOLEAN,
+			"Datetime": PythonTypes.DATE,
+			"Duration": PythonTypes.DATE,
+            "Time": PythonTypes.DATE,
+			"String": PythonTypes.STRING,
+			"Categorical": PythonTypes.STRING,
+			"Enum": PythonTypes.STRING,
+            "Utf8": PythonTypes.STRING,
+			"Binary": PythonTypes.STRING,
+			"Object": PythonTypes.STRING,
+			"Unknown": PythonTypes.STRING,
+            "Boolean": PythonTypes.BOOLEAN
         }
         return {
-            col_info[0]: mapping_type[f"{col_info[1]}"]
+            col_info[0]: mapping_type.get(f"{col_info[1]}", PythonTypes.STRING)
             for col_info in list(dict(self.dataset.schema).items())
         }
 
