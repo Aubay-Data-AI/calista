@@ -25,7 +25,6 @@ from sqlalchemy import (
     and_,
     case,
     cast,
-    column,
     create_engine,
     extract,
     func,
@@ -111,9 +110,12 @@ class SqlEngine(Database):
             "TIMESTAMP": PythonTypes.TIMESTAMP,
             "BOOLEAN": PythonTypes.BOOLEAN,
             "TEXT": PythonTypes.STRING,
+            "INT64": PythonTypes.INTEGER,
         }
         return {
-            column.name: mapping_type[str(column.type).replace("()", "")]
+            column.name: mapping_type.get(
+                str(column.type).replace("()", ""), PythonTypes.STRING
+            )
             for column in self.dataset.c
         }
 

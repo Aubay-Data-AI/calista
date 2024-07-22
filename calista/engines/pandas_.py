@@ -19,7 +19,7 @@ from typing import Any, Dict, List
 
 import numpy as np
 import pandas as pd
-from pandas import Series, DataFrame
+from pandas import DataFrame, Series
 from pandas.core.groupby import DataFrameGroupBy
 
 import calista.core._aggregate_conditions as aggregateCond

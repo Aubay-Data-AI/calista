@@ -20,7 +20,7 @@ from typing import Any, Dict, List
 import snowflake.snowpark.column as C
 import snowflake.snowpark.functions as F
 import snowflake.snowpark.types as T
-from snowflake.snowpark import Column, RelationalGroupedDataFrame, Session, DataFrame
+from snowflake.snowpark import Column, DataFrame, RelationalGroupedDataFrame, Session
 from snowflake.snowpark.window import Window
 
 import calista.core._aggregate_conditions as aggregateCond
