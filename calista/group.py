@@ -1,17 +1,14 @@
-from copy import deepcopy
-
 from calista.core._aggregate_conditions import AggregateCondition
-from calista.core._conditions import AndCondition, Condition, NotCondition, OrCondition
-from calista.core.engine import GenericColumnType, GenericGroupedTableObject
+from calista.core._conditions import AndCondition, Condition, OrCondition
+from calista.core.engine import GenericGroupedTableObject
 from calista.core.metrics import Metrics
 from calista.core.utils import import_engine
+from calista.table import CalistaTable
 
 
 class GroupedTable:
     def __init__(self, engine, agg_keys) -> None:
-        _dataset = engine.dataset
-        self._engine = deepcopy(engine)
-        self._engine.dataset = _dataset
+        self._engine = engine.create_new_instance_from_dataset(engine.dataset)
         self._agg_keys = agg_keys
         self._aggregate_dataset_utils = import_engine(
             self._engine.__name__.lower(), "AggregateDataset"
@@ -55,20 +52,6 @@ class GroupedTable:
         parse(condition)
         return self._engine.aggregate_dataset(self._agg_keys, agg_cols_expr)
 
-    def _evaluate_condition(self, condition: AggregateCondition) -> GenericColumnType:
-
-        if isinstance(condition, AndCondition) or isinstance(condition, OrCondition):
-            left_cond = self._evaluate_condition(condition.left)
-            right_cond = self._evaluate_condition(condition.right)
-
-            return self._engine[condition](left_cond, right_cond)
-
-        if isinstance(condition, NotCondition):
-            cond = self._evaluate_condition(condition.cond)
-            return self._engine[condition](cond)
-
-        return self._engine[condition](condition)
-
     def analyze(self, rule_name: str, condition: AggregateCondition) -> Metrics:
         """
         Compute :class:`~calista.core.metrics.Metrics` based on a condition.
@@ -87,6 +70,4 @@ class GroupedTable:
         self._engine.dataset = self._evaluate_aggregates(condition)
         condition_as_check = condition.get_conditions_as_func_check()
 
-        return self._engine.execute_conditions(
-            {rule_name: self._evaluate_condition(condition_as_check)}
-        )[0]
+        return CalistaTable(self._engine).analyze(rule_name, condition_as_check)

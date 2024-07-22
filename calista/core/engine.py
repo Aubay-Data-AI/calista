@@ -168,6 +168,19 @@ class LazyEngine(ABC):
             memo[id_self] = _copy
         return _copy
 
+    def create_new_instance_from_dataset(self, dataset):
+        new_instance = deepcopy(self)
+        new_instance.dataset = dataset
+        return new_instance
+
+    @abstractmethod
+    def where(self, expression: GenericColumnType) -> DataFrameType:
+        ...
+
+    def filter(self, expresion: GenericColumnType) -> DataFrameType:
+        """Alias of where method"""
+        return self.where(expresion)
+
     @abstractmethod
     def and_condition(
         self, left_cond: GenericColumnType, right_cond: GenericColumnType

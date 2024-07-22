@@ -15,7 +15,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from calista.core._conditions import (
     AndCondition,
@@ -24,11 +24,13 @@ from calista.core._conditions import (
     NotCondition,
     OrCondition,
 )
-from calista.core.engine import GenericColumnType
+from calista.core.engine import GenericColumnType, LazyEngine
 from calista.core.metrics import Metrics
 from calista.core.types_alias import ColumnName, PythonType, RuleName
 from calista.core.utils import import_engine
-from calista.group import GroupedTable
+
+if TYPE_CHECKING:
+    from calista.group import GroupedTable
 
 
 class CalistaTable:
@@ -38,7 +40,7 @@ class CalistaTable:
     snowflake, bigquery, postgre.
     """
 
-    def __init__(self, engine: str, config: Dict[str, Any] = None):
+    def __init__(self, engine: LazyEngine):
         """
         Initialize the class with the specified engine and configuration.
 
@@ -49,168 +51,11 @@ class CalistaTable:
         Raises:
             Exception: If the specified engine is not supported.
         """
-        self._engine_name = engine.lower()
-        if engine.lower() == "pandas":
-            engine = "pandas_"
-        elif engine.lower() == "polars":
-            engine = "polars_"
-        if engine.lower() not in [
-            "spark",
-            "snowflake",
-            "sql",
-            "bigquery",
-            "pandas_",
-            "polars_",
-        ]:
-            raise Exception(
-                f"Je ne sais pas faire avec le moteur {engine} pour l'instant"
-            )
-        self._engine = import_engine(engine.lower())(config=config)
+        self._engine = engine
 
     @property
     def schema(self) -> dict[ColumnName, PythonType]:
         return self._engine.get_schema()
-
-    def load(
-        self,
-        path: str = None,
-        file_format: str = None,
-        data: Dict[str, List] = None,
-        table: str = None,
-        schema: str = None,
-        database: str = None,
-        dataframe: Any = None,
-        options: Dict[str, Any] = None,
-    ) -> CalistaTable:
-        """
-        Load data from a dataset into a :class:`~calista.table.CalistaTable`.
-
-        :param (str, optional) path:
-            The path if you're loading a file.
-        :param (str, optional) file_format:
-            The format of the file (e.g., 'csv', 'parquet').
-        :param (dict) data:
-            The dictionary containing the data of the table.
-        :param (str, optional) table:
-            The name of the table if you're not loading a file.
-        :param (str, optional) schema:
-            The schema containing the table.
-        :param (str, optional) database:
-            The database containing the table.
-        :param (Any, optional) dataframe:
-            An existing dataframe.
-        :param (Dict[str, Any], optional) options:
-            Additional configuration file options.
-
-        Returns:
-            :class:`~calista.table.CalistaTable`: The loaded table.
-
-        Raises:
-            Any exceptions raised by the engine's read_dataset method.
-        """
-        self._engine.read_dataset(
-            path=path,
-            file_format=file_format,
-            data=data,
-            table=table,
-            schema=schema,
-            database=database,
-            dataframe=dataframe,
-            options=options,
-        )
-        return self
-
-    def load_from_dict(self, data: Dict[str, List]) -> CalistaTable:
-        """
-        Load data from a dictionary into a :class:`~calista.table.CalistaTable`.
-
-        :param (dict) data:
-            The dictionary containing the data of the table.
-
-        Returns:
-            :class:`~calista.table.CalistaTable`: The loaded table.
-
-        Raises:
-            Any exceptions raised by the engine's read_dataset method.
-
-        Example
-        --------
-        >>> calista_table = CalistaTable(engine = "spark").load_from_dict({"ID": [1, 2, 3, 4]})
-        >>> calista_table.show()
-        +---+
-        | ID|
-        +---+
-        |  1|
-        |  2|
-        |  3|
-        |  4|
-        +---+
-        """
-        self.load(data=data)
-        return self
-
-    def load_from_path(
-        self, path: str, file_format: str, options: Dict[str, Any] = None
-    ) -> CalistaTable:
-        """
-        Load data from a path into a :class:`~calista.table.CalistaTable`.
-
-        :param (str) path:
-            The path of the file containing your table.
-        :param (str, optional) file_format:
-            The format of the file (e.g., 'csv', 'parquet').
-
-        Returns:
-            :class:`~calista.table.CalistaTable`: The loaded table.
-
-        Raises:
-            Any exceptions raised by the engine's read_dataset method.
-
-        Example
-        --------
-        >>> csv_options = {
-        >>> "delimiter": ",",
-        >>> "header": "True"
-        >>> }
-        >>> calista_table = CalistaTable(engine = "spark").load_from_path(path='my_csv.csv',file_format="csv",options=csv_options)
-        """
-        return self.load(path=path, file_format=file_format, options=options)
-
-    def load_from_dataframe(self, dataframe: Any) -> CalistaTable:
-        """
-        Load data from a dataframe into a :class:`~calista.table.CalistaTable`.
-
-        :param (Any) dataframe:
-            An existing dataframe.
-
-        Returns:
-            :class:`~calista.table.CalistaTable`: The loaded table.
-
-        Raises:
-            Any exceptions raised by the engine's read_dataset method.
-        """
-        return self.load(dataframe=dataframe)
-
-    def load_from_database(
-        self, table: Any, schema: str = None, database: str = None
-    ) -> CalistaTable:
-        """
-        Load data from a table into a :class:`~calista.table.CalistaTable`.
-
-        :param (str) table:
-            The name of the table.
-        :param (str, optional) schema:
-            The schema containing the table
-        :param (str, optional) database:
-            The database containing the table.
-
-        Returns:
-            :class:`~calista.table.CalistaTable`: The loaded table.
-
-        Raises:
-            Any exceptions raised by the engine's read_dataset method.
-        """
-        return self.load(table=table, schema=schema, database=database)
 
     def show(self, n: int = 10) -> None:
         """
@@ -221,13 +66,26 @@ class CalistaTable:
         """
         self._engine.show(n)
 
-    def groupBy(self, *cols: str) -> GroupedTable:
+    def group_by(self, *cols: str) -> GroupedTable:
         for col in cols:
             if col not in self.schema.keys():
                 raise Exception(
                     f"Column '{col}' not found in {list(self.schema.keys())}"
                 )
+        from calista.group import GroupedTable
+
         return GroupedTable(self._engine, cols)
+
+    def where(self, condition: Condition) -> CalistaTable:
+        expr = self._evaluate_condition(condition)
+        dataset_filetred = self._engine.filter(expr)
+
+        new_engine = self._engine.create_new_instance_from_dataset(dataset_filetred)
+
+        return CalistaTable(new_engine)
+
+    def filter(self, condition: Condition) -> CalistaTable:
+        return self.where(condition)
 
     def _evaluate_condition(self, condition: Condition) -> GenericColumnType:
 
@@ -313,3 +171,174 @@ class CalistaTable:
             )
 
         return type_format
+
+
+class CalistaEngine:
+    def __init__(self, engine: str, config: Dict[str, Any] = None):
+        """
+        Initialize the class with the specified engine and configuration.
+
+        Args:
+            engine (str): The engine to use for data processing.
+            config (Dict[str, Any], optional): Configuration options for the engine (default: None).
+
+        Raises:
+            Exception: If the specified engine is not supported.
+        """
+        self._engine_name = engine.lower()
+        if engine.lower() == "pandas":
+            engine = "pandas_"
+        elif engine.lower() == "polars":
+            engine = "polars_"
+        if engine.lower() not in [
+            "spark",
+            "snowflake",
+            "sql",
+            "bigquery",
+            "pandas_",
+            "polars_",
+        ]:
+            raise Exception(
+                f"Je ne sais pas faire avec le moteur {engine} pour l'instant"
+            )
+        self._engine = import_engine(engine.lower())(config=config)
+
+    def load(
+        self,
+        path: str = None,
+        file_format: str = None,
+        data: Dict[str, List] = None,
+        table: str = None,
+        schema: str = None,
+        database: str = None,
+        dataframe: Any = None,
+        options: Dict[str, Any] = None,
+    ) -> CalistaTable:
+        """
+        Load data from a dataset into a :class:`~calista.table.CalistaTable`.
+
+        :param (str, optional) path:
+            The path if you're loading a file.
+        :param (str, optional) file_format:
+            The format of the file (e.g., 'csv', 'parquet').
+        :param (dict) data:
+            The dictionary containing the data of the table.
+        :param (str, optional) table:
+            The name of the table if you're not loading a file.
+        :param (str, optional) schema:
+            The schema containing the table.
+        :param (str, optional) database:
+            The database containing the table.
+        :param (Any, optional) dataframe:
+            An existing dataframe.
+        :param (Dict[str, Any], optional) options:
+            Additional configuration file options.
+
+        Returns:
+            :class:`~calista.table.CalistaTable`: The loaded table.
+
+        Raises:
+            Any exceptions raised by the engine's read_dataset method.
+        """
+        self._engine.read_dataset(
+            path=path,
+            file_format=file_format,
+            data=data,
+            table=table,
+            schema=schema,
+            database=database,
+            dataframe=dataframe,
+            options=options,
+        )
+        return CalistaTable(self._engine)
+
+    def load_from_dict(self, data: Dict[str, List]) -> CalistaTable:
+        """
+        Load data from a dictionary into a :class:`~calista.table.CalistaTable`.
+
+        :param (dict) data:
+            The dictionary containing the data of the table.
+
+        Returns:
+            :class:`~calista.table.CalistaTable`: The loaded table.
+
+        Raises:
+            Any exceptions raised by the engine's read_dataset method.
+
+        Example
+        --------
+        >>> calista_table = CalistaTable(engine = "spark").load_from_dict({"ID": [1, 2, 3, 4]})
+        >>> calista_table.show()
+        +---+
+        | ID|
+        +---+
+        |  1|
+        |  2|
+        |  3|
+        |  4|
+        +---+
+        """
+        return self.load(data=data)
+
+    def load_from_path(
+        self, path: str, file_format: str, options: Dict[str, Any] = None
+    ) -> CalistaTable:
+        """
+        Load data from a path into a :class:`~calista.table.CalistaTable`.
+
+        :param (str) path:
+            The path of the file containing your table.
+        :param (str, optional) file_format:
+            The format of the file (e.g., 'csv', 'parquet').
+
+        Returns:
+            :class:`~calista.table.CalistaTable`: The loaded table.
+
+        Raises:
+            Any exceptions raised by the engine's read_dataset method.
+
+        Example
+        --------
+        >>> csv_options = {
+        >>> "delimiter": ",",
+        >>> "header": "True"
+        >>> }
+        >>> calista_table = CalistaTable(engine = "spark").load_from_path(path='my_csv.csv',file_format="csv",options=csv_options)
+        """
+        return self.load(path=path, file_format=file_format, options=options)
+
+    def load_from_dataframe(self, dataframe: Any) -> CalistaTable:
+        """
+        Load data from a dataframe into a :class:`~calista.table.CalistaTable`.
+
+        :param (Any) dataframe:
+            An existing dataframe.
+
+        Returns:
+            :class:`~calista.table.CalistaTable`: The loaded table.
+
+        Raises:
+            Any exceptions raised by the engine's read_dataset method.
+        """
+        return self.load(dataframe=dataframe)
+
+    def load_from_database(
+        self, table: Any, schema: str = None, database: str = None
+    ) -> CalistaTable:
+        """
+        Load data from a table into a :class:`~calista.table.CalistaTable`.
+
+        :param (str) table:
+            The name of the table.
+        :param (str, optional) schema:
+            The schema containing the table
+        :param (str, optional) database:
+            The database containing the table.
+
+        Returns:
+            :class:`~calista.table.CalistaTable`: The loaded table.
+
+        Raises:
+            Any exceptions raised by the engine's read_dataset method.
+        """
+        return self.load(table=table, schema=schema, database=database)

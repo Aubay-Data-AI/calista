@@ -73,6 +73,9 @@ class SparkEngine(LazyEngine):
     def show(self, n: int = 10) -> None:
         self.dataset.show(n)
 
+    def where(self, expression: Column) -> DataFrame:
+        return self.dataset.filter(expression)
+
     def and_condition(self, left_cond: Column, right_cond: Column) -> Column:
         return left_cond & right_cond
 
