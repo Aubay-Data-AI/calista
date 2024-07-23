@@ -1561,7 +1561,7 @@ def sum_eq_value(col_name: str, value: Any) -> agg_cond.SumBy:
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = sum_eq_value(col_name="POINTS", value=60)
-    >>> print(calista_table.groupBy("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
+    >>> print(calista_table.group_by("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
     rule_name : My Rule Name
     total_row_count : 2
     valid_row_count : 1
@@ -1591,7 +1591,7 @@ def sum_lt_value(col_name: str, value: Any) -> agg_cond.SumBy:
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = sum_lt_value(col_name="POINTS", value=70)
-    >>> print(calista_table.groupBy("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
+    >>> print(calista_table.group_by("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
     rule_name : My Rule Name
     total_row_count : 2
     valid_row_count : 1
@@ -1621,7 +1621,7 @@ def sum_le_value(col_name: str, value: Any) -> agg_cond.SumBy:
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = sum_le_value(col_name="POINTS", value=60)
-    >>> print(calista_table.groupBy("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
+    >>> print(calista_table.group_by("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
     rule_name : My Rule Name
     total_row_count : 2
     valid_row_count : 1
@@ -1651,7 +1651,7 @@ def sum_gt_value(col_name: str, value: Any) -> agg_cond.SumBy:
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = sum_gt_value(col_name="POINTS", value=60)
-    >>> print(calista_table.groupBy("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
+    >>> print(calista_table.group_by("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
     rule_name : My Rule Name
     total_row_count : 2
     valid_row_count : 1
@@ -1681,7 +1681,7 @@ def sum_ge_value(col_name: str, value: Any) -> agg_cond.SumBy:
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = sum_ge_value(col_name="POINTS", value=60)
-    >>> print(calista_table.groupBy("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
+    >>> print(calista_table.group_by("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
     rule_name : My Rule Name
     total_row_count : 2
     valid_row_count : 2
@@ -1711,7 +1711,7 @@ def count_eq_value(col_name: str, value: Any) -> agg_cond.CountBy:
     >>> calista_table = CalistaEngine(engine="pandas").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue", "blue"],
     >>>                                                      "POINTS": [10, 20, 30, 40, 20, 10,50]})
     >>> my_rule = count_eq_value(col_name="TEAM", value=3)
-    >>> print(calista_table.groupBy("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
+    >>> print(calista_table.group_by("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
     rule_name : My Rule Name
     total_row_count : 4
     valid_row_count : 2
@@ -1743,7 +1743,7 @@ def count_lt_value(col_name: str, value: Any) -> agg_cond.CountBy:
     >>> calista_table = CalistaEngine(engine="pandas").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue", "blue"],
     >>>                                                      "POINTS": [10, 20, 30, 40, 20, 10,50]})
     >>> my_rule = count_lt_value(col_name="TEAM", value=3)
-    >>> print(calista_table.groupBy("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
+    >>> print(calista_table.group_by("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
     rule_name : My Rule Name
     total_row_count : 2
     valid_row_count : 0
@@ -1775,7 +1775,7 @@ def count_le_value(col_name: str, value: Any) -> agg_cond.CountBy:
     >>> calista_table = CalistaEngine(engine="pandas").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue", "blue"],
     >>>                                                      "POINTS": [10, 20, 30, 40, 20, 10,50]})
     >>> my_rule = count_le_value(col_name="TEAM", value=3)
-    >>> print(calista_table.groupBy("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
+    >>> print(calista_table.group_by("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
     rule_name : My Rule Name
     total_row_count : 2
     valid_row_count : 1
@@ -1807,7 +1807,7 @@ def count_gt_value(col_name: str, value: Any) -> agg_cond.CountBy:
     >>> calista_table = CalistaEngine(engine="pandas").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue", "blue"],
     >>>                                                      "POINTS": [10, 20, 30, 40, 20, 10,50]})
     >>> my_rule = count_gt_value(col_name="TEAM", value=3)
-    >>> print(calista_table.groupBy("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
+    >>> print(calista_table.group_by("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
     rule_name : My Rule Name
     total_row_count : 2
     valid_row_count : 1
@@ -1838,7 +1838,7 @@ def count_ge_value(col_name: str, value: Any) -> agg_cond.CountBy:
     >>> calista_table = CalistaEngine(engine="pandas").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue", "blue"],
     >>>                                                      "POINTS": [10, 20, 30, 40, 20, 10,50]})
     >>> my_rule = count_ge_value(col_name="TEAM", value=3)
-    >>> print(calista_table.groupBy("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
+    >>> print(calista_table.group_by("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
     rule_name : My Rule Name
     total_row_count : 2
     valid_row_count : 2
@@ -1870,7 +1870,7 @@ def mean_eq_value(col_name: str, value: Any) -> agg_cond.MeanBy:
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = mean_eq_value(col_name="TEAM", value=20)
-    >>> print(calista_table.groupBy("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
+    >>> print(calista_table.group_by("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
     rule_name : My Rule Name
     total_row_count : 2
     valid_row_count : 1
@@ -1900,7 +1900,7 @@ def mean_lt_value(col_name: str, value: Any) -> agg_cond.MeanBy:
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = mean_lt_value(col_name="TEAM", value=25)
-    >>> print(calista_table.groupBy("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
+    >>> print(calista_table.group_by("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
     rule_name : My Rule Name
     total_row_count : 2
     valid_row_count : 1
@@ -1930,7 +1930,7 @@ def mean_le_value(col_name: str, value: Any) -> agg_cond.MeanBy:
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = mean_le_value(col_name="TEAM", value=20)
-    >>> print(calista_table.groupBy("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
+    >>> print(calista_table.group_by("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
     rule_name : My Rule Name
     total_row_count : 2
     valid_row_count : 1
@@ -1962,7 +1962,7 @@ def mean_gt_value(col_name: str, value: Any) -> agg_cond.MeanBy:
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = mean_gt_value(col_name="TEAM", value=20)
-    >>> print(calista_table.groupBy("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
+    >>> print(calista_table.group_by("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
     rule_name : My Rule Name
     total_row_count : 2
     valid_row_count : 2
@@ -1992,7 +1992,7 @@ def mean_ge_value(col_name: str, value: Any) -> agg_cond.MeanBy:
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = mean_ge_value(col_name="TEAM", value=30)
-    >>> print(calista_table.groupBy("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
+    >>> print(calista_table.group_by("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
     rule_name : My Rule Name
     total_row_count : 2
     valid_row_count : 1
@@ -2024,7 +2024,7 @@ def median_eq_value(col_name: str, value: Any) -> agg_cond.MedianBy:
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = median_eq_value(col_name="TEAM", value=20)
-    >>> print(calista_table.groupBy("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
+    >>> print(calista_table.group_by("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
     rule_name : My Rule Name
     total_row_count : 2
     valid_row_count : 2
@@ -2056,7 +2056,7 @@ def median_lt_value(col_name: str, value: Any) -> agg_cond.MedianBy:
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = median_lt_value(col_name="TEAM", value=25)
-    >>> print(calista_table.groupBy("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
+    >>> print(calista_table.group_by("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
     rule_name : My Rule Name
     total_row_count : 2
     valid_row_count : 0
@@ -2088,7 +2088,7 @@ def median_le_value(col_name: str, value: Any) -> agg_cond.MedianBy:
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = median_le_value(col_name="TEAM", value=20)
-    >>> print(calista_table.groupBy("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
+    >>> print(calista_table.group_by("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
     rule_name : My Rule Name
     total_row_count : 2
     valid_row_count : 2
@@ -2120,7 +2120,7 @@ def median_gt_value(col_name: str, value: Any) -> agg_cond.MedianBy:
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = median_gt_value(col_name="TEAM", value=15)
-    >>> print(calista_table.groupBy("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
+    >>> print(calista_table.group_by("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
     rule_name : My Rule Name
     total_row_count : 2
     valid_row_count : 2
@@ -2152,7 +2152,7 @@ def median_ge_value(col_name: str, value: Any) -> agg_cond.MedianBy:
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = median_ge_value(col_name="TEAM", value=20)
-    >>> print(calista_table.groupBy("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
+    >>> print(calista_table.group_by("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
     rule_name : My Rule Name
     total_row_count : 2
     valid_row_count : 2
@@ -2184,7 +2184,7 @@ def min_eq_value(col_name: str, value: Any) -> agg_cond.MinBy:
     >>> calista_table = CalistaEngine(engine="pandas").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                    "POINTS": [5, 20, 30, 40, 20, 10]})
     >>> my_rule = min_eq_value(col_name="TEAM", value=20)
-    >>> print(calista_table.groupBy("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
+    >>> print(calista_table.group_by("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
     rule_name : My Rule Name
     total_row_count : 2
     valid_row_count : 1
@@ -2214,7 +2214,7 @@ def min_lt_value(col_name: str, value: Any) -> agg_cond.MinBy:
     >>> calista_table = CalistaEngine(engine="pandas").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                      "POINTS": [5, 20, 30, 40, 20, 10]})
     >>> my_rule = min_lt_value(col_name="POINTS", value=20)
-    >>> print(calista_table.groupBy("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
+    >>> print(calista_table.group_by("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
     rule_name : My Rule Name
     total_row_count : 2
     valid_row_count : 0
@@ -2244,7 +2244,7 @@ def min_le_value(col_name: str, value: Any) -> agg_cond.MinBy:
     >>> calista_table = CalistaEngine(engine="pandas").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                      "POINTS": [5, 20, 30, 40, 20, 10]})
     >>> my_rule = min_le_value(col_name="POINTS", value=20)
-    >>> print(calista_table.groupBy("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
+    >>> print(calista_table.group_by("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
     rule_name : My Rule Name
     total_row_count : 2
     valid_row_count : 1
@@ -2274,7 +2274,7 @@ def min_gt_value(col_name: str, value: Any) -> agg_cond.MinBy:
     >>> calista_table = CalistaEngine(engine="pandas").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                      "POINTS": [5, 20, 30, 40, 20, 10]})
     >>> my_rule = min_gt_value(col_name="POINTS", value=10)
-    >>> print(calista_table.groupBy("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
+    >>> print(calista_table.group_by("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
     rule_name : My Rule Name
     total_row_count : 2
     valid_row_count : 1
@@ -2304,7 +2304,7 @@ def min_ge_value(col_name: str, value: Any) -> agg_cond.MinBy:
     >>> calista_table = CalistaEngine(engine="pandas").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                      "POINTS": [5, 20, 30, 40, 20, 10]})
     >>> my_rule = min_ge_value(col_name="POINTS", value=10)
-    >>> print(calista_table.groupBy("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
+    >>> print(calista_table.group_by("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
     rule_name : My Rule Name
     total_row_count : 2
     valid_row_count : 1
@@ -2334,7 +2334,7 @@ def max_eq_value(col_name: str, value: Any) -> agg_cond.MaxBy:
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = max_eq_value(col_name="TEAM", value=30)
-    >>> print(calista_table.groupBy("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
+    >>> print(calista_table.group_by("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
     rule_name : My Rule Name
     total_row_count : 2
     valid_row_count : 1
@@ -2364,7 +2364,7 @@ def max_lt_value(col_name: str, value: Any) -> agg_cond.MaxBy:
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = max_lt_value(col_name="TEAM", value=40)
-    >>> print(calista_table.groupBy("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
+    >>> print(calista_table.group_by("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
     rule_name : My Rule Name
     total_row_count : 2
     valid_row_count : 1
@@ -2394,7 +2394,7 @@ def max_le_value(col_name: str, value: Any) -> agg_cond.MaxBy:
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = max_le_value(col_name="TEAM", value=40)
-    >>> print(calista_table.groupBy("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
+    >>> print(calista_table.group_by("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
     rule_name : My Rule Name
     total_row_count : 2
     valid_row_count : 2
@@ -2424,7 +2424,7 @@ def max_gt_value(col_name: str, value: Any) -> agg_cond.MaxBy:
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = max_gt_value(col_name="TEAM", value=30)
-    >>> print(calista_table.groupBy("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
+    >>> print(calista_table.group_by("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
     rule_name : My Rule Name
     total_row_count : 2
     valid_row_count : 1
@@ -2454,7 +2454,7 @@ def max_ge_value(col_name: str, value: Any) -> agg_cond.MaxBy:
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = max_ge_value(col_name="TEAM", value=30)
-    >>> print(calista_table.groupBy("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
+    >>> print(calista_table.group_by("TEAM").analyze(rule_name="My Rule Name", condition=my_rule))
     rule_name : My Rule Name
     total_row_count : 2
     valid_row_count : 2
