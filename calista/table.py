@@ -270,7 +270,7 @@ class CalistaEngine:
 
         Example
         --------
-        >>> calista_table = CalistaTable(engine = "spark").load_from_dict({"ID": [1, 2, 3, 4]})
+        >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"ID": [1, 2, 3, 4]})
         >>> calista_table.show()
         +---+
         | ID|
@@ -306,7 +306,7 @@ class CalistaEngine:
         >>> "delimiter": ",",
         >>> "header": "True"
         >>> }
-        >>> calista_table = CalistaTable(engine = "spark").load_from_path(path='my_csv.csv',file_format="csv",options=csv_options)
+        >>> calista_table = CalistaEngine(engine = "spark").load_from_path(path='my_csv.csv',file_format="csv",options=csv_options)
         """
         return self.load(path=path, file_format=file_format, options=options)
 
