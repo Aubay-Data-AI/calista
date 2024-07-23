@@ -182,7 +182,7 @@ class Pandas_Engine(LazyEngine):
         return self.dataset[condition.col_name].isin(condition.list_of_values)
 
     def rlike(self, condition: cond.Rlike) -> Series:
-        return self.dataset[condition.col_name].str.contains(
+        return self.dataset[condition.col_name].astype('string').str.contains(
             condition.pattern, na=False
         )
 
