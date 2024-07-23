@@ -163,6 +163,9 @@ class SqlEngine(Database):
     def is_in(self, condition: cond.IsIn) -> ColumnExpressionArgument:
         return self.dataset.c[condition.col_name].in_(condition.list_of_values)
 
+    def rlike(self, condition: cond.Rlike) -> ColumnExpressionArgument:
+        raise Exception("rlike() function is not available")
+
     def compare_year_to_value(
         self, condition: cond.CompareYearToValue
     ) -> ColumnExpressionArgument:

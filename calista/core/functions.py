@@ -63,7 +63,7 @@ def is_not_null(col_name: str) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import is_not_null
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"ID": [1, None, 3, None]})
     >>> my_rule = is_not_null(col_name="ID")
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -91,7 +91,7 @@ def is_in(col_name: str, list_of_values: list[Any]) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import is_in
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"ID": [1, None, 3, None]})
     >>> my_rule = is_in(col_name="ID", list_of_values=[1,5])
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -102,6 +102,34 @@ def is_in(col_name: str, list_of_values: list[Any]) -> ConditionExpression:
     timestamp : 2024-01-01 00:00:00.000000
     """
     return cond.IsIn(col_name=col_name, list_of_values=list_of_values)
+
+
+def rlike(col_name: str, pattern: str) -> ConditionExpression:
+    """
+    Create a condition to check if a column value matches a regex.
+
+    Args:
+        col_name (str): The name of the column.
+        pattern (str): Regex pattern to apply.
+
+    Returns:
+        ConditionExpression: The condition to check if a column value matches a regex.
+
+    Example
+    --------
+    >>> from calista import CalistaEngine
+    >>> from calista.core.functions import rlike
+    >>>
+    >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"NAME": ["1", None, "john", None]})
+    >>> my_rule = rlike(col_name="NAME", pattern="^[a-zA-Z ]$")
+    >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
+    rule_name : My Rule Name
+    total_row_count : 4
+    valid_row_count : 1
+    valid_row_count_pct : 25.0
+    timestamp : 2024-01-01 00:00:00.000000
+    """
+    return cond.Rlike(col_name=col_name, pattern=pattern)
 
 
 def compare_year_to_value(
@@ -120,7 +148,7 @@ def compare_year_to_value(
     Example
     --------
     >>> from calista import CalistaEngine
-    >>> from calista.core.functions import compare_year_to_value   
+    >>> from calista.core.functions import compare_year_to_value
     >>> from datetime import datetime
     >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"DATE": [datetime.date(2024, 4, 11), datetime.date(2024, 5, 11), None, None]})
@@ -149,7 +177,7 @@ def is_ip_address(col_name: str) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import is_ip_address
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"IP_ADDRESS": ["192.168.1.1", None, None, "192.168.2.1"]})
     >>> my_rule = is_ip_address(col_name="IP_ADDRESS")
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -176,7 +204,7 @@ def is_float(col_name: str) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import is_float
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"NUMBER": [2344.324, 6000.34, 2345.3, None]})
     >>> my_rule = is_float(col_name="NUMBER")
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -202,7 +230,7 @@ def is_date(col_name: str) -> ConditionExpression:
     Example
     --------
     >>> from calista import CalistaEngine
-    >>> from calista.core.functions import is_date 
+    >>> from calista.core.functions import is_date
     >>> from datetime import datetime
     >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"DATE": datetime.date(2024, 4, 11), datetime.date(2024, 5, 11), None, None})
@@ -234,7 +262,7 @@ def is_phone_number(
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import is_phone_number
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"PHONE_NUMBER": ["0666994412", "0763494412", None, "0460994412"]})
     >>> my_rule = is_phone_number(col_name="PHONE_NUMBER")
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -261,7 +289,7 @@ def is_boolean(col_name: str) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import is_boolean
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"BOOL": [True, None, True, None]})
     >>> my_rule = is_boolean(col_name="BOOL")
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -288,7 +316,7 @@ def is_email(col_name: str) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import is_email
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"EMAIL": ["test@aubay.com", None, None, "test1@aubay.com"]})
     >>> my_rule = is_email(col_name="EMAIL")
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -315,7 +343,7 @@ def is_integer(col_name: str) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import is_integer
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"ID": [1, None, 3, None]})
     >>> my_rule = is_integer(col_name="ID")
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -342,7 +370,7 @@ def is_iban(col_name: str) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import is_iban
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"IBAN": ["FR7612548029989876543210917", "FR7630003035409876543210925", "None", None]})
     >>> my_rule = is_iban(col_name="IBAN")
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -369,7 +397,7 @@ def is_unique(col_name: str) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import is_unique
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"ID": [1, 2, 3, 2]})
     >>> my_rule = is_unique(col_name="ID")
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -400,7 +428,7 @@ def compare_column_to_value(
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import compare_column_to_value
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"NUMBER": [2344.324, 6000.34, 2345.3, None]})
     >>> my_rule = compare_column_to_value(col_name="NUMBER", operator=">=", value=2345)
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -431,7 +459,7 @@ def compare_column_to_column(
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import compare_column_to_column
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"ID": [1, 2, 3, 4],
     >>>                                                        "ID_2": [2, 1, 3, 5]})
     >>> my_rule = compare_column_to_column(col_left="ID", operator=">=", col_right="ID_2")
@@ -465,7 +493,7 @@ def count_decimal_digit(
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import count_decimal_digit
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"NUMBER": [1.2, 1.23, 1.234, 21.2]})
     >>> my_rule = count_decimal_digit(col_name="NUMBER", operator="=", digit=1)
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -496,7 +524,7 @@ def count_integer_digit(
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import count_integer_digit
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"NUMBER": [1.2, 1.23, 1.234, 21.2]})
     >>> my_rule = count_integer_digit(col_name="NUMBER")
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule)
@@ -526,7 +554,7 @@ def is_between(col_name: str, min_value: Any, max_value: Any) -> ConditionExpres
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import is_between
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"ID": [1, 2, 3, 4]})
     >>> my_rule = is_between(col_name="ID", min_value=2, max_value=3
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -556,7 +584,7 @@ def compare_length(col_name: str, operator: str, length: int) -> ConditionExpres
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import compare_length
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"PLANETE": ["mars", None, "jupiter", "terre"]})
     >>> my_rule = compare_length(col_name="PLANETE", operator=">=", length=5)
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -585,7 +613,7 @@ def is_alphabetic(col_name: str) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import is_alphabetic
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"PLANETE": ["mars", None, "jupiter", "terre"]})
     >>> my_rule = is_alphabetic(col_name="PLANETE")
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -613,7 +641,7 @@ def is_positive(col_name: str) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import is_positive
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"NUMBER": [1, 2, -3, -4]})
     >>> my_rule = is_positive(col_name="NUMBER")
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -640,7 +668,7 @@ def is_negative(col_name: str) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import is_negative
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"NUMBER": [1, 2, -3, -4]})
     >>> my_rule = is_negative(col_name="NUMBER")
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -672,7 +700,7 @@ def year_equal_to_value(col_name: str, value: int) -> ConditionExpression:
     Example
     --------
     >>> from calista import CalistaEngine
-    >>> from calista.core.functions import year_equal_to_value 
+    >>> from calista.core.functions import year_equal_to_value
     >>> from datetime import datetime
     >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict("DATE": [datetime.date(2023, 4, 11), datetime.date(2024, 5, 11), None, None],)
@@ -702,7 +730,7 @@ def year_lt_value(col_name: str, value: int) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import year_lt_value
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict("DATE": [datetime.date(2023, 4, 11), datetime.date(2024, 5, 11), None, None],)
     >>> my_rule = year_lt_value(col_name="DATE", value=2024)
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -730,7 +758,7 @@ def year_le_value(col_name: str, value: int) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import year_le_value
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict("DATE": [datetime.date(2023, 4, 11), datetime.date(2024, 5, 11), None, None],)
     >>> my_rule = year_le_value(col_name="DATE", value=2024)
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -758,7 +786,7 @@ def year_gt_value(col_name: str, value: int) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import year_gt_value
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict("DATE": [datetime.date(2023, 4, 11), datetime.date(2024, 5, 11), None, None],)
     >>> my_rule = year_gt_value(col_name="DATE", value=2023)
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -786,7 +814,7 @@ def year_ge_value(col_name: str, value: int) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import year_ge_value
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict("DATE": [datetime.date(2023, 4, 11), datetime.date(2024, 5, 11), None, None],)
     >>> my_rule = year_ge_value(col_name="DATE", value=2023)
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -814,7 +842,7 @@ def column_equal_to_value(col_name: str, value: Any) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import column_equal_to_value
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"ID": [1, 2, 3, 4]})
     >>> my_rule = column_equal_to_value(col_name="ID", value=3)
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -842,7 +870,7 @@ def column_lt_value(col_name: str, value: Any) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import column_lt_value
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"ID": [1, 2, 3, 4]})
     >>> my_rule = column_lt_value(col_name="ID", value=3)
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -870,7 +898,7 @@ def column_le_value(col_name: str, value: Any) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import column_le_value
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"ID": [1, 2, 3, 4]})
     >>> my_rule = column_le_value(col_name="ID", value=2)
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -898,7 +926,7 @@ def column_gt_value(col_name: str, value: Any) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import column_gt_value
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"ID": [1, 2, 3, 4]})
     >>> my_rule = column_gt_value(col_name="ID", value=2)
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -926,7 +954,7 @@ def column_ge_value(col_name: str, value: Any) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import column_ge_value
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"ID": [1, 2, 3, 4]})
     >>> my_rule = column_ge_value(col_name="ID", value=3)
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -954,7 +982,7 @@ def column_equal_to_column(col_left: str, col_right: str) -> ConditionExpression
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import column_equal_to_column
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"ID": [10, 4, 5, 2],
     >>>                                                        "ID_2": [8, 4, 1, 3]})
     >>> my_rule = column_equal_to_column(col_left="ID", col_right="ID_2")
@@ -985,7 +1013,7 @@ def column_lt_column(col_left: str, col_right: str) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import column_lt_column
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"ID": [10, 4, 5, 2],
     >>>                                                         "ID_2": [8, 4, 1, 3]})
     >>> my_rule = column_lt_column(col_left="ID", col_right="ID_2")
@@ -1016,7 +1044,7 @@ def column_le_column(col_left: str, col_right: str) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import column_le_column
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"ID": [10, 4, 5, 2],
     >>>                                                         "ID_2": [8, 4, 1, 3]})
     >>> my_rule = column_le_column(col_left="ID", col_right="ID_2")
@@ -1047,7 +1075,7 @@ def column_gt_column(col_left: str, col_right: str) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import column_gt_column
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"ID": [10, 4, 5, 2],
     >>>                                                         "ID_2": [8, 4, 1, 3]})
     >>> my_rule = column_gt_column(col_left="ID", col_right="ID_2")
@@ -1078,7 +1106,7 @@ def column_ge_column(col_left: str, col_right: str) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import column_ge_column
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"ID": [10, 4, 5, 2],
     >>>                                                         "ID_2": [8, 4, 1, 3]})
     >>> my_rule = column_ge_column(col_left="ID", col_right="ID_2")
@@ -1109,7 +1137,7 @@ def decimal_digit_eq(col_name: str, digit: int) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import decimal_digit_eq
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"NUMBER": [2344.324, 600.34, 45.3, None]})
     >>> my_rule = decimal_digit_eq(col_name="NUMBER", digit=2)
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -1137,7 +1165,7 @@ def decimal_digit_lt(col_name: str, digit: int) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import decimal_digit_lt
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"NUMBER": [2344.324, 600.34, 45.3, None]})
     >>> my_rule = decimal_digit_lt(col_name="NUMBER", digit=2)
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -1165,7 +1193,7 @@ def decimal_digit_le(col_name: str, digit: int) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import decimal_digit_le
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"NUMBER": [2344.324, 600.34, 45.3, None]})
     >>> my_rule = decimal_digit_le(col_name="NUMBER", digit=2)
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -1193,7 +1221,7 @@ def decimal_digit_gt(col_name: str, digit: int) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import decimal_digit_gt
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"NUMBER": [2344.324, 600.34, 45.3, None]})
     >>> my_rule = decimal_digit_gt(col_name="NUMBER", digit=2)
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -1221,7 +1249,7 @@ def decimal_digit_ge(col_name: str, digit: int) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import decimal_digit_ge
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"NUMBER": [2344.324, 600.34, 45.3, None]})
     >>> my_rule = decimal_digit_ge(col_name="NUMBER", digit=2)
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -1249,7 +1277,7 @@ def integer_digit_equal(col_name: str, digit: int) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import integer_digit_equal
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"NUMBER": [2344.324, 600.34, 45.3, None]})
     >>> my_rule = integer_digit_equal(col_name="NUMBER", digit=3)
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -1277,7 +1305,7 @@ def integer_lt_digit(col_name: str, digit: int) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import integer_lt_digit
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"NUMBER": [2344.324, 600.34, 45.3, None]})
     >>> my_rule = integer_lt_digit(col_name="NUMBER", digit=3)
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -1305,7 +1333,7 @@ def integer_digit_le(col_name: str, digit: int) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import integer_digit_le
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({{"NUMBER": [2344.324, 600.34, 45.3, None]})
     >>> my_rule = integer_digit_le(col_name="NUMBER", digit=3)
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -1333,7 +1361,7 @@ def integer_digit_gt(col_name: str, digit: int) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import integer_digit_gt
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"NUMBER": [2344.324, 600.34, 45.3, None]})
     >>> my_rule = integer_digit_gt(col_name="NUMBER", digit=3)
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -1361,7 +1389,7 @@ def integer_digit_ge(col_name: str, digit: int) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import integer_digit_ge
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"NUMBER": [2344.324, 600.34, 45.3, None]})
     >>> my_rule = integer_digit_ge(col_name="NUMBER", digit=3)
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -1389,7 +1417,7 @@ def length_eq(col_name: str, length: int) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import length_eq
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"PLANETE": ["mars", None, "jupiter", "terre"]})
     >>> my_rule = length_eq(col_name="PLANETE", length=4)
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -1417,7 +1445,7 @@ def length_lt(col_name: str, length: int) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import length_lt
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"PLANETE": ["mars", None, "jupiter", "terre"]})
     >>> my_rule = length_lt(col_name="PLANETE", length=4)
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -1445,7 +1473,7 @@ def length_le(col_name: str, length: int) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import length_le
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"PLANETE": ["mars", None, "jupiter", "terre"]})
     >>> my_rule = length_le(col_name="PLANETE", length=4)
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -1473,7 +1501,7 @@ def length_gt(col_name: str, length: int) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import length_gt
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"PLANETE": ["mars", None, "jupiter", "terre"]})
     >>> my_rule = length_gt(col_name="PLANETE", length=4)
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -1501,7 +1529,7 @@ def length_ge(col_name: str, length: int) -> ConditionExpression:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import length_ge
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"PLANETE": ["mars", None, "jupiter", "terre"]})
     >>> my_rule = length_ge(col_name="PLANETE", length=4)
     >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
@@ -1529,7 +1557,7 @@ def sum_eq_value(col_name: str, value: Any) -> agg_cond.SumBy:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import sum_eq_value
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = sum_eq_value(col_name="POINTS", value=60)
@@ -1559,7 +1587,7 @@ def sum_lt_value(col_name: str, value: Any) -> agg_cond.SumBy:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import sum_lt_value
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = sum_lt_value(col_name="POINTS", value=70)
@@ -1589,7 +1617,7 @@ def sum_le_value(col_name: str, value: Any) -> agg_cond.SumBy:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import sum_le_value
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = sum_le_value(col_name="POINTS", value=60)
@@ -1619,7 +1647,7 @@ def sum_gt_value(col_name: str, value: Any) -> agg_cond.SumBy:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import sum_gt_value
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = sum_gt_value(col_name="POINTS", value=60)
@@ -1649,7 +1677,7 @@ def sum_ge_value(col_name: str, value: Any) -> agg_cond.SumBy:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import sum_ge_value
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = sum_ge_value(col_name="POINTS", value=60)
@@ -1679,7 +1707,7 @@ def count_eq_value(col_name: str, value: Any) -> agg_cond.CountBy:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import count_eq_value
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine="pandas").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue", "blue"],
     >>>                                                      "POINTS": [10, 20, 30, 40, 20, 10,50]})
     >>> my_rule = count_eq_value(col_name="TEAM", value=3)
@@ -1711,7 +1739,7 @@ def count_lt_value(col_name: str, value: Any) -> agg_cond.CountBy:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import count_lt_value
-    >>>     
+    >>>
     >>> calista_table = CalistaEngine(engine="pandas").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue", "blue"],
     >>>                                                      "POINTS": [10, 20, 30, 40, 20, 10,50]})
     >>> my_rule = count_lt_value(col_name="TEAM", value=3)
@@ -1743,7 +1771,7 @@ def count_le_value(col_name: str, value: Any) -> agg_cond.CountBy:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import count_le_value
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine="pandas").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue", "blue"],
     >>>                                                      "POINTS": [10, 20, 30, 40, 20, 10,50]})
     >>> my_rule = count_le_value(col_name="TEAM", value=3)
@@ -1775,7 +1803,7 @@ def count_gt_value(col_name: str, value: Any) -> agg_cond.CountBy:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import count_gt_value
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine="pandas").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue", "blue"],
     >>>                                                      "POINTS": [10, 20, 30, 40, 20, 10,50]})
     >>> my_rule = count_gt_value(col_name="TEAM", value=3)
@@ -1806,7 +1834,7 @@ def count_ge_value(col_name: str, value: Any) -> agg_cond.CountBy:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import count_ge_value
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine="pandas").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue", "blue"],
     >>>                                                      "POINTS": [10, 20, 30, 40, 20, 10,50]})
     >>> my_rule = count_ge_value(col_name="TEAM", value=3)
@@ -1838,7 +1866,7 @@ def mean_eq_value(col_name: str, value: Any) -> agg_cond.MeanBy:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import mean_eq_value
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = mean_eq_value(col_name="TEAM", value=20)
@@ -1868,7 +1896,7 @@ def mean_lt_value(col_name: str, value: Any) -> agg_cond.MeanBy:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import mean_lt_value
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = mean_lt_value(col_name="TEAM", value=25)
@@ -1898,7 +1926,7 @@ def mean_le_value(col_name: str, value: Any) -> agg_cond.MeanBy:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import mean_le_value
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = mean_le_value(col_name="TEAM", value=20)
@@ -1930,7 +1958,7 @@ def mean_gt_value(col_name: str, value: Any) -> agg_cond.MeanBy:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import mean_gt_value
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = mean_gt_value(col_name="TEAM", value=20)
@@ -1960,7 +1988,7 @@ def mean_ge_value(col_name: str, value: Any) -> agg_cond.MeanBy:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import mean_ge_value
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = mean_ge_value(col_name="TEAM", value=30)
@@ -1992,7 +2020,7 @@ def median_eq_value(col_name: str, value: Any) -> agg_cond.MedianBy:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import median_eq_value
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = median_eq_value(col_name="TEAM", value=20)
@@ -2024,7 +2052,7 @@ def median_lt_value(col_name: str, value: Any) -> agg_cond.MedianBy:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import median_lt_value
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = median_lt_value(col_name="TEAM", value=25)
@@ -2056,7 +2084,7 @@ def median_le_value(col_name: str, value: Any) -> agg_cond.MedianBy:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import median_le_value
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = median_le_value(col_name="TEAM", value=20)
@@ -2088,7 +2116,7 @@ def median_gt_value(col_name: str, value: Any) -> agg_cond.MedianBy:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import median_gt_value
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = median_gt_value(col_name="TEAM", value=15)
@@ -2120,7 +2148,7 @@ def median_ge_value(col_name: str, value: Any) -> agg_cond.MedianBy:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import median_ge_value
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = median_ge_value(col_name="TEAM", value=20)
@@ -2152,7 +2180,7 @@ def min_eq_value(col_name: str, value: Any) -> agg_cond.MinBy:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import min_eq_value
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine="pandas").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                    "POINTS": [5, 20, 30, 40, 20, 10]})
     >>> my_rule = min_eq_value(col_name="TEAM", value=20)
@@ -2182,7 +2210,7 @@ def min_lt_value(col_name: str, value: Any) -> agg_cond.MinBy:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import min_lt_value
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine="pandas").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                      "POINTS": [5, 20, 30, 40, 20, 10]})
     >>> my_rule = min_lt_value(col_name="POINTS", value=20)
@@ -2212,7 +2240,7 @@ def min_le_value(col_name: str, value: Any) -> agg_cond.MinBy:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import min_le_value
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine="pandas").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                      "POINTS": [5, 20, 30, 40, 20, 10]})
     >>> my_rule = min_le_value(col_name="POINTS", value=20)
@@ -2242,7 +2270,7 @@ def min_gt_value(col_name: str, value: Any) -> agg_cond.MinBy:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import min_gt_value
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine="pandas").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                      "POINTS": [5, 20, 30, 40, 20, 10]})
     >>> my_rule = min_gt_value(col_name="POINTS", value=10)
@@ -2272,7 +2300,7 @@ def min_ge_value(col_name: str, value: Any) -> agg_cond.MinBy:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import min_ge_value
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine="pandas").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                      "POINTS": [5, 20, 30, 40, 20, 10]})
     >>> my_rule = min_ge_value(col_name="POINTS", value=10)
@@ -2302,7 +2330,7 @@ def max_eq_value(col_name: str, value: Any) -> agg_cond.MaxBy:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import max_eq_value
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = max_eq_value(col_name="TEAM", value=30)
@@ -2332,7 +2360,7 @@ def max_lt_value(col_name: str, value: Any) -> agg_cond.MaxBy:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import max_lt_value
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = max_lt_value(col_name="TEAM", value=40)
@@ -2362,7 +2390,7 @@ def max_le_value(col_name: str, value: Any) -> agg_cond.MaxBy:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import max_le_value
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = max_le_value(col_name="TEAM", value=40)
@@ -2392,7 +2420,7 @@ def max_gt_value(col_name: str, value: Any) -> agg_cond.MaxBy:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import max_gt_value
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = max_gt_value(col_name="TEAM", value=30)
@@ -2422,7 +2450,7 @@ def max_ge_value(col_name: str, value: Any) -> agg_cond.MaxBy:
     --------
     >>> from calista import CalistaEngine
     >>> from calista.core.functions import max_ge_value
-    >>>    
+    >>>
     >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
     >>>                                                        "POINTS": [10, 20, 30, 40, 20, 10]})
     >>> my_rule = max_ge_value(col_name="TEAM", value=30)

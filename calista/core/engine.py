@@ -299,6 +299,19 @@ class LazyEngine(ABC):
         ...
 
     @abstractmethod
+    def rlike(self, condition: cond.Rlike) -> GenericColumnType:
+        """
+        Check if a column value matches a regex.
+
+        Args:
+            condition (cond.Rlike): The condition specifying the column and the pattern.
+
+        Returns:
+            GenericColumnType: The result of the matching pattern check.
+        """
+        ...
+
+    @abstractmethod
     def compare_year_to_value(
         self, condition: cond.CompareYearToValue
     ) -> GenericColumnType:

@@ -181,6 +181,11 @@ class Pandas_Engine(LazyEngine):
     def is_in(self, condition: cond.IsIn) -> Series:
         return self.dataset[condition.col_name].isin(condition.list_of_values)
 
+    def rlike(self, condition: cond.Rlike) -> Series:
+        return self.dataset[condition.col_name].str.contains(
+            condition.pattern, na=False
+        )
+
     def compare_year_to_value(self, condition: cond.CompareYearToValue) -> Series:
         operator = self.mapping_operator.get(condition.operator, None)
         return self.dataset[condition.col_name].dt.year.__getattribute__(operator)(

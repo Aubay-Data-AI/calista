@@ -233,6 +233,15 @@ class TestBigqueryTable:
             bigquery_table, salary_rule_name, salary_rule, expected_valid_row_count
         )
 
+    def test_rlike(self, bigquery_table):
+        with pytest.raises(Exception) as rlike_exception:
+            bigquery_table.analyze(
+                "salaire_regex",
+                F.rlike(col_name="SALAIRE", pattern=r"^[+-]?[0-9]+\.[0-9]+$"),
+            )
+
+        assert "rlike() function is not available" == str(rlike_exception.value)
+
     def test_not_condition(self, bigquery_table):
         salary_rule_name = "check_Prenom_not_not_null"
         salary_rule = ~F.is_not_null(col_name="PRENOM")

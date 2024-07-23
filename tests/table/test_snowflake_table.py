@@ -233,6 +233,16 @@ class TestSnowflakeTable:
             snowflake_table, salary_rule_name, salary_rule, expected_valid_row_count
         )
 
+    def test_rlike(self, snowflake_table):
+        salary_rule_name = "check_salaire_regex"
+        salary_rule = F.rlike(col_name="SALAIRE", pattern=r"^[+-]?[0-9]+\.[0-9]+$")
+
+        expected_valid_row_count = 84
+
+        self.analyze_and_assert_rule(
+            snowflake_table, salary_rule_name, salary_rule, expected_valid_row_count
+        )
+
     def test_not_condition(self, snowflake_table):
         salary_rule_name = "check_Prenom_not_not_null"
         salary_rule = ~F.is_not_null(col_name="PRENOM")

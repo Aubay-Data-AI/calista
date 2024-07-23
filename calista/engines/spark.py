@@ -155,6 +155,9 @@ class SparkEngine(LazyEngine):
     def is_in(self, condition: cond.IsIn) -> Column:
         return F.col(condition.col_name).isin(condition.list_of_values)
 
+    def rlike(self, condition: cond.Rlike) -> Column:
+        return F.col(condition.col_name).rlike(condition.pattern)
+
     def compare_year_to_value(self, condition: cond.CompareYearToValue) -> Column:
         operator = self.mapping_operator.get(condition.operator, None)
         return F.year(condition.col_name).__getattribute__(operator)(

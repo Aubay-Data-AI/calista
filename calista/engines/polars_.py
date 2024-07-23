@@ -152,6 +152,9 @@ class Polars_Engine(LazyEngine):
     def is_in(self, condition: cond.IsIn) -> Expr:
         return pl.col(condition.col_name).is_in(condition.list_of_values)
 
+    def rlike(self, condition: cond.Rlike) -> Expr:
+        return pl.col(condition.col_name).str.contains(condition.pattern)
+
     def compare_year_to_value(self, condition: cond.CompareYearToValue) -> Expr:
         operator = self.mapping_operator.get(condition.operator, None)
         return (
