@@ -82,18 +82,18 @@ class SnowflakeEngine(Database):
 
     def get_schema(self) -> dict[ColumnName:str, PythonType:str]:
         mapping_type = {
-			"ByteType": PythonTypes.INTEGER,
+            "ByteType": PythonTypes.INTEGER,
             "LongType": PythonTypes.INTEGER,
             "IntegerType": PythonTypes.INTEGER,
-			"ShortType": PythonTypes.INTEGER,
+            "ShortType": PythonTypes.INTEGER,
             "StringType": PythonTypes.STRING,
-			"GeographyType": PythonTypes.STRING,
-			"FloatType": PythonTypes.FLOAT,
+            "GeographyType": PythonTypes.STRING,
+            "FloatType": PythonTypes.FLOAT,
             "DoubleType": PythonTypes.DOUBLE,
-			"DecimalType": PythonTypes.DECIMAL,
+            "DecimalType": PythonTypes.DECIMAL,
             "DateType": PythonTypes.DATE,
             "TimestampType": PythonTypes.TIMESTAMP,
-			"Timestamp": PythonTypes.TIMESTAMP,
+            "Timestamp": PythonTypes.TIMESTAMP,
             "BooleanType": PythonTypes.BOOLEAN,
         }
         datatype = self.dataset.schema.fields
@@ -101,7 +101,7 @@ class SnowflakeEngine(Database):
         return {
             datatype[i].name: mapping_type.get(
                 re.match(pattern, str(datatype[i].datatype)).group(1),
-                PythonTypes.STRING
+                PythonTypes.STRING,
             )
             for i in range(len(datatype))
         }

@@ -88,31 +88,32 @@ class SparkEngine(LazyEngine):
     def get_schema(self) -> dict[ColumnName:str, PythonType:str]:
         mapping_type = {
             "ByteType": PythonTypes.INTEGER,
-			"ShortType": PythonTypes.INTEGER,
-			"IntegerType": PythonTypes.INTEGER,
-			"LongType": PythonTypes.INTEGER,
+            "ShortType": PythonTypes.INTEGER,
+            "IntegerType": PythonTypes.INTEGER,
+            "LongType": PythonTypes.INTEGER,
             "int": PythonTypes.INTEGER,
             "bigint": PythonTypes.INTEGER,
-			"DecimalType": PythonTypes.FLOAT,
-			"DoubleType": PythonTypes.FLOAT,
-			"FloatType": PythonTypes.FLOAT,
+            "DecimalType": PythonTypes.FLOAT,
+            "DoubleType": PythonTypes.FLOAT,
+            "FloatType": PythonTypes.FLOAT,
             "double": PythonTypes.FLOAT,
             "float": PythonTypes.FLOAT,
             "decimal": PythonTypes.FLOAT,
-			"StringType": PythonTypes.STRING,
-			"CharType": PythonTypes.STRING,
-			"VarcharType": PythonTypes.STRING,
-            "string": PythonTypes.STRING,			
-			"DateType": PythonTypes.DATE,
+            "StringType": PythonTypes.STRING,
+            "CharType": PythonTypes.STRING,
+            "VarcharType": PythonTypes.STRING,
+            "string": PythonTypes.STRING,
+            "DateType": PythonTypes.DATE,
             "date": PythonTypes.DATE,
-			"TimestampType": PythonTypes.TIMESTAMP,
-			"TimestampNTZType": PythonTypes.TIMESTAMP,
+            "TimestampType": PythonTypes.TIMESTAMP,
+            "TimestampNTZType": PythonTypes.TIMESTAMP,
             "timestamp": PythonTypes.TIMESTAMP,
-			"BooleanType": PythonTypes.BOOLEAN,
-            "boolean": PythonTypes.BOOLEAN
+            "BooleanType": PythonTypes.BOOLEAN,
+            "boolean": PythonTypes.BOOLEAN,
         }
         return {
-            col_info[0]: mapping_type.get(col_info[1], PythonTypes.STRING) for col_info in self.dataset.dtypes
+            col_info[0]: mapping_type.get(col_info[1], PythonTypes.STRING)
+            for col_info in self.dataset.dtypes
         }
 
     def count_records(self) -> int:

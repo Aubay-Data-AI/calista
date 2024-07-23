@@ -73,7 +73,7 @@ class SqlEngine(Database):
             raise KeyError(f"This table doesn't exist: {table}")
 
     def where(self, expression: ColumnExpressionArgument) -> Select:
-        return self.dataset.where(expression)
+        return select(self.dataset).where(expression)
 
     def filter(self, expression: ColumnExpressionArgument) -> Select:
         return self.where(expression)

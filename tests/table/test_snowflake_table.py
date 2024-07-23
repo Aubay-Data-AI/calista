@@ -509,3 +509,22 @@ class TestSnowflakeTable:
             "Column 'DATE' not found in ['NOM', 'PRENOM', 'SEXE', 'DATE_ENTREE', 'CDI', 'IBAN', 'SECTEUR_ACTIVITE', 'ADRESSE', 'SITUATION_FAMILIALE', 'ADRESSE_IP_V4', 'ADRESSE_IP_V6', 'DATE_NAISSANCE', 'DATE_SORTIE', 'DATE_DERNIER_EA', 'DATE_DERNIERE_AUGMENTATION', 'CDD', 'EMAIL', 'TELEPHONE', 'SALAIRE', 'DEVISE', 'ID']"
             == str(combination_exception.value)
         )
+
+    def test_calistatable_filter(self, snowflake_table):
+        rule_name = "check_iban_not_null"
+        rule = F.is_not_null(col_name="IBAN")
+
+        expected_valid_row_count = 90
+
+        computed_metrics = snowflake_table.filter(F.is_iban("IBAN")).analyze(
+            rule_name, rule
+        )
+        expected_metrics = Metrics(
+            rule=rule_name,
+            total_row_count=90,
+            valid_row_count=expected_valid_row_count,
+            valid_row_count_pct=expected_valid_row_count * 100 / 90,
+            timestamp=computed_metrics.timestamp,
+        )
+
+        assert computed_metrics == expected_metrics
