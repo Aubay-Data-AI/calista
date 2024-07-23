@@ -34,12 +34,6 @@ if TYPE_CHECKING:
 
 
 class CalistaTable:
-    """
-    For now, you can execute data quality checks using the
-    following engines or platforms: spark, pandas, polars,
-    snowflake, bigquery, postgre.
-    """
-
     def __init__(self, engine: LazyEngine):
         """
         Initialize the class with the specified engine and configuration.
@@ -177,6 +171,12 @@ class CalistaTable:
 
 
 class CalistaEngine:
+    """
+    For now, you can execute data quality checks using the
+    following engines or platforms: spark, pandas, polars,
+    snowflake, bigquery, postgre.
+    """
+
     def __init__(self, engine: str, config: Dict[str, Any] = None):
         """
         Initialize the class with the specified engine and configuration.
