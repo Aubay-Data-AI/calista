@@ -7,7 +7,7 @@ find = { namespaces = false }
 
 [project]
 name = "calista"
-version = "0.1.2"
+version = "0.2.0"
 authors = []
 description = "Comprehensive Python package designed to simplify data quality checks across multiple platforms"
 readme = "README.md"
