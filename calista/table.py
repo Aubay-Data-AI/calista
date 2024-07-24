@@ -49,6 +49,12 @@ class CalistaTable:
 
     @property
     def schema(self) -> dict[ColumnName, PythonType]:
+        """
+        Returns the schema of the underlying dataset.
+
+        Returns:
+            Dict[ColumnName, PythonType]: Dict representing the schema of the underlying dataset.
+        """
         return self._engine.get_schema()
 
     def show(self, n: int = 10) -> None:
@@ -61,6 +67,15 @@ class CalistaTable:
         self._engine.show(n)
 
     def group_by(self, *cols: str) -> GroupedTable:
+        """
+        Groups the :class:`CalistaTable` using the specified columns,
+        so we can execute aggregation conditions on them. See :class:`GroupedTable`
+        for all the available functions after calling group_by.
+
+        Args:
+            cols (list, str):columns to group by.
+            Each element should be a column name (string).
+        """
         for col in cols:
             if col not in self.schema.keys():
                 raise Exception(
@@ -71,6 +86,17 @@ class CalistaTable:
         return GroupedTable(self._engine, cols)
 
     def where(self, condition: Condition) -> CalistaTable:
+        """
+        Filters rows using the given condition.
+
+        :func:`filter` is an alias for :func:`where`.
+
+        Args:
+            condition : :class:`Condition`
+
+        Returns:
+            :class:`CalistaTable`: Filtered CalistaTable.
+        """
         if condition.is_aggregate:
             raise Exception("Cannot apply filter for AggregateCondition")
 
@@ -130,7 +156,7 @@ class CalistaTable:
         """
         return self.analyze_rules({rule_name: condition})[0]
 
-    def analyze_rules(self, rules: dict[RuleName:str, Condition]) -> list[Metrics]:
+    def analyze_rules(self, rules: dict[RuleName, Condition]) -> list[Metrics]:
         """
         Compute :class:`list[Metrics]` based on conditions.
 
@@ -174,7 +200,7 @@ class CalistaEngine:
     """
     For now, you can execute data quality checks using the
     following engines or platforms: spark, pandas, polars,
-    snowflake, bigquery, postgre.
+    snowflake, bigquery.
     """
 
     def __init__(self, engine: str, config: Dict[str, Any] = None):

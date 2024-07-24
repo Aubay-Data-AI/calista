@@ -6,4 +6,5 @@ API
 
    calistaengine
    calistatable
+   grouped_table
    functions
