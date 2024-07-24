@@ -11,7 +11,7 @@ class AggregateCondition(Condition):
     @computed_field
     @property
     def agg_col_name(self) -> str:
-        return f"{self.__class__.__name__}_{self.col_name}"
+        return f"{self.__class__.__name__.upper()}_{self.col_name}"
 
 
 class Sum(AggregateCondition):

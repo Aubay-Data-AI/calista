@@ -25,7 +25,6 @@ from sqlalchemy import (
     and_,
     case,
     cast,
-    column,
     create_engine,
     extract,
     func,
@@ -73,6 +72,12 @@ class SqlEngine(Database):
         except KeyError:
             raise KeyError(f"This table doesn't exist: {table}")
 
+    def where(self, expression: ColumnExpressionArgument) -> Select:
+        return select(self.dataset).where(expression)
+
+    def filter(self, expression: ColumnExpressionArgument) -> Select:
+        return self.where(expression)
+
     def show(self, n: int = 10):
         stmt = select(self.dataset)
         with self.engine.connect() as conn:
@@ -105,9 +110,12 @@ class SqlEngine(Database):
             "TIMESTAMP": PythonTypes.TIMESTAMP,
             "BOOLEAN": PythonTypes.BOOLEAN,
             "TEXT": PythonTypes.STRING,
+            "INT64": PythonTypes.INTEGER,
         }
         return {
-            column.name: mapping_type[str(column.type).replace("()", "")]
+            column.name: mapping_type.get(
+                str(column.type).replace("()", ""), PythonTypes.STRING
+            )
             for column in self.dataset.c
         }
 
@@ -154,6 +162,9 @@ class SqlEngine(Database):
 
     def is_in(self, condition: cond.IsIn) -> ColumnExpressionArgument:
         return self.dataset.c[condition.col_name].in_(condition.list_of_values)
+
+    def rlike(self, condition: cond.Rlike) -> ColumnExpressionArgument:
+        raise Exception("rlike() function is not available")
 
     def compare_year_to_value(
         self, condition: cond.CompareYearToValue

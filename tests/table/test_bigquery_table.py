@@ -233,6 +233,15 @@ class TestBigqueryTable:
             bigquery_table, salary_rule_name, salary_rule, expected_valid_row_count
         )
 
+    def test_rlike(self, bigquery_table):
+        with pytest.raises(Exception) as rlike_exception:
+            bigquery_table.analyze(
+                "salaire_regex",
+                F.rlike(col_name="SALAIRE", pattern=r"^[+-]?[0-9]+\.[0-9]+$"),
+            )
+
+        assert "rlike() function is not available" == str(rlike_exception.value)
+
     def test_not_condition(self, bigquery_table):
         salary_rule_name = "check_Prenom_not_not_null"
         salary_rule = ~F.is_not_null(col_name="PRENOM")
@@ -317,7 +326,7 @@ class TestBigqueryTable:
         expected_valid_row_count,
         expected_dataset_row_count,
     ):
-        computed_metrics = bigquery_table.groupBy(keys).analyze(rule_name, rule)
+        computed_metrics = bigquery_table.group_by(keys).analyze(rule_name, rule)
         expected_metrics = Metrics(
             rule=rule_name,
             total_row_count=expected_dataset_row_count,
@@ -491,9 +500,28 @@ class TestBigqueryTable:
 
     def test_col_not_in_table_groupby(self, bigquery_table):
         with pytest.raises(Exception) as combination_exception:
-            bigquery_table.groupBy("DATE")
+            bigquery_table.group_by("DATE")
 
         assert (
             "Column 'DATE' not found in ['NOM', 'PRENOM', 'SEXE', 'DATE_ENTREE', 'CDI', 'IBAN', 'SECTEUR_ACTIVITE', 'ADRESSE', 'SITUATION_FAMILIALE', 'ADRESSE_IP_V4', 'ADRESSE_IP_V6', 'DATE_NAISSANCE', 'DATE_SORTIE', 'DATE_DERNIER_EA', 'DATE_DERNIERE_AUGMENTATION', 'CDD', 'EMAIL', 'TELEPHONE', 'SALAIRE', 'DEVISE', 'ID']"
             == str(combination_exception.value)
         )
+
+    def test_calistatable_filter(self, bigquery_table):
+        rule_name = "check_iban_not_null"
+        rule = F.is_not_null(col_name="IBAN")
+
+        expected_valid_row_count = 90
+
+        computed_metrics = bigquery_table.filter(F.is_iban("IBAN")).analyze(
+            rule_name, rule
+        )
+        expected_metrics = Metrics(
+            rule=rule_name,
+            total_row_count=90,
+            valid_row_count=expected_valid_row_count,
+            valid_row_count_pct=expected_valid_row_count * 100 / 90,
+            timestamp=computed_metrics.timestamp,
+        )
+
+        assert computed_metrics == expected_metrics

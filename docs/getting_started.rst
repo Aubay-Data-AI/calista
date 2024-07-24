@@ -36,9 +36,9 @@ Load a table with Calista:
 
 .. code-block:: python
 
-    from calista import CalistaTable
+    from calista import CalistaEngine
 
-    table = CalistaTable(engine="pandas") \
+    table = CalistaEngine(engine="pandas") \
     .load_from_path(<path_to_your_file>, file_format=<your_file_format>)
 
 
@@ -53,9 +53,9 @@ Load a table with Calista:
 
 .. code-block:: python
 
-    from calista import CalistaTable
+    from calista import CalistaEngine
 
-    table = CalistaTable(engine="polars") \
+    table = CalistaEngine(engine="polars") \
     .load_from_path(<path_to_your_file>, file_format=<your_file_format>)
 
 
@@ -77,18 +77,18 @@ Load a table with Calista:
 
 .. code-block:: python
 
-    from calista import CalistaTable
+    from calista import CalistaEngine
 
-    table = CalistaTable(engine="spark") \
+    table = CalistaEngine(engine="spark") \
     .load_from_path(<path_to_your_file>, file_format=<your_file_format>)
 
 
 For the previous engines, you can also use the following functions to load your Calista table
 from an existing dataframe or a dictionary.
 
-:func:`calista.table.CalistaTable.load_from_dataframe`
+:func:`calista.table.CalistaEngine.load_from_dataframe`
 
-:func:`calista.table.CalistaTable.load_from_dict`
+:func:`calista.table.CalistaEngine.load_from_dict`
 
 
 Snowflake
@@ -108,7 +108,7 @@ Load a table with Calista:
 
 .. code-block:: python
 
-    from calista import CalistaTable
+    from calista import CalistaEngine
 
     config = {
          "credentials": {
@@ -117,7 +117,7 @@ Load a table with Calista:
              "password": <password>,
          }
      }
-     table = CalistaTable(engine="snowflake", config=config) \
+     table = CalistaEngine(engine="snowflake", config=config) \
          .load_from_database(database=<your_database_name>, schema=<your_schema_name>, table=<your_table_name>)
 
 BigQuery
@@ -137,7 +137,7 @@ Load a table with Calista:
 
 .. code-block:: python
 
-    from calista import CalistaTable
+    from calista import CalistaEngine
 
     connection_string = f'bigquery://<my-project>/<my-dataset>'
     credentials_path='<path_to_credentials>.json'
@@ -145,7 +145,7 @@ Load a table with Calista:
         'connection_string': connection_string,
         'credentials_path': credentials_path
         }
-    table = CalistaTable(engine="bigquery", config=config).load_from_database(table=<your_table_name>)
+    table = CalistaEngine(engine="bigquery", config=config).load_from_database(table=<your_table_name>)
 
 How to compute metrics
 ----------------------

@@ -73,6 +73,9 @@ class SparkEngine(LazyEngine):
     def show(self, n: int = 10) -> None:
         self.dataset.show(n)
 
+    def where(self, expression: Column) -> DataFrame:
+        return self.dataset.filter(expression)
+
     def and_condition(self, left_cond: Column, right_cond: Column) -> Column:
         return left_cond & right_cond
 
@@ -84,18 +87,33 @@ class SparkEngine(LazyEngine):
 
     def get_schema(self) -> dict[ColumnName:str, PythonType:str]:
         mapping_type = {
+            "ByteType": PythonTypes.INTEGER,
+            "ShortType": PythonTypes.INTEGER,
+            "IntegerType": PythonTypes.INTEGER,
+            "LongType": PythonTypes.INTEGER,
             "int": PythonTypes.INTEGER,
             "bigint": PythonTypes.INTEGER,
-            "string": PythonTypes.STRING,
+            "DecimalType": PythonTypes.FLOAT,
+            "DoubleType": PythonTypes.FLOAT,
+            "FloatType": PythonTypes.FLOAT,
             "double": PythonTypes.FLOAT,
             "float": PythonTypes.FLOAT,
             "decimal": PythonTypes.FLOAT,
+            "StringType": PythonTypes.STRING,
+            "CharType": PythonTypes.STRING,
+            "VarcharType": PythonTypes.STRING,
+            "string": PythonTypes.STRING,
+            "DateType": PythonTypes.DATE,
             "date": PythonTypes.DATE,
+            "TimestampType": PythonTypes.TIMESTAMP,
+            "TimestampNTZType": PythonTypes.TIMESTAMP,
             "timestamp": PythonTypes.TIMESTAMP,
+            "BooleanType": PythonTypes.BOOLEAN,
             "boolean": PythonTypes.BOOLEAN,
         }
         return {
-            col_info[0]: mapping_type[col_info[1]] for col_info in self.dataset.dtypes
+            col_info[0]: mapping_type.get(col_info[1], PythonTypes.STRING)
+            for col_info in self.dataset.dtypes
         }
 
     def count_records(self) -> int:
@@ -137,6 +155,9 @@ class SparkEngine(LazyEngine):
 
     def is_in(self, condition: cond.IsIn) -> Column:
         return F.col(condition.col_name).isin(condition.list_of_values)
+
+    def rlike(self, condition: cond.Rlike) -> Column:
+        return F.col(condition.col_name).rlike(condition.pattern)
 
     def compare_year_to_value(self, condition: cond.CompareYearToValue) -> Column:
         operator = self.mapping_operator.get(condition.operator, None)

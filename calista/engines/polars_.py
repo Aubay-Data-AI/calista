@@ -18,7 +18,7 @@ from typing import Any, Dict, List
 
 import polars as pl
 import pyarrow.dataset as ds
-from polars import Expr
+from polars import Expr, LazyFrame
 from polars.lazyframe.group_by import LazyGroupBy
 
 import calista.core._aggregate_conditions as aggregateCond
@@ -72,6 +72,12 @@ class Polars_Engine(LazyEngine):
         else:
             raise ValueError(f"I don't know how to read {lowered_file_format} yet.")
 
+    def where(self, expression: Expr) -> LazyFrame:
+        return self.dataset.filter(expression)
+
+    def filter(self, expression: Expr) -> LazyFrame:
+        return self.where(expression)
+
     def show(self, n: int = 10) -> None:
         print(self.dataset.head(n).collect())
 
@@ -106,18 +112,31 @@ class Polars_Engine(LazyEngine):
     def get_schema(self) -> dict[ColumnName:str, PythonType:str]:
         """return a dict with col names as key and python types as values"""
         mapping_type = {
+            "Decimal": PythonTypes.DECIMAL,
+            "Float32": PythonTypes.FLOAT,
+            "Float64": PythonTypes.FLOAT,
+            "Int8": PythonTypes.INTEGER,
             "Int32": PythonTypes.INTEGER,
             "Int64": PythonTypes.INTEGER,
-            "String": PythonTypes.STRING,
-            "Utf8": PythonTypes.STRING,
-            "Float64": PythonTypes.FLOAT,
-            "Float32": PythonTypes.FLOAT,
+            "UInt8": PythonTypes.INTEGER,
+            "UInt16": PythonTypes.INTEGER,
+            "UInt32": PythonTypes.INTEGER,
+            "UInt64": PythonTypes.INTEGER,
             "Date": PythonTypes.DATE,
-            "Time": PythonTypes.TIMESTAMP,
+            "Datetime": PythonTypes.DATE,
+            "Duration": PythonTypes.DATE,
+            "Time": PythonTypes.DATE,
+            "String": PythonTypes.STRING,
+            "Categorical": PythonTypes.STRING,
+            "Enum": PythonTypes.STRING,
+            "Utf8": PythonTypes.STRING,
+            "Binary": PythonTypes.STRING,
+            "Object": PythonTypes.STRING,
+            "Unknown": PythonTypes.STRING,
             "Boolean": PythonTypes.BOOLEAN,
         }
         return {
-            col_info[0]: mapping_type[f"{col_info[1]}"]
+            col_info[0]: mapping_type.get(f"{col_info[1]}", PythonTypes.STRING)
             for col_info in list(dict(self.dataset.schema).items())
         }
 
@@ -132,6 +151,9 @@ class Polars_Engine(LazyEngine):
 
     def is_in(self, condition: cond.IsIn) -> Expr:
         return pl.col(condition.col_name).is_in(condition.list_of_values)
+
+    def rlike(self, condition: cond.Rlike) -> Expr:
+        return pl.col(condition.col_name).str.contains(condition.pattern)
 
     def compare_year_to_value(self, condition: cond.CompareYearToValue) -> Expr:
         operator = self.mapping_operator.get(condition.operator, None)

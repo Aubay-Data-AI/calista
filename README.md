@@ -45,7 +45,7 @@ pip install calista[EngineName]
 To start using __Calista__, import the appropriate class:
 
 ```
-from calista import CalistaTable
+from calista import CalistaEngine
 ```
 
 With __Calista__, you can easily analyze your data quality, regardless of the underlying engine. The unified API streamlines your workflow and enables seamless integration across different environments.
@@ -61,11 +61,11 @@ Here's an example using the Pandas Engine. Suppose youhave a dataset represented
 | 1         |           |2023-12-31 | 53000     |
 | 2         | Marié     |2018-12-31 | 28000     |
 
-You can load this table using CalistaTable with the Pandas engine:
+You can load this table using CalistaEngine with the Pandas engine:
 ```
-from calista import CalistaTable
+from calista import CalistaEngine
 
-table_pandas = CalistaTable(engine="pandas").load(path="examples/demo_new_model.csv", file_format="parquet")
+table_pandas = CalistaEngine(engine="pandas").load(path="examples/demo_new_model.csv", file_format="parquet")
 ```
 
 You can define custom rules using __Calista__ to analyze specific conditions within your data:

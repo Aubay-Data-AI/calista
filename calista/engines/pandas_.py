@@ -19,7 +19,7 @@ from typing import Any, Dict, List
 
 import numpy as np
 import pandas as pd
-from pandas import Series
+from pandas import DataFrame, Series
 from pandas.core.groupby import DataFrameGroupBy
 
 import calista.core._aggregate_conditions as aggregateCond
@@ -122,6 +122,12 @@ class Pandas_Engine(LazyEngine):
         else:
             raise ValueError(f"I don't know how to read {lowered_file_format} yet.")
 
+    def where(self, expression: Series) -> DataFrame:
+        return self.dataset[expression]
+
+    def filter(self, expression: Series) -> DataFrame:
+        return self.where(expression)
+
     def show(self, n: int = 10) -> None:
         print(self.dataset.head(n))
 
@@ -143,7 +149,9 @@ class Pandas_Engine(LazyEngine):
             "datetime64": PythonTypes.DATE,
         }
 
-        return self.dataset.dtypes.apply(lambda x: mapping_type[x.name]).to_dict()
+        return self.dataset.dtypes.apply(
+            lambda x: mapping_type.get(x.name, PythonTypes.STRING)
+        ).to_dict()
 
     def count_records(self) -> int:
         return len(self.dataset)
@@ -174,6 +182,13 @@ class Pandas_Engine(LazyEngine):
 
     def is_in(self, condition: cond.IsIn) -> Series:
         return self.dataset[condition.col_name].isin(condition.list_of_values)
+
+    def rlike(self, condition: cond.Rlike) -> Series:
+        return (
+            self.dataset[condition.col_name]
+            .astype("string")
+            .str.contains(condition.pattern, na=False)
+        )
 
     def compare_year_to_value(self, condition: cond.CompareYearToValue) -> Series:
         operator = self.mapping_operator.get(condition.operator, None)
