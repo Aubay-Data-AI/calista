@@ -3,7 +3,7 @@ import pathlib
 import pytest
 
 import calista
-from calista.table import CalistaTable
+from calista.table import CalistaEngine
 from tests.table.parameters import BIGQUERY_CONN_PARAMS, SNOWFLAKE_CONN_PARAMS
 
 
@@ -24,21 +24,21 @@ def bigquery_table(request):
 
 @pytest.fixture(scope="module")
 def spark_table():
-    return CalistaTable("spark").load_from_path(
+    return CalistaEngine("spark").load_from_path(
         get_file_path("TEST_DATASET_100.parquet"), "parquet"
     )
 
 
 @pytest.fixture(scope="module")
 def pandas_table():
-    return CalistaTable("pandas").load_from_path(
+    return CalistaEngine("pandas").load_from_path(
         get_file_path("TEST_DATASET_100.parquet"), "parquet"
     )
 
 
 @pytest.fixture(scope="module")
 def polars_table():
-    return CalistaTable("polars").load_from_path(
+    return CalistaEngine("polars").load_from_path(
         get_file_path("TEST_DATASET_100.parquet"), "parquet"
     )
 
@@ -65,12 +65,12 @@ def bigquery_session():
     credentials_path = get_bigquery_key_path(BIGQUERY_CONN_PARAMS["credentials_path"])
     BIGQUERY_CONN_PARAMS["credentials_path"] = credentials_path
 
-    return CalistaTable(engine="bigquery", config=BIGQUERY_CONN_PARAMS)
+    return CalistaEngine(engine="bigquery", config=BIGQUERY_CONN_PARAMS)
 
 
 @pytest.fixture(scope="module")
 def snowflake_session():
-    return CalistaTable(
+    return CalistaEngine(
         "snowflake",
         SNOWFLAKE_CONN_PARAMS,
     )

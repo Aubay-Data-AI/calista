@@ -20,7 +20,7 @@ from typing import Any, Dict, List
 import snowflake.snowpark.column as C
 import snowflake.snowpark.functions as F
 import snowflake.snowpark.types as T
-from snowflake.snowpark import Column, RelationalGroupedDataFrame, Session
+from snowflake.snowpark import Column, DataFrame, RelationalGroupedDataFrame, Session
 from snowflake.snowpark.window import Window
 
 import calista.core._aggregate_conditions as aggregateCond
@@ -62,6 +62,12 @@ class SnowflakeEngine(Database):
         self.snowflake.sql(f"USE {database}").collect()
         self.dataset = self.snowflake.table(f"{schema}.{table}")
 
+    def where(self, expression: Column) -> DataFrame:
+        return self.dataset.filter(expression)
+
+    def filter(self, expression: Column) -> DataFrame:
+        return self.where(expression)
+
     def show(self, n: int = 10) -> None:
         self.dataset.show(n)
 
@@ -76,20 +82,27 @@ class SnowflakeEngine(Database):
 
     def get_schema(self) -> dict[ColumnName:str, PythonType:str]:
         mapping_type = {
+            "ByteType": PythonTypes.INTEGER,
             "LongType": PythonTypes.INTEGER,
             "IntegerType": PythonTypes.INTEGER,
+            "ShortType": PythonTypes.INTEGER,
             "StringType": PythonTypes.STRING,
-            "DoubleType": PythonTypes.FLOAT,
+            "GeographyType": PythonTypes.STRING,
+            "FloatType": PythonTypes.FLOAT,
+            "DoubleType": PythonTypes.DOUBLE,
+            "DecimalType": PythonTypes.DECIMAL,
             "DateType": PythonTypes.DATE,
             "TimestampType": PythonTypes.TIMESTAMP,
+            "Timestamp": PythonTypes.TIMESTAMP,
             "BooleanType": PythonTypes.BOOLEAN,
         }
         datatype = self.dataset.schema.fields
         pattern = r"^(.*?)\("
         return {
-            datatype[i].name: mapping_type[
-                re.match(pattern, str(datatype[i].datatype)).group(1)
-            ]
+            datatype[i].name: mapping_type.get(
+                re.match(pattern, str(datatype[i].datatype)).group(1),
+                PythonTypes.STRING,
+            )
             for i in range(len(datatype))
         }
 
@@ -138,6 +151,9 @@ class SnowflakeEngine(Database):
 
     def is_in(self, condition: cond.IsIn) -> Column:
         return F.col(condition.col_name).isin(condition.list_of_values)
+
+    def rlike(self, condition: cond.Rlike) -> Column:
+        return F.col(condition.col_name).rlike(condition.pattern)
 
     def compare_year_to_value(self, condition: cond.CompareYearToValue) -> Column:
         operator = self.mapping_operator.get(condition.operator, None)

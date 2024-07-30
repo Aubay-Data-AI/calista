@@ -7,7 +7,7 @@ import pytest
 import calista.core.functions as F
 import calista.core.rules as R
 from calista.core.metrics import Metrics
-from calista.table import CalistaTable
+from calista.table import CalistaEngine
 
 
 class TestSparkTable:
@@ -235,6 +235,16 @@ class TestSparkTable:
             spark_table, salary_rule_name, salary_rule, expected_valid_row_count
         )
 
+    def test_rlike(self, spark_table):
+        salary_rule_name = "check_salaire_regex"
+        salary_rule = F.rlike(col_name="SALAIRE", pattern=r"^[+-]?[0-9]+\.[0-9]+$")
+
+        expected_valid_row_count = 87
+
+        self.analyze_and_assert_rule(
+            spark_table, salary_rule_name, salary_rule, expected_valid_row_count
+        )
+
     def test_not_condition(self, spark_table):
         salary_rule_name = "check_Prenom_not_not_null"
         salary_rule = ~F.is_not_null(col_name="PRENOM")
@@ -272,7 +282,7 @@ class TestSparkTable:
             "float": [4.0, 5.0, 6.0],
             "string": ["a", "b", "c"],
         }
-        calista_table_from_dict = CalistaTable("spark").load_from_dict(data_dict)
+        calista_table_from_dict = CalistaEngine("spark").load_from_dict(data_dict)
         assert calista_table_from_dict._engine.dataset.toPandas().equals(
             pd.DataFrame(data_dict)
         )
@@ -316,7 +326,7 @@ class TestSparkTable:
         expected_valid_row_count,
         expected_dataset_row_count,
     ):
-        computed_metrics = spark_table.groupBy(keys).analyze(rule_name, rule)
+        computed_metrics = spark_table.group_by(keys).analyze(rule_name, rule)
         expected_metrics = Metrics(
             rule=rule_name,
             total_row_count=expected_dataset_row_count,
@@ -445,10 +455,75 @@ class TestSparkTable:
             expected_dataset_row_count,
         )
 
-    def test_agg_and_normal_cond_combination(self, spark_table):
+    def test_agg_and_normal_cond_combination(self):
         with pytest.raises(Exception) as combination_exception:
             F.sum_gt_value(col_name="SALAIRE", value=20000) | F.is_iban("SALAIRE")
 
         assert "Cannot combine Condition with AggregateCondition" == str(
             combination_exception.value
         )
+
+    def test_colname_not_in_table(self, spark_table):
+        with pytest.raises(Exception) as combination_exception:
+            spark_table.analyze("rule", F.is_iban("DATE"))
+
+        assert (
+            "Column 'DATE' not found in ['NOM', 'PRENOM', 'SEXE', 'DATE_ENTREE', 'CDI', 'IBAN', 'SECTEUR_ACTIVITE', 'ADRESSE', 'SITUATION_FAMILIALE', 'ADRESSE_IP_V4', 'ADRESSE_IP_V6', 'DATE_NAISSANCE', 'DATE_SORTIE', 'DATE_DERNIER_EA', 'DATE_DERNIERE_AUGMENTATION', 'CDD', 'EMAIL', 'TELEPHONE', 'SALAIRE', 'DEVISE', 'ID']"
+            == str(combination_exception.value)
+        )
+
+    def test_col_left_not_in_table_compare_col_to_col(self, spark_table):
+        with pytest.raises(Exception) as combination_exception:
+            spark_table.analyze(
+                "rule",
+                F.compare_column_to_column(
+                    col_left="DATE", operator="=", col_right="DATE_ENTREE"
+                ),
+            )
+
+        assert (
+            "Column 'DATE' not found in ['NOM', 'PRENOM', 'SEXE', 'DATE_ENTREE', 'CDI', 'IBAN', 'SECTEUR_ACTIVITE', 'ADRESSE', 'SITUATION_FAMILIALE', 'ADRESSE_IP_V4', 'ADRESSE_IP_V6', 'DATE_NAISSANCE', 'DATE_SORTIE', 'DATE_DERNIER_EA', 'DATE_DERNIERE_AUGMENTATION', 'CDD', 'EMAIL', 'TELEPHONE', 'SALAIRE', 'DEVISE', 'ID']"
+            == str(combination_exception.value)
+        )
+
+    def test_col_right_not_in_table_compare_col_to_col(self, spark_table):
+        with pytest.raises(Exception) as combination_exception:
+            spark_table.analyze(
+                "rule",
+                F.compare_column_to_column(
+                    col_left="DATE_ENTREE", operator="=", col_right="DATE"
+                ),
+            )
+
+        assert (
+            "Column 'DATE' not found in ['NOM', 'PRENOM', 'SEXE', 'DATE_ENTREE', 'CDI', 'IBAN', 'SECTEUR_ACTIVITE', 'ADRESSE', 'SITUATION_FAMILIALE', 'ADRESSE_IP_V4', 'ADRESSE_IP_V6', 'DATE_NAISSANCE', 'DATE_SORTIE', 'DATE_DERNIER_EA', 'DATE_DERNIERE_AUGMENTATION', 'CDD', 'EMAIL', 'TELEPHONE', 'SALAIRE', 'DEVISE', 'ID']"
+            == str(combination_exception.value)
+        )
+
+    def test_col_not_in_table_groupby(self, spark_table):
+        with pytest.raises(Exception) as combination_exception:
+            spark_table.group_by("DATE")
+
+        assert (
+            "Column 'DATE' not found in ['NOM', 'PRENOM', 'SEXE', 'DATE_ENTREE', 'CDI', 'IBAN', 'SECTEUR_ACTIVITE', 'ADRESSE', 'SITUATION_FAMILIALE', 'ADRESSE_IP_V4', 'ADRESSE_IP_V6', 'DATE_NAISSANCE', 'DATE_SORTIE', 'DATE_DERNIER_EA', 'DATE_DERNIERE_AUGMENTATION', 'CDD', 'EMAIL', 'TELEPHONE', 'SALAIRE', 'DEVISE', 'ID']"
+            == str(combination_exception.value)
+        )
+
+    def test_calistatable_filter(self, spark_table):
+        rule_name = "check_iban_not_null"
+        rule = F.is_not_null(col_name="IBAN")
+
+        expected_valid_row_count = 90
+
+        computed_metrics = spark_table.filter(F.is_iban("IBAN")).analyze(
+            rule_name, rule
+        )
+        expected_metrics = Metrics(
+            rule=rule_name,
+            total_row_count=90,
+            valid_row_count=expected_valid_row_count,
+            valid_row_count_pct=expected_valid_row_count * 100 / 90,
+            timestamp=computed_metrics.timestamp,
+        )
+
+        assert computed_metrics == expected_metrics

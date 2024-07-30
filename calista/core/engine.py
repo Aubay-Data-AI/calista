@@ -168,6 +168,19 @@ class LazyEngine(ABC):
             memo[id_self] = _copy
         return _copy
 
+    def create_new_instance_from_dataset(self, dataset):
+        new_instance = deepcopy(self)
+        new_instance.dataset = dataset
+        return new_instance
+
+    @abstractmethod
+    def where(self, expression: GenericColumnType) -> DataFrameType:
+        ...
+
+    def filter(self, expresion: GenericColumnType) -> DataFrameType:
+        """Alias of where method"""
+        return self.where(expresion)
+
     @abstractmethod
     def and_condition(
         self, left_cond: GenericColumnType, right_cond: GenericColumnType
@@ -222,7 +235,7 @@ class LazyEngine(ABC):
     @abstractmethod
     def get_schema(
         self,
-    ) -> dict[ColumnName:str, PythonType:str]:
+    ) -> dict[ColumnName, PythonType]:
         """return a dict with col names as key and python types as values"""
         ...
 
@@ -282,6 +295,19 @@ class LazyEngine(ABC):
 
         Returns:
             GenericColumnType: The result of the membership check.
+        """
+        ...
+
+    @abstractmethod
+    def rlike(self, condition: cond.Rlike) -> GenericColumnType:
+        """
+        Check if a column value matches a regex.
+
+        Args:
+            condition (cond.Rlike): The condition specifying the column and the pattern.
+
+        Returns:
+            GenericColumnType: The result of the matching pattern check.
         """
         ...
 

@@ -21,33 +21,12 @@ from sqlalchemy.sql import text
 import calista.core._aggregate_conditions as aggregateCond
 import calista.core._conditions as cond
 import calista.core.rules as R
-from calista.core.catalogue import PythonTypes
-from calista.core.types_alias import ColumnName, PythonType
 from calista.engines.sql import SqlAggregateDataset, SqlEngine
 
 GenericAggExpr = TypeVar("GenericAggExpr")
 
 
 class BigqueryEngine(SqlEngine):
-    def get_schema(self) -> dict[ColumnName:str, PythonType:str]:
-        mapping_type = {
-            "INTEGER": PythonTypes.INTEGER,
-            "INT64": PythonTypes.INTEGER,
-            "CHAR": PythonTypes.STRING,
-            "VARCHAR": PythonTypes.STRING,
-            "DOUBLE PRECISION": PythonTypes.FLOAT,
-            "FLOAT": PythonTypes.FLOAT,
-            "DOUBLE": PythonTypes.FLOAT,
-            "DATE": PythonTypes.DATE,
-            "TIMESTAMP": PythonTypes.TIMESTAMP,
-            "BOOLEAN": PythonTypes.BOOLEAN,
-            "TEXT": PythonTypes.STRING,
-        }
-        return {
-            column.name: mapping_type[str(column.type).replace("()", "")]
-            for column in self.dataset.c
-        }
-
     def is_integer(self, condition: cond.IsInteger) -> ColumnExpressionArgument:
         return (
             self.dataset.c[condition.col_name]

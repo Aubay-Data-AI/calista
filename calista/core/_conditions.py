@@ -249,6 +249,19 @@ class IsIn(Condition):
     list_of_values: list[Any]
 
 
+class Rlike(Condition):
+    """
+    Condition to check if a column value matches a regex.
+
+    Args:
+        col_name (str): The name of the column.
+        pattern (str): Regex pattern to apply.
+    """
+
+    col_name: str
+    pattern: str
+
+
 class CompareYearToValue(Condition):
     """
     Condition to compare a column value to a specific year.

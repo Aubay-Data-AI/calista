@@ -15,21 +15,192 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
-from calista.core._conditions import AndCondition, Condition, NotCondition, OrCondition
-from calista.core.engine import GenericColumnType
+from calista.core._conditions import (
+    AndCondition,
+    CompareColumnToColumn,
+    Condition,
+    NotCondition,
+    OrCondition,
+)
+from calista.core.engine import GenericColumnType, LazyEngine
 from calista.core.metrics import Metrics
-from calista.core.types_alias import RuleName
+from calista.core.types_alias import ColumnName, PythonType, RuleName
 from calista.core.utils import import_engine
-from calista.group import GroupedTable
+
+if TYPE_CHECKING:
+    from calista.group import GroupedTable
 
 
 class CalistaTable:
+    def __init__(self, engine: LazyEngine):
+        """
+        Initialize the class with the specified engine and configuration.
+
+        Args:
+            engine (str): The engine to use for data processing.
+            config (Dict[str, Any], optional): Configuration options for the engine (default: None).
+
+        Raises:
+            Exception: If the specified engine is not supported.
+        """
+        self._engine = engine
+
+    @property
+    def schema(self) -> dict[ColumnName, PythonType]:
+        """
+        Returns the schema of the underlying dataset.
+
+        Returns:
+            Dict[ColumnName, PythonType]: Dict representing the schema of the underlying dataset.
+        """
+        return self._engine.get_schema()
+
+    def show(self, n: int = 10) -> None:
+        """
+        Prints the first n rows to the console.
+
+        Args:
+            n (int, optional): Number of rows to show
+        """
+        self._engine.show(n)
+
+    def group_by(self, *cols: str) -> GroupedTable:
+        """
+        Groups the :class:`CalistaTable` using the specified columns,
+        so we can execute aggregation conditions on them. See :class:`GroupedTable`
+        for all the available functions after calling group_by.
+
+        Args:
+            cols (list, str):columns to group by.
+            Each element should be a column name (string).
+        """
+        for col in cols:
+            if col not in self.schema.keys():
+                raise Exception(
+                    f"Column '{col}' not found in {list(self.schema.keys())}"
+                )
+        from calista.group import GroupedTable
+
+        return GroupedTable(self._engine, cols)
+
+    def where(self, condition: Condition) -> CalistaTable:
+        """
+        Filters rows using the given condition.
+
+        :func:`filter` is an alias for :func:`where`.
+
+        Args:
+            condition : :class:`Condition`
+
+        Returns:
+            :class:`CalistaTable`: Filtered CalistaTable.
+        """
+        if condition.is_aggregate:
+            raise Exception("Cannot apply filter for AggregateCondition")
+
+        expr = self._evaluate_condition(condition)
+        dataset_filtered = self._engine.filter(expr)
+
+        new_engine = self._engine.create_new_instance_from_dataset(dataset_filtered)
+
+        return CalistaTable(new_engine)
+
+    def filter(self, condition: Condition) -> CalistaTable:
+        return self.where(condition)
+
+    def _evaluate_condition(self, condition: Condition) -> GenericColumnType:
+
+        if isinstance(condition, AndCondition) or isinstance(condition, OrCondition):
+            left_cond = self._evaluate_condition(condition.left)
+            right_cond = self._evaluate_condition(condition.right)
+
+            return self._engine[condition](left_cond, right_cond)
+
+        if isinstance(condition, NotCondition):
+            cond = self._evaluate_condition(condition.cond)
+            return self._engine[condition](cond)
+
+        if isinstance(condition, CompareColumnToColumn):
+            if condition.col_left not in self.schema.keys():
+                raise Exception(
+                    f"Column '{condition.col_left}' not found in {list(self.schema.keys())}"
+                )
+            if condition.col_right not in self.schema.keys():
+                raise Exception(
+                    f"Column '{condition.col_right}' not found in {list(self.schema.keys())}"
+                )
+            return self._engine[condition](condition)
+
+        if condition.col_name not in self.schema.keys():
+            raise Exception(
+                f"Column '{condition.col_name}' not found in {list(self.schema.keys())}"
+            )
+
+        return self._engine[condition](condition)
+
+    def analyze(self, rule_name: str, condition: Condition) -> Metrics:
+        """
+        Compute :class:`~calista.core.metrics.Metrics` based on a condition.
+
+        Args:
+            rule_name (str): The name of the rule.
+            condition (Condition): The condition to evaluate.
+
+        Returns:
+            :class:`~calista.core.metrics.Metrics`: The metrics resulting from the analysis.
+
+        Raises:
+            Any exceptions raised by the analyze_rules method.
+        """
+        return self.analyze_rules({rule_name: condition})[0]
+
+    def analyze_rules(self, rules: dict[RuleName, Condition]) -> list[Metrics]:
+        """
+        Compute :class:`list[Metrics]` based on conditions.
+
+        Args:
+            rules (dict[RuleName, Condition]): The name of the rules and the conditions to execute.
+
+        Returns:
+            :class:`list[Metrics]`: The metrics resulting from the analysis.
+
+        Raises:
+            Any exceptions raised by the engine's execute_conditions method.
+        """
+        conditions = {
+            rule_name: self._evaluate_condition(rule_condition)
+            for rule_name, rule_condition in rules.items()
+        }
+        return self._engine.execute_conditions(conditions)
+
+    def _get_type_format(
+        self,
+        col_name,
+        conditions: list[tuple[Condition, str]],
+        threshold,
+        percentage=False,
+    ) -> Optional[str]:
+        type_scores = []
+        type_format = None
+        for cond, value in conditions:
+            m = self.analyze(f"{col_name} is_{value}", cond)
+            type_scores.append((m.valid_row_count_pct, value))
+        max_score = max(type_scores, key=lambda x: x[0])
+        if max_score[0] >= threshold:
+            type_format = (
+                f"{max_score[1]} ({max_score[0]}%)" if percentage else max_score[1]
+            )
+
+        return type_format
+
+
+class CalistaEngine:
     """
     For now, you can execute data quality checks using the
     following engines or platforms: spark, pandas, polars,
-    snowflake, bigquery, postgre.
+    snowflake, bigquery.
     """
 
     def __init__(self, engine: str, config: Dict[str, Any] = None):
@@ -60,7 +231,6 @@ class CalistaTable:
                 f"Je ne sais pas faire avec le moteur {engine} pour l'instant"
             )
         self._engine = import_engine(engine.lower())(config=config)
-        self._cached_diagnostic = None
 
     def load(
         self,
@@ -109,8 +279,7 @@ class CalistaTable:
             dataframe=dataframe,
             options=options,
         )
-        self._cached_diagnostic = None
-        return self
+        return CalistaTable(self._engine)
 
     def load_from_dict(self, data: Dict[str, List]) -> CalistaTable:
         """
@@ -127,7 +296,7 @@ class CalistaTable:
 
         Example
         --------
-        >>> calista_table = CalistaTable(engine = "spark").load_from_dict({"ID": [1, 2, 3, 4]})
+        >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"ID": [1, 2, 3, 4]})
         >>> calista_table.show()
         +---+
         | ID|
@@ -138,9 +307,7 @@ class CalistaTable:
         |  4|
         +---+
         """
-        self.load(data=data)
-        self._cached_diagnostic = None
-        return self
+        return self.load(data=data)
 
     def load_from_path(
         self, path: str, file_format: str, options: Dict[str, Any] = None
@@ -165,7 +332,7 @@ class CalistaTable:
         >>> "delimiter": ",",
         >>> "header": "True"
         >>> }
-        >>> calista_table = CalistaTable(engine = "spark").load_from_path(path='my_csv.csv',file_format="csv",options=csv_options)
+        >>> calista_table = CalistaEngine(engine = "spark").load_from_path(path='my_csv.csv',file_format="csv",options=csv_options)
         """
         return self.load(path=path, file_format=file_format, options=options)
 
@@ -204,84 +371,3 @@ class CalistaTable:
             Any exceptions raised by the engine's read_dataset method.
         """
         return self.load(table=table, schema=schema, database=database)
-
-    def show(self, n: int = 10) -> None:
-        """
-        Prints the first n rows to the console.
-
-        Args:
-            n (int, optional): Number of rows to show
-        """
-        self._engine.show(n)
-
-    def groupBy(self, *cols: str) -> GroupedTable:
-        return GroupedTable(self._engine, cols)
-
-    def _evaluate_condition(self, condition: Condition) -> GenericColumnType:
-
-        if isinstance(condition, AndCondition) or isinstance(condition, OrCondition):
-            left_cond = self._evaluate_condition(condition.left)
-            right_cond = self._evaluate_condition(condition.right)
-
-            return self._engine[condition](left_cond, right_cond)
-
-        if isinstance(condition, NotCondition):
-            cond = self._evaluate_condition(condition.cond)
-            return self._engine[condition](cond)
-
-        return self._engine[condition](condition)
-
-    def analyze(self, rule_name: str, condition: Condition) -> Metrics:
-        """
-        Compute :class:`~calista.core.metrics.Metrics` based on a condition.
-
-        Args:
-            rule_name (str): The name of the rule.
-            condition (Condition): The condition to evaluate.
-
-        Returns:
-            :class:`~calista.core.metrics.Metrics`: The metrics resulting from the analysis.
-
-        Raises:
-            Any exceptions raised by the analyze_rules method.
-        """
-        return self.analyze_rules({rule_name: condition})[0]
-
-    def analyze_rules(self, rules: dict[RuleName:str, Condition]) -> list[Metrics]:
-        """
-        Compute :class:`list[Metrics]` based on conditions.
-
-        Args:
-            rules (dict[RuleName, Condition]): The name of the rules and the conditions to execute.
-
-        Returns:
-            :class:`list[Metrics]`: The metrics resulting from the analysis.
-
-        Raises:
-            Any exceptions raised by the engine's execute_conditions method.
-        """
-        conditions = {
-            rule_name: self._evaluate_condition(rule_condition)
-            for rule_name, rule_condition in rules.items()
-        }
-        return self._engine.execute_conditions(conditions)
-
-    def _get_type_format(
-        self,
-        col_name,
-        conditions: list[tuple[Condition, str]],
-        threshold,
-        percentage=False,
-    ) -> Optional[str]:
-        type_scores = []
-        type_format = None
-        for cond, value in conditions:
-            m = self.analyze(f"{col_name} is_{value}", cond)
-            type_scores.append((m.valid_row_count_pct, value))
-        max_score = max(type_scores, key=lambda x: x[0])
-        if max_score[0] >= threshold:
-            type_format = (
-                f"{max_score[1]} ({max_score[0]}%)" if percentage else max_score[1]
-            )
-
-        return type_format

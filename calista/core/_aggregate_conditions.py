@@ -1,19 +1,8 @@
-from typing import Any, TypeAlias, Union
+from typing import Any
 
 from pydantic import computed_field
 
 from calista.core._conditions import CompareColumnToValue, Condition
-
-
-class CompareAggColumnToValue(Condition):
-    col_name: str
-    operator: str
-    agg_ope: str
-    value: Any
-
-
-# TODO: rendre dynamique la création
-AggregateCondition: TypeAlias = Union[CompareAggColumnToValue]
 
 
 class AggregateCondition(Condition):
@@ -22,7 +11,7 @@ class AggregateCondition(Condition):
     @computed_field
     @property
     def agg_col_name(self) -> str:
-        return f"{self.__class__.__name__}_{self.col_name}"
+        return f"{self.__class__.__name__.upper()}_{self.col_name}"
 
 
 class Sum(AggregateCondition):
