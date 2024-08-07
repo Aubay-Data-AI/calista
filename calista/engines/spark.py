@@ -85,6 +85,12 @@ class SparkEngine(LazyEngine):
     def not_condition(self, cond: Column) -> Column:
         return ~cond
 
+    def add_columns(self, columns: dict[str, Column]) -> DataFrame:
+        result_dataset = self.dataset
+        for col_name, col in columns.items():
+            result_dataset = result_dataset.withColumn(col_name, col)
+        return result_dataset
+
     def get_schema(self) -> dict[ColumnName:str, PythonType:str]:
         mapping_type = {
             "ByteType": PythonTypes.INTEGER,

@@ -3,6 +3,7 @@ from functools import reduce
 
 import pandas as pd
 import pytest
+from chispa.dataframe_comparer import assert_df_equality
 
 import calista.core.functions as F
 import calista.core.rules as R
@@ -527,3 +528,22 @@ class TestSparkTable:
         )
 
         assert computed_metrics == expected_metrics
+
+    def test_get_rows(self, spark_table):
+        rule_name = "IBAN_is_iban"
+        rule = F.is_iban(col_name="IBAN")
+        df_result = spark_table.get_rows({rule_name: rule})
+        df_result = df_result.select("IBAN", rule_name).limit(5)
+
+        expected_data = [
+            ("FR4756356801990924110246661", True),
+            ("FR9152927592715361970259533", True),
+            ("FR6098743347361131022029548", True),
+            ("FR2371478023732554095214206", True),
+            ("FR0330875910858658779613722", True),
+        ]
+        expected_df = spark_table._engine.spark.createDataFrame(
+            expected_data, ["IBAN", rule_name]
+        )
+
+        assert_df_equality(df_result, expected_df)

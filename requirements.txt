@@ -1,6 +1,7 @@
 sqlalchemy==2.0.29
 pyarrow
 pydantic
+chispa
 pytest
 pytest-cov
 polars

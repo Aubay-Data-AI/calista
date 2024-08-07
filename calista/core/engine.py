@@ -218,6 +218,17 @@ class LazyEngine(ABC):
         ...
 
     @abstractmethod
+    def add_columns(self, columns: dict[str, GenericColumnType]) -> DataFrameType:
+        """
+        Add columns to the dataset.
+        Args:
+            conditions (dict[str, GenericColumnType]): The columns to add to the dataset with the name of each column.
+        Returns:
+            DataFrameType: The modified DataFrame with additional columns
+        """
+        ...
+
+    @abstractmethod
     def execute_conditions(
         self, conditions: dict[RuleName:str, GenericColumnType]
     ) -> list[Metrics]:
