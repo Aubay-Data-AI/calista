@@ -176,21 +176,44 @@ class CalistaTable:
         return self._engine.execute_conditions(conditions)
 
     def get_rows(self, rules: dict[RuleName, Condition]) -> DataFrameType:
+        """
+        Returns the dataset with new columns of booleans for each rules.
+
+        Args:
+            rules (dict[RuleName, Condition]): The name of the rules and the conditions to execute.
+
+        Returns:
+            `DataFrameType`: The dataset with new columns resulting from the analysis.
+        """
         conditions = {
             rule_name: self._evaluate_condition(rule_condition)
             for rule_name, rule_condition in rules.items()
         }
         return self._engine.add_columns(conditions)
 
-    def get_valid_rows(
-        self, rule_name: RuleName, condition: Condition
-    ) -> DataFrameType:
+    def get_valid_rows(self, condition: Condition) -> DataFrameType:
+        """
+        Returns the dataset filtered with the rows validating the rules.
+
+        Args:
+            condition (Condition): The condition to evaluate.
+
+        Returns:
+            `DataFrameType`: The dataset filtered with the rows where the condition is satisfied.
+        """
         column_expression = self._evaluate_condition(condition)
         return self._engine.filter(column_expression)
 
-    def get_invalid_rows(
-        self, rule_name: RuleName, condition: Condition
-    ) -> DataFrameType:
+    def get_invalid_rows(self, condition: Condition) -> DataFrameType:
+        """
+        Returns the dataset filtered with the rows not validating the rules.
+
+        Args:
+            condition (Condition): The condition to evaluate.
+
+        Returns:
+            `DataFrameType`: The dataset filtered with the rows where the condition is not satisfied.
+        """
         column_expression = self._evaluate_condition(condition)
         return self._engine.filter(~column_expression)
 
