@@ -140,10 +140,9 @@ class Pandas_Engine(LazyEngine):
     def not_condition(self, cond: Series) -> Series:
         return ~cond
 
-    def add_columns(self, columns: dict[str, pd.Series]) -> DataFrame:
+    def add_column(self, col_name, col) -> DataFrame:
         new_dataset = self.dataset.copy()
-        for col_name, col in columns.items():
-            new_dataset[col_name] = col
+        new_dataset[col_name] = col
         return new_dataset
 
     def get_schema(self) -> dict[ColumnName:str, PythonType:str]:

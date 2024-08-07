@@ -185,11 +185,16 @@ class CalistaTable:
         Returns:
             `DataFrameType`: The dataset with new columns resulting from the analysis.
         """
-        conditions = {
-            rule_name: self._evaluate_condition(rule_condition)
-            for rule_name, rule_condition in rules.items()
-        }
-        return self._engine.add_columns(conditions)
+        new_dataset = self._engine.dataset
+
+        for rule_name, rule_condition in rules.items():
+            condition_result = self._evaluate_condition(rule_condition)
+            temp_engine = self._engine.create_new_instance_from_dataset(
+                self._engine.dataset
+            )
+            new_dataset = temp_engine.add_column(rule_name, condition_result)
+
+        return new_dataset
 
     def get_valid_rows(self, condition: Condition) -> DataFrameType:
         """
