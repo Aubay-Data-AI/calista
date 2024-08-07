@@ -97,11 +97,11 @@ class SqlEngine(Database):
     def not_condition(self, cond: ColumnExpressionArgument) -> ColumnExpressionArgument:
         return ~cond
 
-    def add_columns(self, columns: dict[str, ColumnExpressionArgument]) -> Select:
+    def add_column(self, col_name: str, col_expr: ColumnExpressionArgument) -> Select:
         new_columns = [self.dataset]
-        for col_name, col_expr in columns.items():
-            new_columns.append(col_expr.label(col_name))
-        return select(*new_columns)
+        new_columns.append(col_expr.label(col_name))
+        new_select = select(*new_columns)
+        return new_select
 
     def get_schema(self) -> dict[ColumnName:str, PythonType:str]:
         mapping_type = {

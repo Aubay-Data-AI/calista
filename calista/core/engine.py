@@ -218,11 +218,14 @@ class LazyEngine(ABC):
         ...
 
     @abstractmethod
-    def add_columns(self, columns: dict[str, GenericColumnType]) -> DataFrameType:
+    def add_column(self, col_name: str, col: GenericColumnType) -> DataFrameType:
         """
-        Add columns to the dataset.
+        Add a column to the dataset.
+
         Args:
-            conditions (dict[str, GenericColumnType]): The columns to add to the dataset with the name of each column.
+            col_name (str): The column name.
+            col (GenericColumnType): The column to add to the dataset.
+
         Returns:
             DataFrameType: The modified DataFrame with additional columns
         """
