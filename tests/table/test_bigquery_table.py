@@ -1,7 +1,9 @@
 from datetime import datetime
 from functools import reduce
 
+import pandas as pd
 import pytest
+from sqlalchemy.orm import sessionmaker
 
 import calista.core.functions as F
 import calista.core.rules as R
@@ -525,3 +527,29 @@ class TestBigqueryTable:
         )
 
         assert computed_metrics == expected_metrics
+
+    def test_get_rows(self, bigquery_table):
+        rule_name = "IBAN_is_iban"
+        rule = F.is_iban(col_name="IBAN")
+        query = bigquery_table.get_rows({rule_name: rule})
+
+        Session = sessionmaker(bind=bigquery_table._engine.engine)
+        session = Session()
+        table = session.execute(query)
+        df_result = pd.DataFrame(table.fetchall(), columns=table.keys())
+        df_result = df_result[["IBAN", rule_name]].head(5)
+
+        expected_df = pd.DataFrame(
+            {
+                "IBAN": [
+                    "FR1981073760101001813753760",
+                    "FR6906093250967318491811332",
+                    "FR7049971597282699593917624",
+                    "FR1773393443400319003480793",
+                    "FR3637964138787947015880922",
+                ],
+                "IBAN_is_iban": [True, True, True, True, True],
+            }
+        )
+
+        pd.testing.assert_frame_equal(left=df_result, right=expected_df)

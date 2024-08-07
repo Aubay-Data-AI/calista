@@ -24,7 +24,7 @@ from calista.core._conditions import (
     NotCondition,
     OrCondition,
 )
-from calista.core.engine import GenericColumnType, LazyEngine
+from calista.core.engine import DataFrameType, GenericColumnType, LazyEngine
 from calista.core.metrics import Metrics
 from calista.core.types_alias import ColumnName, PythonType, RuleName
 from calista.core.utils import import_engine
@@ -174,6 +174,25 @@ class CalistaTable:
             for rule_name, rule_condition in rules.items()
         }
         return self._engine.execute_conditions(conditions)
+
+    def get_rows(self, rules: dict[RuleName, Condition]) -> DataFrameType:
+        conditions = {
+            rule_name: self._evaluate_condition(rule_condition)
+            for rule_name, rule_condition in rules.items()
+        }
+        return self._engine.add_columns(conditions)
+
+    def get_valid_rows(
+        self, rule_name: RuleName, condition: Condition
+    ) -> DataFrameType:
+        column_expression = self._evaluate_condition(condition)
+        return self._engine.filter(column_expression)
+
+    def get_invalid_rows(
+        self, rule_name: RuleName, condition: Condition
+    ) -> DataFrameType:
+        column_expression = self._evaluate_condition(condition)
+        return self._engine.filter(~column_expression)
 
     def _get_type_format(
         self,
