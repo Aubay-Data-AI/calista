@@ -189,12 +189,12 @@ class CalistaTable:
         ...
 
     @overload
-    def get_rows(self, rules: dict[RuleName, Condition]) -> DataFrameType:
+    def get_rows(self, rules: Dict[RuleName, Condition]) -> DataFrameType:
         """
         Returns the dataset with new columns of booleans for each rules.
 
         Args:
-            rules (dict[RuleName, Condition]): The name of the rules and the conditions to execute.
+            rules (Dict[RuleName, Condition]): The name of the rules and the conditions to execute.
 
         Returns:
             `DataFrameType`: The dataset with new columns resulting from the analysis.
@@ -202,13 +202,13 @@ class CalistaTable:
         ...
 
     def get_rows(
-        self, cond_rules: Union[Condition, dict[RuleName, Condition]]
+        self, cond_rules: Union[Condition, Dict[RuleName, Condition]]
     ) -> DataFrameType:
         """
         Returns the dataset with new columns of booleans for each rules or the given condition.
 
         Args:
-            rules (dict[RuleName, Condition]): The name of the rules and the conditions to execute.
+            rules (Dict[RuleName, Condition]): The name of the rules and the conditions to execute.
 
         Returns:
             `DataFrameType`: The dataset with new columns resulting from the analysis.
