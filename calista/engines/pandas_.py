@@ -22,9 +22,9 @@ import pandas as pd
 from pandas import DataFrame, Series
 from pandas.core.groupby import DataFrameGroupBy
 
-import calista.core._aggregate_conditions as aggregateCond
 import calista.core._conditions as cond
 import calista.core.rules as R
+from calista.core._aggregate_conditions import Count, Max, Mean, Median, Min, Sum
 from calista.core.aggregates import AggregateDataset
 from calista.core.catalogue import PythonTypes
 from calista.core.engine import LazyEngine
@@ -387,7 +387,7 @@ class Pandas_Engine(LazyEngine):
 class Pandas_AggregateDataset(AggregateDataset):
     @staticmethod
     def sum(
-        agg_func: aggregateCond.SumBy,
+        agg_func: Sum,
         agg_col_name: str,
         keys: List[str],
         engine: Pandas_Engine,
@@ -396,7 +396,7 @@ class Pandas_AggregateDataset(AggregateDataset):
 
     @staticmethod
     def count(
-        agg_func: aggregateCond.SumBy,
+        agg_func: Count,
         agg_col_name: str,
         keys: List[str],
         engine: Pandas_Engine,
@@ -405,7 +405,7 @@ class Pandas_AggregateDataset(AggregateDataset):
 
     @staticmethod
     def mean(
-        agg_func: aggregateCond.SumBy,
+        agg_func: Mean,
         agg_col_name: str,
         keys: List[str],
         engine: Pandas_Engine,
@@ -414,7 +414,7 @@ class Pandas_AggregateDataset(AggregateDataset):
 
     @staticmethod
     def min(
-        agg_func: aggregateCond.SumBy,
+        agg_func: Min,
         agg_col_name: str,
         keys: List[str],
         engine: Pandas_Engine,
@@ -423,7 +423,7 @@ class Pandas_AggregateDataset(AggregateDataset):
 
     @staticmethod
     def max(
-        agg_func: aggregateCond.SumBy,
+        agg_func: Max,
         agg_col_name: str,
         keys: List[str],
         engine: Pandas_Engine,
@@ -432,7 +432,7 @@ class Pandas_AggregateDataset(AggregateDataset):
 
     @staticmethod
     def median(
-        agg_func: aggregateCond.SumBy,
+        agg_func: Median,
         agg_col_name: str,
         keys: List[str],
         engine: Pandas_Engine,

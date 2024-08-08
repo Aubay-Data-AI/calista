@@ -18,9 +18,9 @@ from typing import List, TypeVar
 from sqlalchemy import VARCHAR, ColumnExpressionArgument, case, func, select
 from sqlalchemy.sql import text
 
-import calista.core._aggregate_conditions as aggregateCond
 import calista.core._conditions as cond
 import calista.core.rules as R
+from calista.core._aggregate_conditions import Median
 from calista.engines.sql import SqlAggregateDataset, SqlEngine
 
 GenericAggExpr = TypeVar("GenericAggExpr")
@@ -71,7 +71,7 @@ class BigqueryEngine(SqlEngine):
 class BigqueryAggregateDataset(SqlAggregateDataset):
     @staticmethod
     def median(
-        agg_func: aggregateCond.MedianBy,
+        agg_func: Median,
         agg_col_name: str,
         keys: List[str],
         engine: BigqueryEngine,
