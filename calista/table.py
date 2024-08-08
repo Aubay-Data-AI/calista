@@ -156,15 +156,15 @@ class CalistaTable:
         """
         return self.analyze_rules({rule_name: condition})[0]
 
-    def analyze_rules(self, rules: dict[RuleName, Condition]) -> list[Metrics]:
+    def analyze_rules(self, rules: Dict[RuleName, Condition]) -> List[Metrics]:
         """
-        Compute :class:`list[Metrics]` based on conditions.
+        Compute :class:`List[Metrics]` based on conditions.
 
         Args:
             rules (dict[RuleName, Condition]): The name of the rules and the conditions to execute.
 
         Returns:
-            :class:`list[Metrics]`: The metrics resulting from the analysis.
+            :class:`List[Metrics]`: The metrics resulting from the analysis.
 
         Raises:
             Any exceptions raised by the engine's execute_conditions method.
