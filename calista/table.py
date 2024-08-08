@@ -15,7 +15,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, overload
 
 from calista.core._conditions import (
     AndCondition,
@@ -175,6 +175,20 @@ class CalistaTable:
         }
         return self._engine.execute_conditions(conditions)
 
+    @overload
+    def get_rows(self, condition: Condition) -> DataFrameType:
+        """
+        Returns the dataset with new columns of booleans for given condition.
+
+        Args:
+            condition (Condition): The condition to execute.
+
+        Returns:
+            `DataFrameType`: The dataset with the new column resulting from the analysis.
+        """
+        ...
+
+    @overload
     def get_rows(self, rules: dict[RuleName, Condition]) -> DataFrameType:
         """
         Returns the dataset with new columns of booleans for each rules.
@@ -185,17 +199,31 @@ class CalistaTable:
         Returns:
             `DataFrameType`: The dataset with new columns resulting from the analysis.
         """
-        #new_dataset = self._engine.dataset
+        ...
 
-        temp_engine = self._engine
-        for rule_name, rule_condition in rules.items():
-            condition_result = self._evaluate_condition(rule_condition)
-            #temp_engine = self._engine.create_new_instance_from_dataset(
-            #    self._engine.dataset
-            #)
-            temp_engine = temp_engine.add_column(rule_name, condition_result)
+    def get_rows(
+        self, cond_rules: Union[Condition, dict[RuleName, Condition]]
+    ) -> DataFrameType:
+        """
+        Returns the dataset with new columns of booleans for each rules or the given condition.
 
-        return temp_engine.dataset
+        Args:
+            rules (dict[RuleName, Condition]): The name of the rules and the conditions to execute.
+
+        Returns:
+            `DataFrameType`: The dataset with new columns resulting from the analysis.
+        """
+        if isinstance(cond_rules, Condition):
+            condition = self._evaluate_condition(cond_rules)
+            return self._engine.add_column(type(cond_rules).__name__, condition)
+
+        else:
+            new_dataset = self._engine.dataset
+            for rule_name, rule_condition in cond_rules.items():
+                condition_result = self._evaluate_condition(rule_condition)
+                temp_engine = self._engine.create_new_instance_from_dataset(new_dataset)
+                new_dataset = temp_engine.add_column(rule_name, condition_result)
+            return new_dataset
 
     def get_valid_rows(self, condition: Condition) -> DataFrameType:
         """

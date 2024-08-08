@@ -98,10 +98,14 @@ class SqlEngine(Database):
         return ~cond
 
     def add_column(self, col_name: str, col_expr: ColumnExpressionArgument) -> Select:
-        new_columns = [self.dataset]
-        new_columns.append(col_expr.label(col_name))
-        new_select = select(*new_columns)
-        return new_select
+        if isinstance(self.dataset, Select):
+            new_columns = list(self.dataset.selected_columns) + [
+                col_expr.label(col_name)
+            ]
+            return self.dataset.with_only_columns(*new_columns)
+
+        else:
+            return select(self.dataset, col_expr.label(col_name))
 
     def get_schema(self) -> dict[ColumnName:str, PythonType:str]:
         mapping_type = {
