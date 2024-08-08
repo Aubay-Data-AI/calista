@@ -72,7 +72,7 @@ class GroupedTable:
 
         return CalistaTable(self._engine).analyze(rule_name, condition_as_check)
 
-    def get_rows(self, condition: Condition) -> DataFrameType:
+    def apply_rule(self, condition: Condition) -> DataFrameType:
         """
         Returns the dataset with new columns of booleans for given condition.
 
@@ -84,7 +84,7 @@ class GroupedTable:
         """
         self._engine.dataset = self._evaluate_aggregates(condition)
         condition_as_check = condition.get_conditions_as_func_check()
-        return CalistaTable(self._engine).get_rows(condition_as_check)
+        return CalistaTable(self._engine).apply_rule(condition_as_check)
 
     def get_valid_rows(self, condition: Condition) -> DataFrameType:
         """
