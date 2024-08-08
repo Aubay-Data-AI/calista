@@ -534,9 +534,9 @@ class TestPolarsTable:
 
         assert computed_metrics == expected_metrics
 
-    def test_get_rows_single_condition(self, polars_table):
+    def test_apply_rule(self, polars_table):
         condition = F.is_iban(col_name="IBAN")
-        df_result = polars_table.get_rows(condition)
+        df_result = polars_table.apply_rule(rule_name="IsIban", rule=condition)
         df_result = df_result.select(["IBAN", "IsIban"]).head(5).collect()
 
         expected_df = pl.DataFrame(
@@ -554,10 +554,10 @@ class TestPolarsTable:
 
         assert_frame_equal(df_result, expected_df)
 
-    def test_get_rows_multiple_rules(self, polars_table):
+    def test_apply_rules(self, polars_table):
         rule_1 = F.is_iban(col_name="IBAN")
         rule_2 = F.is_not_null(col_name="IBAN")
-        df_result = polars_table.get_rows(
+        df_result = polars_table.apply_rules(
             {"IBAN_is_iban": rule_1, "IBAN_is_not_null": rule_2}
         )
         df_result = (

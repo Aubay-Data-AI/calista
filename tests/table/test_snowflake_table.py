@@ -531,9 +531,9 @@ class TestSnowflakeTable:
 
         assert computed_metrics == expected_metrics
 
-    def test_get_rows_single_condition(self, snowflake_table):
+    def test_apply(self, snowflake_table):
         condition = F.is_iban(col_name="IBAN")
-        df_result = snowflake_table.get_rows(condition)
+        df_result = snowflake_table.apply_rule(rule_name="IsIban", rule=condition)
         df_result = df_result.select("IBAN", "IsIban").limit(5)
 
         schema = StructType(
@@ -557,10 +557,10 @@ class TestSnowflakeTable:
             df_result, expected_df, ignore_column_order=True, ignore_row_order=True
         )
 
-    def test_get_rows_multiple_rules(self, snowflake_table):
+    def test_apply_rules(self, snowflake_table):
         rule_1 = F.is_iban(col_name="IBAN")
         rule_2 = F.is_not_null(col_name="IBAN")
-        df_result = snowflake_table.get_rows(
+        df_result = snowflake_table.apply_rules(
             {"IBAN_is_iban": rule_1, "IBAN_is_not_null": rule_2}
         )
         df_result = df_result.select("IBAN", "IBAN_is_iban", "IBAN_is_not_null").limit(

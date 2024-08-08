@@ -15,7 +15,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, overload
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from calista.core._conditions import (
     AndCondition,
@@ -175,34 +175,25 @@ class CalistaTable:
         }
         return self._engine.execute_conditions(conditions)
 
-    @overload
-    def get_rows(self, condition: Condition) -> DataFrameType:
+    def apply_rule(self, rule: Condition, rule_name: str = None) -> DataFrameType:
         """
         Returns the dataset with new columns of booleans for given condition.
 
         Args:
-            condition (Condition): The condition to execute.
+            rule (Condition): The condition to execute.
+            rule_name (str): Name of the rule (Default: None)
 
         Returns:
             `DataFrameType`: The dataset with the new column resulting from the analysis.
         """
-        ...
+        if rule_name is None:
+            rule_name = rule.__repr__()
 
-    @overload
-    def get_rows(self, rules: Dict[RuleName, Condition]) -> DataFrameType:
-        """
-        Returns the dataset with new columns of booleans for each rules.
+        condition_result = self._evaluate_condition(rule)
+        return self._engine.add_column(rule_name, condition_result)
 
-        Args:
-            rules (Dict[RuleName, Condition]): The name of the rules and the conditions to execute.
-
-        Returns:
-            `DataFrameType`: The dataset with new columns resulting from the analysis.
-        """
-        ...
-
-    def get_rows(
-        self, cond_rules: Union[Condition, Dict[RuleName, Condition]]
+    def apply_rules(
+        self, rules: Union[Condition, Dict[RuleName, Condition]]
     ) -> DataFrameType:
         """
         Returns the dataset with new columns of booleans for each rules or the given condition.
@@ -213,17 +204,13 @@ class CalistaTable:
         Returns:
             `DataFrameType`: The dataset with new columns resulting from the analysis.
         """
-        if isinstance(cond_rules, Condition):
-            condition = self._evaluate_condition(cond_rules)
-            return self._engine.add_column(type(cond_rules).__name__, condition)
+        new_dataset = self._engine.dataset
+        for rule_name, rule_condition in rules.items():
+            condition_result = self._evaluate_condition(rule_condition)
+            temp_engine = self._engine.create_new_instance_from_dataset(new_dataset)
+            new_dataset = temp_engine.add_column(rule_name, condition_result)
 
-        else:
-            new_dataset = self._engine.dataset
-            for rule_name, rule_condition in cond_rules.items():
-                condition_result = self._evaluate_condition(rule_condition)
-                temp_engine = self._engine.create_new_instance_from_dataset(new_dataset)
-                new_dataset = temp_engine.add_column(rule_name, condition_result)
-            return new_dataset
+        return new_dataset
 
     def get_valid_rows(self, condition: Condition) -> DataFrameType:
         """
