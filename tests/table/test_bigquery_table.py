@@ -528,9 +528,9 @@ class TestBigqueryTable:
 
         assert computed_metrics == expected_metrics
 
-    def test_get_rows_single_condition(self, bigquery_table):
+    def test_apply_rule(self, bigquery_table):
         condition = F.is_iban(col_name="IBAN")
-        query = bigquery_table.get_rows(condition)
+        query = bigquery_table.apply_rule(rule_name="IsIban", rule=condition)
         Session = sessionmaker(bind=bigquery_table._engine.engine)
         session = Session()
         table = session.execute(query)
@@ -552,10 +552,10 @@ class TestBigqueryTable:
 
         pd.testing.assert_frame_equal(left=df_result, right=expected_df)
 
-    def test_get_rows_multiple_rules(self, bigquery_table):
+    def test_apply_rules(self, bigquery_table):
         rule_1 = F.is_iban(col_name="IBAN")
         rule_2 = F.is_not_null(col_name="IBAN")
-        query = bigquery_table.get_rows(
+        query = bigquery_table.apply_rules(
             {"IBAN_is_iban": rule_1, "IBAN_is_not_null": rule_2}
         )
         Session = sessionmaker(bind=bigquery_table._engine.engine)
