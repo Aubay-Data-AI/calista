@@ -15,7 +15,7 @@
 
 from abc import ABC, abstractmethod
 from copy import deepcopy
-from typing import Any, Dict, List, TypeVar, Callable
+from typing import Any, Dict, List, TypeVar
 
 import numpy as np
 
@@ -159,21 +159,6 @@ class LazyEngine(ABC):
         """
         attr_name = _camel_to_snake(condition.__class__.__name__)
         return self.__getattribute__(attr_name)
-
-    def __getattribute__(self, attr):
-        funcs = {"add_column"}
-        if attr in funcs:
-            return self.transform_dataset_to_new_instance(super().__getattribute__(attr))
-
-        return super().__getattribute__(attr)
-
-    def transform_dataset_to_new_instance(self, attr: Callable):
-
-        def _transform_dataset_to_new_instance(*args, **kwargs):
-            new_dataset = attr(*args, **kwargs)
-            return self.create_new_instance_from_dataset(new_dataset)
-
-        return _transform_dataset_to_new_instance
 
     def __deepcopy__(self, memo):  # memo is a dict of id's to copies
         id_self = id(self)  # memoization avoids unnecesary recursion

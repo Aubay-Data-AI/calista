@@ -1,6 +1,6 @@
 from calista.core._aggregate_conditions import AggregateCondition
 from calista.core._conditions import AndCondition, Condition, OrCondition
-from calista.core.engine import GenericGroupedTableObject
+from calista.core.engine import DataFrameType, GenericGroupedTableObject
 from calista.core.metrics import Metrics
 from calista.core.utils import import_engine
 from calista.table import CalistaTable
@@ -71,3 +71,45 @@ class GroupedTable:
         condition_as_check = condition.get_conditions_as_func_check()
 
         return CalistaTable(self._engine).analyze(rule_name, condition_as_check)
+
+    def get_rows(self, condition: Condition) -> DataFrameType:
+        """
+        Returns the dataset with new columns of booleans for given condition.
+
+        Args:
+            condition (Condition): The condition to execute.
+
+        Returns:
+            `DataFrameType`: The aggregated dataset with the new column resulting from the analysis.
+        """
+        self._engine.dataset = self._evaluate_aggregates(condition)
+        condition_as_check = condition.get_conditions_as_func_check()
+        return CalistaTable(self._engine).get_rows(condition_as_check)
+
+    def get_valid_rows(self, condition: Condition) -> DataFrameType:
+        """
+        Returns the dataset filtered with the rows validating the rules.
+
+        Args:
+            condition (Condition): The condition to evaluate.
+
+        Returns:
+            `DataFrameType`: The aggregated dataset filtered with the rows where the condition is satisfied.
+        """
+        self._engine.dataset = self._evaluate_aggregates(condition)
+        condition_as_check = condition.get_conditions_as_func_check()
+        return CalistaTable(self._engine).get_valid_rows(condition_as_check)
+
+    def get_invalid_rows(self, condition: Condition) -> DataFrameType:
+        """
+        Returns the dataset filtered with the rows not validating the rules.
+
+        Args:
+            condition (Condition): The condition to evaluate.
+
+        Returns:
+            `DataFrameType`: The aggregated dataset filtered with the rows where the condition is not satisfied.
+        """
+        self._engine.dataset = self._evaluate_aggregates(condition)
+        condition_as_check = condition.get_conditions_as_func_check()
+        return CalistaTable(self._engine).get_invalid_rows(condition_as_check)
