@@ -1,6 +1,6 @@
 from typing import Any
 
-from pydantic import computed_field
+from pydantic import BaseModel, computed_field
 
 from calista.core._conditions import CompareColumnToValue, Condition
 
@@ -8,40 +8,36 @@ from calista.core._conditions import CompareColumnToValue, Condition
 class AggregateCondition(Condition):
     is_aggregate: bool = True
 
+
+class AggregateFunction(BaseModel):
     @computed_field
     @property
     def agg_col_name(self) -> str:
         return f"{self.__class__.__name__.upper()}_{self.col_name}"
 
 
-class Sum(AggregateCondition):
+class Sum(AggregateFunction):
     col_name: str
-    is_aggregate: bool = True
 
 
-class Count(AggregateCondition):
+class Count(AggregateFunction):
     col_name: str
-    is_aggregate: bool = True
 
 
-class Mean(AggregateCondition):
+class Mean(AggregateFunction):
     col_name: str
-    is_aggregate: bool = True
 
 
-class Min(AggregateCondition):
+class Min(AggregateFunction):
     col_name: str
-    is_aggregate: bool = True
 
 
-class Max(AggregateCondition):
+class Max(AggregateFunction):
     col_name: str
-    is_aggregate: bool = True
 
 
-class Median(AggregateCondition):
+class Median(AggregateFunction):
     col_name: str
-    is_aggregate: bool = True
 
 
 class SumBy(AggregateCondition):
