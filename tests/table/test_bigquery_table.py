@@ -579,3 +579,13 @@ class TestBigqueryTable:
         )
 
         pd.testing.assert_frame_equal(left=df_result, right=expected_df)
+
+    def test_aggregate_invalid_rows(self, bigquery_table):
+        rule = F.mean_le_value(col_name="SALAIRE", value=63500)
+        query = bigquery_table.group_by("SEXE").get_valid_rows(rule)
+        Session = sessionmaker(bind=bigquery_table._engine.engine)
+        session = Session()
+        table = session.execute(query)
+        df_result = pd.DataFrame(table.fetchall(), columns=table.keys())
+        expected_df = pd.DataFrame({"MEAN_SALAIRE": [63404.656421]})
+        pd.testing.assert_frame_equal(left=df_result, right=expected_df)
