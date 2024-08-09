@@ -14,7 +14,7 @@
 
 
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Sequence
 
 import pandas as pd
 from sqlalchemy import (
@@ -97,15 +97,21 @@ class SqlEngine(Database):
     def not_condition(self, cond: ColumnExpressionArgument) -> ColumnExpressionArgument:
         return ~cond
 
-    def add_column(self, col_name: str, col_expr: ColumnExpressionArgument) -> Select:
-        if isinstance(self.dataset, Select):
-            new_columns = list(self.dataset.selected_columns) + [
-                col_expr.label(col_name)
-            ]
-            return self.dataset.with_only_columns(*new_columns)
-
-        else:
-            return select(self.dataset, col_expr.label(col_name))
+    def add_column(self, col_name: str, col_expr: ColumnExpressionArgument) -> Sequence:
+        query = select(self.dataset, col_expr.label(col_name))
+        print(query)
+        with self.engine.connect() as conn:
+            data = conn.execute(query).fetchall()
+            conn.close()
+        return data
+    
+    def add_new_columns_to_dataset(self, col_exprs: List[ColumnExpressionArgument]) -> Sequence:
+        query = select(self.dataset, *col_exprs)
+        print(query)
+        with self.engine.connect() as conn:
+            data = conn.execute(query).fetchall()
+            conn.close()
+        return data
 
     def get_schema(self) -> dict[ColumnName:str, PythonType:str]:
         mapping_type = {
