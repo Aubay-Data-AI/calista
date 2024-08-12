@@ -90,9 +90,13 @@ class Polars_Engine(LazyEngine):
     def not_condition(self, cond: Expr) -> Expr:
         return cond.not_()
 
-    def add_column(self, col_name: str, col: Expr) -> pl.LazyFrame:
-        new_dataset = self.dataset.with_columns(col.alias(col_name))
-        return new_dataset
+    def add_new_columns_to_dataset(
+        self, col_exprs: Dict[ColumnName, Expr]
+    ) -> pl.LazyFrame:
+        col_exprs = [
+            col_expr.alias(col_name) for col_name, col_expr in col_exprs.items()
+        ]
+        return self.dataset.with_columns(col_exprs)
 
     def execute_conditions(self, conditions: dict[str, Expr]) -> list[Metrics]:
         total_count = self.dataset.select(pl.len()).collect().item()

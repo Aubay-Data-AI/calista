@@ -85,9 +85,13 @@ class SparkEngine(LazyEngine):
     def not_condition(self, cond: Column) -> Column:
         return ~cond
 
-    def add_column(self, col_name: str, col: Column) -> DataFrame:
-        result_dataset = self.dataset.withColumn(col_name, col)
-        return result_dataset
+    def add_new_columns_to_dataset(
+        self, col_exprs: Dict[ColumnName, Column]
+    ) -> DataFrame:
+        col_exprs = [
+            col_expr.alias(col_name) for col_name, col_expr in col_exprs.items()
+        ]
+        return self.dataset.select("*", col_exprs)
 
     def get_schema(self) -> dict[ColumnName:str, PythonType:str]:
         mapping_type = {
