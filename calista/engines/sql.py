@@ -417,7 +417,7 @@ class SqlEngine(Database):
     ) -> Select:
         keys_expr = [self.dataset.c[key] for key in keys]
         subquery = select(*agg_cols_expr).group_by(*keys_expr)
-        return subquery
+        return subquery.alias("subquery")
 
 
 class SqlAggregateDataset(AggregateDataset):
