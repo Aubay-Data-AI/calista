@@ -115,8 +115,7 @@ class GroupedTable:
         Returns:
             `DataFrameType`: The aggregated dataset with the new column resulting from the analysis.
         """
-        self._engine.dataset = self._evaluate_aggregates([condition]).alias("subquery")
-        print(type(self._engine.dataset))
+        self._engine.dataset = self._evaluate_aggregates([condition])
         condition_as_check = condition.get_conditions_as_func_check()
         return CalistaTable(self._engine).apply_rule(condition_as_check)
 
@@ -133,7 +132,7 @@ class GroupedTable:
         # TODO: à corriger pour SQL
         conditions = {}
         aggregated_conditions = list(rules.values())
-        self._engine.dataset = self._evaluate_aggregates(aggregated_conditions).alias("subquery")
+        self._engine.dataset = self._evaluate_aggregates(aggregated_conditions)
 
         conditions = {
             rule_name: rule_condition.get_conditions_as_func_check()
