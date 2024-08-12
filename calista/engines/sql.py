@@ -97,19 +97,16 @@ class SqlEngine(Database):
     def not_condition(self, cond: ColumnExpressionArgument) -> ColumnExpressionArgument:
         return ~cond
 
-    def add_column(self, col_name: str, col_expr: ColumnExpressionArgument) -> Sequence:
-        query = select(self.dataset, col_expr.label(col_name))
-        print(query)
-        with self.engine.connect() as conn:
-            data = conn.execute(query).fetchall()
-            conn.close()
-        return data
-    
-    def add_new_columns_to_dataset(self, col_exprs: List[ColumnExpressionArgument]) -> Sequence:
+    def add_new_columns_to_dataset(
+        self, col_exprs: Dict[ColumnName, ColumnExpressionArgument]
+    ) -> Sequence:
+        col_exprs = [
+            col_expr.label(rule_name) for rule_name, col_expr in col_exprs.items()
+        ]
         query = select(self.dataset, *col_exprs)
-        print(query)
         with self.engine.connect() as conn:
             data = conn.execute(query).fetchall()
+            print(conn.execute(query).keys())
             conn.close()
         return data
 

@@ -190,7 +190,7 @@ class CalistaTable:
             rule_name = rule.__repr__()
 
         condition_result = self._evaluate_condition(rule)
-        return self._engine.add_column(rule_name, condition_result)
+        return self._engine.add_new_columns_to_dataset({rule_name: condition_result})
 
     def apply_rules(
         self, rules: Union[Condition, Dict[RuleName, Condition]]
@@ -204,15 +204,10 @@ class CalistaTable:
         Returns:
             `DataFrameType`: The dataset with new columns resulting from the analysis.
         """
-        colums_expr = [self._evaluate_condition(rule_condition).label(rule_name) for rule_name, rule_condition in rules.items()]
+        colums_expr = {}
+        for rule_name, rule_condition in rules.items():
+            colums_expr[rule_name] = self._evaluate_condition(rule_condition)
         return self._engine.add_new_columns_to_dataset(colums_expr)
-        # new_dataset = self._engine.dataset
-        # for rule_name, rule_condition in rules.items():
-        #     condition_result = self._evaluate_condition(rule_condition)
-        #     temp_engine = self._engine.create_new_instance_from_dataset(new_dataset)
-        #     new_dataset = temp_engine.add_column(rule_name, condition_result)
-
-        # return new_dataset
 
     def get_valid_rows(self, condition: Condition) -> DataFrameType:
         """
