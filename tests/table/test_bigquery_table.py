@@ -530,11 +530,14 @@ class TestBigqueryTable:
 
     def test_apply_rule(self, bigquery_table):
         condition = F.is_iban(col_name="IBAN")
-        query = bigquery_table.apply_rule(rule_name="IsIban", rule=condition)
-        Session = sessionmaker(bind=bigquery_table._engine.engine)
-        session = Session()
-        table = session.execute(query)
-        df_result = pd.DataFrame(table.fetchall(), columns=table.keys())
+        cursor = bigquery_table.apply_rule(rule_name="IsIban", rule=condition)
+        rows = list(cursor)
+        columns = (
+            [col[0] for col in cursor.description]
+            if hasattr(cursor, "description")
+            else None
+        )
+        df_result = pd.DataFrame(rows, columns=columns)
         df_result = df_result[["IBAN", "IsIban"]].head(5)
 
         expected_df = pd.DataFrame(
@@ -555,13 +558,16 @@ class TestBigqueryTable:
     def test_apply_rules(self, bigquery_table):
         rule_1 = F.is_iban(col_name="IBAN")
         rule_2 = F.is_not_null(col_name="IBAN")
-        query = bigquery_table.apply_rules(
+        cursor = bigquery_table.apply_rules(
             {"IBAN_is_iban": rule_1, "IBAN_is_not_null": rule_2}
         )
-        Session = sessionmaker(bind=bigquery_table._engine.engine)
-        session = Session()
-        table = session.execute(query)
-        df_result = pd.DataFrame(table.fetchall(), columns=table.keys())
+        rows = list(cursor)
+        columns = (
+            [col[0] for col in cursor.description]
+            if hasattr(cursor, "description")
+            else None
+        )
+        df_result = pd.DataFrame(rows, columns=columns)
         df_result = df_result[["IBAN", "IBAN_is_iban", "IBAN_is_not_null"]].head(5)
 
         expected_df = pd.DataFrame(
