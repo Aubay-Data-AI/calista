@@ -14,12 +14,13 @@
 
 
 from datetime import datetime
-from typing import Any, Dict, List, Sequence
+from typing import Any, Dict, List
 
 import pandas as pd
 from sqlalchemy import (
     VARCHAR,
     ColumnExpressionArgument,
+    CursorResult,
     MetaData,
     String,
     and_,
@@ -99,16 +100,14 @@ class SqlEngine(Database):
 
     def add_new_columns_to_dataset(
         self, col_exprs: Dict[ColumnName, ColumnExpressionArgument]
-    ) -> Sequence:
+    ) -> CursorResult:
         col_exprs = [
             col_expr.label(rule_name) for rule_name, col_expr in col_exprs.items()
         ]
         query = select(self.dataset, *col_exprs)
         with self.engine.connect() as conn:
-            data = conn.execute(query).fetchall()
-            print(conn.execute(query).keys())
-            conn.close()
-        return data
+            cursor = conn.execute(query)
+        return cursor
 
     def get_schema(self) -> dict[ColumnName:str, PythonType:str]:
         mapping_type = {

@@ -91,7 +91,7 @@ class SparkEngine(LazyEngine):
         col_exprs = [
             col_expr.alias(col_name) for col_name, col_expr in col_exprs.items()
         ]
-        return self.dataset.select("*", col_exprs)
+        return self.dataset.select("*", *col_exprs)
 
     def get_schema(self) -> dict[ColumnName:str, PythonType:str]:
         mapping_type = {
