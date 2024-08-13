@@ -17,6 +17,7 @@ from datetime import datetime
 from typing import Any, Dict, List
 
 import pandas as pd
+import polars as pl
 from sqlalchemy import (
     VARCHAR,
     ColumnExpressionArgument,
@@ -43,6 +44,49 @@ from calista.core.catalogue import PythonTypes
 from calista.core.database import Database
 from calista.core.metrics import Metrics
 from calista.core.types_alias import ColumnName, PythonType
+
+
+class SqlDataManager:
+    def __init__(self, engine, query) -> None:
+        self._engine = engine
+        self._query = query
+        with self._engine.connect() as conn:
+            self._cursor = conn.execute(query)
+            conn.close()
+
+    @property
+    def select_object(self) -> Select:
+        return self._query
+
+    @property
+    def cursor(self) -> CursorResult:
+        return self._cursor
+
+    def to_pandas(self):
+        """
+        Converts the data from the cursor to a pandas DataFrame.
+        """
+        rows = list(self.cursor)
+        columns = (
+            [col[0] for col in self.cursor.description]
+            if hasattr(self.cursor, "description")
+            else None
+        )
+        df = pd.DataFrame(rows, columns=columns)
+        return df
+
+    def to_polars_lazyframe(self):
+        """
+        Converts the data from the cursor to a polars LazyFrame.
+        """
+        rows = list(self.cursor)
+        columns = (
+            [col[0] for col in self.cursor.description]
+            if hasattr(self.cursor, "description")
+            else None
+        )
+        lf = pl.DataFrame(rows, columns=columns).lazy()
+        return lf
 
 
 class SqlEngine(Database):
@@ -73,10 +117,11 @@ class SqlEngine(Database):
         except KeyError:
             raise KeyError(f"This table doesn't exist: {table}")
 
-    def where(self, expression: ColumnExpressionArgument) -> Select:
-        return select(self.dataset).where(expression)
+    def where(self, expression: ColumnExpressionArgument) -> SqlDataManager:
+        filter_query = select(self.dataset).where(expression)
+        return SqlDataManager(self.engine, filter_query)
 
-    def filter(self, expression: ColumnExpressionArgument) -> Select:
+    def filter(self, expression: ColumnExpressionArgument) -> SqlDataManager:
         return self.where(expression)
 
     def show(self, n: int = 10):
@@ -100,14 +145,12 @@ class SqlEngine(Database):
 
     def add_new_columns_to_dataset(
         self, col_exprs: Dict[ColumnName, ColumnExpressionArgument]
-    ) -> CursorResult:
+    ) -> SqlDataManager:
         col_exprs = [
             col_expr.label(rule_name) for rule_name, col_expr in col_exprs.items()
         ]
         query = select(self.dataset, *col_exprs)
-        with self.engine.connect() as conn:
-            cursor = conn.execute(query)
-        return cursor
+        return SqlDataManager(self.engine, query)
 
     def get_schema(self) -> dict[ColumnName:str, PythonType:str]:
         mapping_type = {
