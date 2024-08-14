@@ -63,9 +63,15 @@ Here's an example using the Pandas Engine. Suppose youhave a dataset represented
 
 You can load this table using CalistaEngine with the Pandas engine:
 ```
+<<<<<<< HEAD
 from calista import CalistaEngine
 
 table_pandas = CalistaEngine(engine="pandas").load(path="examples/demo_new_model.csv", file_format="parquet")
+=======
+from calista import CalistaTable
+
+table_pandas = CalistaTable(engine="pandas").load(path="examples/demo_new_model.csv", file_format="parquet")
+>>>>>>> cda40d9 (FEAT: check if specified columns in conditions exist before submitting the rule for computation  (#4))
 ```
 
 You can define custom rules using __Calista__ to analyze specific conditions within your data:
