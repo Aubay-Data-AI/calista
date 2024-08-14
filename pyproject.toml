@@ -7,11 +7,7 @@ find = { namespaces = false }
 
 [project]
 name = "calista"
-<<<<<<< HEAD
 version = "0.2.0"
-=======
-version = "0.1.2"
->>>>>>> cda40d9 (FEAT: check if specified columns in conditions exist before submitting the rule for computation  (#4))
 authors = []
 description = "Comprehensive Python package designed to simplify data quality checks across multiple platforms"
 readme = "README.md"
