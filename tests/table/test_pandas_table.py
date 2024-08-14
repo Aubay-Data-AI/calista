@@ -526,3 +526,43 @@ class TestPandasTable:
         )
 
         assert computed_metrics == expected_metrics
+
+    def test_apply_rule(self, pandas_table):
+        condition = F.is_iban(col_name="IBAN")
+        df_result = pandas_table.apply_rule(rule_name="IsIban", rule=condition)
+        df_result = df_result[["IBAN", "IsIban"]].head(5)
+        expected_df = pd.DataFrame(
+            {
+                "IBAN": [
+                    "FR4756356801990924110246661",
+                    "FR9152927592715361970259533",
+                    "FR6098743347361131022029548",
+                    "FR2371478023732554095214206",
+                    "FR0330875910858658779613722",
+                ],
+                "IsIban": [True, True, True, True, True],
+            }
+        )
+        pd.testing.assert_frame_equal(left=df_result, right=expected_df)
+
+    def test_apply_rules(self, pandas_table):
+        rule_1 = F.is_iban(col_name="IBAN")
+        rule_2 = F.is_not_null(col_name="IBAN")
+        df_result = pandas_table.apply_rules(
+            {"IBAN_is_iban": rule_1, "IBAN_is_not_null": rule_2}
+        )
+        df_result = df_result[["IBAN", "IBAN_is_iban", "IBAN_is_not_null"]].head(5)
+        expected_df = pd.DataFrame(
+            {
+                "IBAN": [
+                    "FR4756356801990924110246661",
+                    "FR9152927592715361970259533",
+                    "FR6098743347361131022029548",
+                    "FR2371478023732554095214206",
+                    "FR0330875910858658779613722",
+                ],
+                "IBAN_is_iban": [True, True, True, True, True],
+                "IBAN_is_not_null": [True, True, True, True, True],
+            }
+        )
+        pd.testing.assert_frame_equal(left=df_result, right=expected_df)

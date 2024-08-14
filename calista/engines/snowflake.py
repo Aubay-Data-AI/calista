@@ -23,9 +23,9 @@ import snowflake.snowpark.types as T
 from snowflake.snowpark import Column, DataFrame, RelationalGroupedDataFrame, Session
 from snowflake.snowpark.window import Window
 
-import calista.core._aggregate_conditions as aggregateCond
 import calista.core._conditions as cond
 import calista.core.rules as R
+from calista.core._aggregate_conditions import Count, Max, Mean, Median, Min, Sum
 from calista.core.aggregates import AggregateDataset
 from calista.core.catalogue import PythonTypes
 from calista.core.database import Database
@@ -79,6 +79,14 @@ class SnowflakeEngine(Database):
 
     def not_condition(self, cond: Column) -> Column:
         return ~cond
+
+    def add_new_columns_to_dataset(
+        self, col_exprs: Dict[ColumnName, Column]
+    ) -> DataFrame:
+        col_exprs = [
+            col_expr.alias(col_name) for col_name, col_expr in col_exprs.items()
+        ]
+        return self.dataset.select("*", *col_exprs)
 
     def get_schema(self) -> dict[ColumnName:str, PythonType:str]:
         mapping_type = {
@@ -342,7 +350,7 @@ class SnowflakeEngine(Database):
 class SnowflakeAggregateDataset(AggregateDataset):
     @staticmethod
     def sum(
-        agg_func: aggregateCond.MedianBy,
+        agg_func: Sum,
         agg_col_name: str,
         keys: List[str],
         engine: SnowflakeEngine,
@@ -351,7 +359,7 @@ class SnowflakeAggregateDataset(AggregateDataset):
 
     @staticmethod
     def count(
-        agg_func: aggregateCond.MedianBy,
+        agg_func: Count,
         agg_col_name: str,
         keys: List[str],
         engine: SnowflakeEngine,
@@ -360,7 +368,7 @@ class SnowflakeAggregateDataset(AggregateDataset):
 
     @staticmethod
     def mean(
-        agg_func: aggregateCond.MedianBy,
+        agg_func: Mean,
         agg_col_name: str,
         keys: List[str],
         engine: SnowflakeEngine,
@@ -369,7 +377,7 @@ class SnowflakeAggregateDataset(AggregateDataset):
 
     @staticmethod
     def min(
-        agg_func: aggregateCond.MedianBy,
+        agg_func: Min,
         agg_col_name: str,
         keys: List[str],
         engine: SnowflakeEngine,
@@ -378,7 +386,7 @@ class SnowflakeAggregateDataset(AggregateDataset):
 
     @staticmethod
     def max(
-        agg_func: aggregateCond.MedianBy,
+        agg_func: Max,
         agg_col_name: str,
         keys: List[str],
         engine: SnowflakeEngine,
@@ -387,7 +395,7 @@ class SnowflakeAggregateDataset(AggregateDataset):
 
     @staticmethod
     def median(
-        agg_func: aggregateCond.MedianBy,
+        agg_func: Median,
         agg_col_name: str,
         keys: List[str],
         engine: SnowflakeEngine,

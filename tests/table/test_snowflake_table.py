@@ -2,6 +2,8 @@ from datetime import datetime
 from functools import reduce
 
 import pytest
+from chispa.dataframe_comparer import assert_df_equality
+from snowflake.snowpark.types import BooleanType, StringType, StructField, StructType
 
 import calista.core.functions as F
 import calista.core.rules as R
@@ -528,3 +530,61 @@ class TestSnowflakeTable:
         )
 
         assert computed_metrics == expected_metrics
+
+    def test_apply(self, snowflake_table):
+        condition = F.is_iban(col_name="IBAN")
+        df_result = snowflake_table.apply_rule(rule_name="IsIban", rule=condition)
+        df_result = df_result.select("IBAN", "IsIban").limit(5)
+
+        schema = StructType(
+            [
+                StructField("IBAN", StringType(), nullable=True),
+                StructField("IsIban", BooleanType(), nullable=True),
+            ]
+        )
+        expected_data = [
+            ("FR4756356801990924110246661", True),
+            ("FR9152927592715361970259533", True),
+            ("FR6098743347361131022029548", True),
+            ("FR2371478023732554095214206", True),
+            ("FR0330875910858658779613722", True),
+        ]
+        expected_df = snowflake_table._engine.snowflake.createDataFrame(
+            expected_data, schema
+        )
+
+        assert_df_equality(
+            df_result, expected_df, ignore_column_order=True, ignore_row_order=True
+        )
+
+    def test_apply_rules(self, snowflake_table):
+        rule_1 = F.is_iban(col_name="IBAN")
+        rule_2 = F.is_not_null(col_name="IBAN")
+        df_result = snowflake_table.apply_rules(
+            {"IBAN_is_iban": rule_1, "IBAN_is_not_null": rule_2}
+        )
+        df_result = df_result.select("IBAN", "IBAN_is_iban", "IBAN_is_not_null").limit(
+            5
+        )
+
+        schema = StructType(
+            [
+                StructField("IBAN", StringType(), nullable=True),
+                StructField("IBAN_is_iban", BooleanType(), nullable=True),
+                StructField("IBAN_is_not_null", BooleanType(), nullable=False),
+            ]
+        )
+        expected_data = [
+            ("FR4756356801990924110246661", True, True),
+            ("FR9152927592715361970259533", True, True),
+            ("FR6098743347361131022029548", True, True),
+            ("FR2371478023732554095214206", True, True),
+            ("FR0330875910858658779613722", True, True),
+        ]
+        expected_df = snowflake_table._engine.snowflake.createDataFrame(
+            expected_data, schema
+        )
+
+        assert_df_equality(
+            df_result, expected_df, ignore_column_order=True, ignore_row_order=True
+        )

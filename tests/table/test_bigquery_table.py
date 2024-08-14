@@ -1,6 +1,7 @@
 from datetime import datetime
 from functools import reduce
 
+import pandas as pd
 import pytest
 
 import calista.core.functions as F
@@ -525,3 +526,58 @@ class TestBigqueryTable:
         )
 
         assert computed_metrics == expected_metrics
+
+    def test_apply_rule(self, bigquery_table):
+        condition = F.is_iban(col_name="IBAN")
+        res = bigquery_table.apply_rule(rule_name="IsIban", rule=condition)
+
+        df_result = res.to_pandas()
+        df_result = df_result[["IBAN", "IsIban"]].head(5)
+
+        expected_df = pd.DataFrame(
+            {
+                "IBAN": [
+                    "FR1981073760101001813753760",
+                    "FR6906093250967318491811332",
+                    "FR7049971597282699593917624",
+                    "FR1773393443400319003480793",
+                    "FR3637964138787947015880922",
+                ],
+                "IsIban": [True, True, True, True, True],
+            }
+        )
+
+        pd.testing.assert_frame_equal(left=df_result, right=expected_df)
+
+    def test_apply_rules(self, bigquery_table):
+        rule_1 = F.is_iban(col_name="IBAN")
+        rule_2 = F.is_not_null(col_name="IBAN")
+        res = bigquery_table.apply_rules(
+            {"IBAN_is_iban": rule_1, "IBAN_is_not_null": rule_2}
+        )
+
+        df_result = res.to_pandas()
+        df_result = df_result[["IBAN", "IBAN_is_iban", "IBAN_is_not_null"]].head(5)
+
+        expected_df = pd.DataFrame(
+            {
+                "IBAN": [
+                    "FR1981073760101001813753760",
+                    "FR6906093250967318491811332",
+                    "FR7049971597282699593917624",
+                    "FR1773393443400319003480793",
+                    "FR3637964138787947015880922",
+                ],
+                "IBAN_is_iban": [True, True, True, True, True],
+                "IBAN_is_not_null": [True, True, True, True, True],
+            }
+        )
+
+        pd.testing.assert_frame_equal(left=df_result, right=expected_df)
+
+    def test_aggregate_invalid_rows(self, bigquery_table):
+        rule = F.mean_le_value(col_name="SALAIRE", value=63500)
+        res = bigquery_table.group_by("SEXE").get_valid_rows(rule)
+        df_result = res.to_pandas()
+        expected_df = pd.DataFrame({"MEAN_SALAIRE": [63404.656421]})
+        pd.testing.assert_frame_equal(left=df_result, right=expected_df)

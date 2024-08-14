@@ -17,9 +17,11 @@ from datetime import datetime
 from typing import Any, Dict, List
 
 import pandas as pd
+import polars as pl
 from sqlalchemy import (
     VARCHAR,
     ColumnExpressionArgument,
+    CursorResult,
     MetaData,
     String,
     and_,
@@ -34,14 +36,69 @@ from sqlalchemy import (
 from sqlalchemy import types as T
 from sqlalchemy.sql.selectable import Select
 
-import calista.core._aggregate_conditions as aggregateCond
 import calista.core._conditions as cond
 import calista.core.rules as R
+from calista.core._aggregate_conditions import Count, Max, Mean, Median, Min, Sum
 from calista.core.aggregates import AggregateDataset
 from calista.core.catalogue import PythonTypes
 from calista.core.database import Database
 from calista.core.metrics import Metrics
 from calista.core.types_alias import ColumnName, PythonType
+
+
+class SqlDataManager:
+    def __init__(self, engine, query) -> None:
+        self._engine = engine
+        self._query = query
+        with self._engine.connect() as conn:
+            self._cursor = conn.execute(query)
+            conn.close()
+
+    @property
+    def select_object(self) -> Select:
+        return self._query
+
+    @property
+    def cursor(self) -> CursorResult:
+        return self._cursor
+
+    def to_pandas(self, n_rows=1000):
+        """
+        Converts the first n_rows from the cursor to a pandas DataFrame.
+
+        Parameters:
+        n_rows (int): The number of rows to convert. Default is 1000.
+
+        Returns:
+        pd.DataFrame: A pandas DataFrame containing the data.
+        """
+        rows = [row for _, row in zip(range(n_rows), self.cursor)]
+        columns = (
+            [col[0] for col in self.cursor.description]
+            if hasattr(self.cursor, "description")
+            else None
+        )
+        df = pd.DataFrame(rows, columns=columns)
+        return df
+
+    def to_polars_lazyframe(self, n_rows=1000):
+        """
+        Converts the first n_rows from the cursor to a polars LazyFrame.
+
+        Parameters:
+        n_rows (int): The number of rows to convert. Default is 1000.
+
+        Returns:
+        pl.LazyFrame: A polars LazyFrame containing the data.
+        """
+        rows = [row for _, row in zip(range(n_rows), self.cursor)]
+        columns = (
+            [col[0] for col in self.cursor.description]
+            if hasattr(self.cursor, "description")
+            else None
+        )
+        lf = pl.DataFrame(rows, columns=columns).lazy()
+        return lf
 
 
 class SqlEngine(Database):
@@ -72,10 +129,11 @@ class SqlEngine(Database):
         except KeyError:
             raise KeyError(f"This table doesn't exist: {table}")
 
-    def where(self, expression: ColumnExpressionArgument) -> Select:
-        return select(self.dataset).where(expression)
+    def where(self, expression: ColumnExpressionArgument) -> SqlDataManager:
+        filter_query = select(self.dataset).where(expression)
+        return SqlDataManager(self.engine, filter_query)
 
-    def filter(self, expression: ColumnExpressionArgument) -> Select:
+    def filter(self, expression: ColumnExpressionArgument) -> SqlDataManager:
         return self.where(expression)
 
     def show(self, n: int = 10):
@@ -96,6 +154,15 @@ class SqlEngine(Database):
 
     def not_condition(self, cond: ColumnExpressionArgument) -> ColumnExpressionArgument:
         return ~cond
+
+    def add_new_columns_to_dataset(
+        self, col_exprs: Dict[ColumnName, ColumnExpressionArgument]
+    ) -> SqlDataManager:
+        col_exprs = [
+            col_expr.label(rule_name) for rule_name, col_expr in col_exprs.items()
+        ]
+        query = select(self.dataset, *col_exprs)
+        return SqlDataManager(self.engine, query)
 
     def get_schema(self) -> dict[ColumnName:str, PythonType:str]:
         mapping_type = {
@@ -401,13 +468,13 @@ class SqlEngine(Database):
     ) -> Select:
         keys_expr = [self.dataset.c[key] for key in keys]
         subquery = select(*agg_cols_expr).group_by(*keys_expr)
-        return subquery
+        return subquery.alias("subquery")
 
 
 class SqlAggregateDataset(AggregateDataset):
     @staticmethod
     def sum(
-        agg_func: aggregateCond.SumBy,
+        agg_func: Sum,
         agg_col_name: str,
         keys: List[str],
         engine: SqlEngine,
@@ -416,7 +483,7 @@ class SqlAggregateDataset(AggregateDataset):
 
     @staticmethod
     def count(
-        agg_func: aggregateCond.CountBy,
+        agg_func: Count,
         agg_col_name: str,
         keys: List[str],
         engine: SqlEngine,
@@ -425,7 +492,7 @@ class SqlAggregateDataset(AggregateDataset):
 
     @staticmethod
     def mean(
-        agg_func: aggregateCond.MeanBy,
+        agg_func: Mean,
         agg_col_name: str,
         keys: List[str],
         engine: SqlEngine,
@@ -434,7 +501,7 @@ class SqlAggregateDataset(AggregateDataset):
 
     @staticmethod
     def min(
-        agg_func: aggregateCond.MinBy,
+        agg_func: Min,
         agg_col_name: str,
         keys: List[str],
         engine: SqlEngine,
@@ -443,7 +510,7 @@ class SqlAggregateDataset(AggregateDataset):
 
     @staticmethod
     def max(
-        agg_func: aggregateCond.MaxBy,
+        agg_func: Max,
         agg_col_name: str,
         keys: List[str],
         engine: SqlEngine,
@@ -452,7 +519,7 @@ class SqlAggregateDataset(AggregateDataset):
 
     @staticmethod
     def median(
-        agg_func: aggregateCond.MedianBy,
+        agg_func: Median,
         agg_col_name: str,
         keys: List[str],
         engine: SqlEngine,
