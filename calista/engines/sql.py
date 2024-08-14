@@ -62,11 +62,17 @@ class SqlDataManager:
     def cursor(self) -> CursorResult:
         return self._cursor
 
-    def to_pandas(self):
+    def to_pandas(self, n_rows=1000):
         """
-        Converts the data from the cursor to a pandas DataFrame.
+        Converts the first n_rows from the cursor to a pandas DataFrame.
+
+        Parameters:
+        n_rows (int): The number of rows to convert. Default is 1000.
+
+        Returns:
+        pd.DataFrame: A pandas DataFrame containing the data.
         """
-        rows = list(self.cursor)
+        rows = [row for _, row in zip(range(n_rows), self.cursor)]
         columns = (
             [col[0] for col in self.cursor.description]
             if hasattr(self.cursor, "description")
@@ -75,11 +81,17 @@ class SqlDataManager:
         df = pd.DataFrame(rows, columns=columns)
         return df
 
-    def to_polars_lazyframe(self):
+    def to_polars_lazyframe(self, n_rows=1000):
         """
-        Converts the data from the cursor to a polars LazyFrame.
+        Converts the first n_rows from the cursor to a polars LazyFrame.
+
+        Parameters:
+        n_rows (int): The number of rows to convert. Default is 1000.
+
+        Returns:
+        pl.LazyFrame: A polars LazyFrame containing the data.
         """
-        rows = list(self.cursor)
+        rows = [row for _, row in zip(range(n_rows), self.cursor)]
         columns = (
             [col[0] for col in self.cursor.description]
             if hasattr(self.cursor, "description")
