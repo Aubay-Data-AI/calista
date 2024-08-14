@@ -34,7 +34,7 @@ def _udc_to_condition_model(user_func: Callable) -> Type[Condition]:
                             "with the following arguments type: KEYWORD_ONLY, "
                             "POSITIONAL_ONLY and POSITIONAL_OR_KEYWORD")
 
-    return create_model(__model_name=user_func.__name__,
+    return create_model(user_func.__name__,
                         __base__=Condition,
                         **model_params)
 
