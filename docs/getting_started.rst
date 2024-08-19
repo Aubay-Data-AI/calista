@@ -161,7 +161,7 @@ Rules
     from calista.core import functions as F
 
     my_rule = F.is_iban(col_name="IBAN") & F.is_float("SALAIRE") | ~F.is_iban(col_name="ADRESSE_IP_V4")
-    print(table.analyze(rule_name=<your_rule_name>, condition=my_rule))
+    print(table.analyze(rule_name=<your_rule_name>, rule=my_rule))
 
 .. code-block:: python
 
@@ -207,3 +207,78 @@ Rules
           valid_row_count_pct=92.0,
           timestamp='2024-05-07 11:37:34.038035')
     ]
+
+How to get enhanced data
+------------------------
+
+* You have the possibility to get your enhanced data by applying a rule
+
+.. code-block:: python
+
+    from calista.core import functions as F
+
+    print(table.apply_rule(rule_name="check_iban_quality", rule=F.is_iban("IBAN"))[['IBAN', 'check_iban_quality']])
+
+.. code-block:: python
+
+                               IBAN  check_iban_quality
+    0   FR4756356801990924110246661                True
+    1   FR9152927592715361970259533                True
+    2   FR6098743347361131022029548                True
+    3   FR2371478023732554095214206                True
+    4   FR0330875910858658779613722                True
+    ..                          ...                 ...
+    95  FR1773393443400319003480793                True
+    96  FR0228768854412051157590266                True
+    97  FR5869598054756805717971833                True
+    98  FR6634213649058126775820977                True
+    99                         None               False
+
+* You can also do the same with a list of rules
+
+.. code-block:: python
+
+    from calista.core import functions as F
+
+    rules = {
+    "check_iban_quality": F.is_iban("IBAN"),
+    "check_email_quality": F.is_email("EMAIL"),
+    }
+    print(table.apply_rules(rules)[['IBAN', 'check_iban_quality', 'EMAIL', 'check_email_quality']])
+
+.. code-block:: python
+
+                              IBAN  check_iban_quality                          EMAIL  check_email_quality
+    0   FR4756356801990924110246661                True  aristidesgordillo@example.net                 True
+    1   FR9152927592715361970259533                True     oceane.leclercq@orange.com                 True
+    2   FR6098743347361131022029548                True        elodie.morel@icloud.com                 True
+    3   FR2371478023732554095214206                True          therese04@example.com                 True
+    4   FR0330875910858658779613722                True      bertrand.dijoux@yahoo.com                 True
+    ..                          ...                 ...                            ...                  ...
+    95  FR1773393443400319003480793                True         eugene.munoz@yahoo.com                 True
+    96  FR0228768854412051157590266                True                           None                False
+    97  FR5869598054756805717971833                True            aaron50@example.net                 True
+    98  FR6634213649058126775820977                True         lucie.allard@gmail.com                 True
+    99                         None               False     alexandria.petit@yahoo.com                 True
+
+* If you want to retrieve the data not validating your rule for some analysis, it is possible.
+
+.. code-block:: python
+
+    from calista.core import functions as F
+
+    print(table.get_invalid_rows(rule=my_rule))
+
+.. code-block:: python
+
+              NOM      PRENOM SEXE DATE_ENTREE  CDI  IBAN  ...    CDD                          EMAIL             TELEPHONE   SALAIRE DEVISE   ID
+    10  Chevalier    Adélaïde    M        None  1.0  None  ...  False  adelaide.chevalier@icloud.com  +33 (0)3 52 49 21 25  39630.16    GPB   11
+    28      Petit  Antoinette    F  2016-04-04  1.0  None  ...  False     antoinette.petit@gmail.com  +33 (0)3 63 22 80 94  48302.80    EUR   29
+    31      Gomez     Antoine    M  2015-04-04  0.0  None  ...   True     miguel-angel83@example.com  +33 (0)6 30 22 34 32  53213.86    EUR   32
+    47     Lebrun      Xavier    M  2018-01-20  1.0  None  ...  False       xavier.lebrun@orange.com                  None  51289.21    EUR   48
+    54    Ferrand     Chantal    M  2002-01-26  NaN  None  ...   True     chantal.ferrand@orange.com        06 82 99 40 77  89947.60    EUR   55
+    59  Lemonnier    Éléonore    M  2011-12-22  1.0  None  ...  False  eleonore.lemonnier@orange.com            0329984138  58303.00    EUR   60
+    62      Dupré    Frédéric    F  2022-07-21  0.0  None  ...   True       frederic.dupre@gmail.com            0385249100  53914.36    EUR   63
+    64    Étienne    Nathalie    F  2008-07-17  0.0  None  ...   True     nathalie.etienne@gmail.com  +33 (0)3 51 82 62 52  48394.97    EUR   65
+    78    Roussel         Luc    F  2013-11-27  0.0  None  ...   None          luc.roussel@gmail.com                  None  47089.29    EUR   79
+    99      Petit  Alexandria    F  2003-11-18  0.0  None  ...   True     alexandria.petit@yahoo.com                  None  82053.90    EUR  100

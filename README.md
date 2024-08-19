@@ -53,7 +53,7 @@ With __Calista__, you can easily analyze your data quality, regardless of the un
 
 ### Example
 
-Here's an example using the Pandas Engine. Suppose youhave a dataset represented as a table:
+Here's an example using the Pandas Engine. Suppose you have a dataset represented as a table:
 
 | ID        | status    |last increase | salary  |
 |-----------|-----------|-----------|-----------|
@@ -68,13 +68,13 @@ from calista import CalistaEngine
 table_pandas = CalistaEngine(engine="pandas").load(path="examples/demo_new_model.csv", file_format="parquet")
 ```
 
-You can define custom rules using __Calista__ to analyze specific conditions within your data:
+You can define custom rules using __Calista__ functions to analyze specific conditions within your data:
 ```
 from calista.core import functions as F
 
-my_rule = F.is_not_null(col_name="status") & F.is_not_null("salary")
+my_rule = F.is_not_null(col_name="status") & F.is_integer("salary")
 
-print(table.analyze(rule_name="demo_new_model", condition=my_rule))
+print(table.analyze(rule_name="demo_new_model", rule=my_rule))
 ```
 
 The output of the analysis provides insights into data quality based on the defined rule:
@@ -85,6 +85,38 @@ valid_row_count : 2
 valid_row_count_pct : 66.66
 timestamp : 2024-04-23 10:00:59.449193
 ```
+
+You can also just enhance your data by applying the rule:
+```
+from calista.core import functions as F
+
+my_rule = F.is_not_null(col_name="status") & F.is_integer("salary")
+
+print(table.apply_rule(rule_name="demo_new_model", rule=my_rule))
+```
+
+When printing, you'll get the following result:
+
+| ID        | status    |last increase | salary  | demo_new_model
+|-----------|-----------|-----------|-----------|----------------|
+| 0         |Célibataire|2022-12-31 | 36000     | True     |
+| 1         |           |2023-12-31 | 53000     | False     |
+| 2         | Marié     |2018-12-31 | 28000     | True     |
+
+You also have the possibility to only retrieve the data that validate or invalidate the rule. For example, to get data invalidating the rule:
+```
+from calista.core import functions as F
+
+my_rule = F.is_not_null(col_name="status") & F.is_integer("salary")
+
+print(table.get_invalid_rows(rule=my_rule))
+```
+
+When printing, you'll get the following result:
+
+| ID        | status    |last increase | salary  | demo_new_model
+|-----------|-----------|-----------|-----------|----------------|
+| 1         |           |2023-12-31 | 53000     | False     |
 ## Documentation
 [Calista docs](https://calista.readthedocs.io/en/latest/)
 ## License
