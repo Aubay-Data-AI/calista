@@ -5,6 +5,9 @@ from calista.core._aggregate_conditions import Count, Max, Mean, Median, Min, Su
 from calista.core.engine import LazyEngine
 
 GenericAggExpr = TypeVar("GenericAggExpr")
+GenericGroupedTableObject = TypeVar("GenericGroupedTableObject")
+GenericAggExpr = TypeVar("GenericAggExpr")
+DataFrameType = TypeVar("DataFrameType")
 
 
 class AggregateDataset(ABC):
@@ -48,4 +51,41 @@ class AggregateDataset(ABC):
     def median(
         agg_func: Median, agg_col_name: str, keys: List[str], engine: LazyEngine
     ) -> GenericAggExpr:
+        ...
+
+    @staticmethod
+    @abstractmethod
+    def aggregate_dataset(
+        df: DataFrameType, keys: list[str], agg_cols_expr: list[GenericAggExpr]
+    ) -> GenericGroupedTableObject:
+        """
+        Aggregate a dataset. It will be used for aggregate conditions
+
+        Args:
+            df (DataFrameType): DataFrame type object to aggregate.
+            keys (list[str]): The aggregation keys.
+            agg_cols_expr: list[GenericAggExpr]: The aggregation expressions list.
+
+        Returns:
+            GenericGroupedTableObject: The aggregated dataset.
+        """
+        ...
+
+    @staticmethod
+    @abstractmethod
+    def left_join(
+        left: DataFrameType, right: DataFrameType, on: list[str]
+    ) -> DataFrameType:
+        """
+        This function joins two tables using left join. It will be used for the reverse
+        param of GroupedTable methods: get_valid_rows, get_invalid_rows.
+
+        Args:
+            left (DataFrameType): Left side of the join.
+            right (DataFrameType): Right side of the join.
+            on (list[str]): List of column names. The column(s) must exist on both sides.
+
+        Returns:
+            DataFrameType: Result of the join.
+        """
         ...

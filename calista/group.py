@@ -57,7 +57,9 @@ class GroupedTable:
         for condition in conditions:
             parse(condition)
 
-        return self._engine.aggregate_dataset(self._agg_keys, agg_cols_expr)
+        return self._aggregate_dataset_utils.aggregate_dataset(
+            self._engine.dataset, self._agg_keys, agg_cols_expr
+        )
 
     def analyze(self, rule_name: str, rule: AggregateCondition) -> Metrics:
         """
@@ -140,7 +142,7 @@ class GroupedTable:
         }
         return CalistaTable(self._engine).apply_rules(conditions)
 
-    def get_valid_rows(self, rule: AggregateCondition) -> DataFrameType:
+    def get_valid_rows(self, rule: AggregateCondition, reverse=False) -> DataFrameType:
         """
         Returns the dataset filtered with the rows validating the rules.
 
@@ -150,11 +152,19 @@ class GroupedTable:
         Returns:
             `DataFrameType`: The aggregated dataset filtered with the rows where the rule is satisfied.
         """
-        self._engine.dataset = self._evaluate_aggregates([rule])
+        new_dataset = self._evaluate_aggregates([rule])
+        if reverse:
+            self._engine.dataset = self._aggregate_dataset_utils.left_join(
+                self._engine.dataset, new_dataset, on=self._agg_keys
+            )
+        else:
+            self._engine.dataset = new_dataset
         condition_as_check = rule.get_conditions_as_func_check()
         return CalistaTable(self._engine).get_valid_rows(condition_as_check)
 
-    def get_invalid_rows(self, rule: AggregateCondition) -> DataFrameType:
+    def get_invalid_rows(
+        self, rule: AggregateCondition, reverse=False
+    ) -> DataFrameType:
         """
         Returns the dataset filtered with the rows not validating the rules.
 
@@ -164,6 +174,12 @@ class GroupedTable:
         Returns:
             `DataFrameType`: The aggregated dataset filtered with the rows where the rule is not satisfied.
         """
-        self._engine.dataset = self._evaluate_aggregates([rule])
+        new_dataset = self._evaluate_aggregates([rule])
+        if reverse:
+            self._engine.dataset = self._aggregate_dataset_utils.left_join(
+                self._engine.dataset, new_dataset, on=self._agg_keys
+            )
+        else:
+            self._engine.dataset = new_dataset
         condition_as_check = rule.get_conditions_as_func_check()
         return CalistaTable(self._engine).get_invalid_rows(condition_as_check)
