@@ -3,9 +3,11 @@ from functools import reduce
 
 import pandas as pd
 import pytest
+from pyspark.sql import functions as F_spark
 
 import calista.core.functions as F
 import calista.core.rules as R
+from calista import register_spark_condition
 from calista.core.metrics import Metrics
 from calista.table import CalistaEngine
 
@@ -523,6 +525,31 @@ class TestSparkTable:
             total_row_count=90,
             valid_row_count=expected_valid_row_count,
             valid_row_count_pct=expected_valid_row_count * 100 / 90,
+            timestamp=computed_metrics.timestamp,
+        )
+
+        assert computed_metrics == expected_metrics
+
+    def test_udc(self, spark_table):
+        rule_name = "udc_floor"
+
+        @register_spark_condition(name="floor_udc")
+        def spark_floor_lt_value(col_name: str, value: int):
+            return F_spark.col(col_name) < value
+
+        udc = spark_floor_lt_value(col_name="SALAIRE", value=54000)
+
+        expected_dataset_row_count = 100
+        expected_valid_row_count = 30
+
+        computed_metrics = spark_table.analyze(rule_name, udc)
+        expected_metrics = Metrics(
+            rule=rule_name,
+            total_row_count=expected_dataset_row_count,
+            valid_row_count=expected_valid_row_count,
+            valid_row_count_pct=expected_valid_row_count
+            * 100
+            / expected_dataset_row_count,
             timestamp=computed_metrics.timestamp,
         )
 
