@@ -16,7 +16,7 @@ Your function should take parameters (e.g: column names or any threshold values)
 - **Spark and Snowflake:** Return a `Column` object.
 - **Pandas:** Return a `Series` object.
 - **Polars:** Return an `Expr` object.
-- **BigQuery (via SQLAlchemy):** Return a `ColumnExpressionArgument` object.
+- **BigQuery (using SQLAlchemy):** Return a `ColumnExpressionArgument` object.
 
 .. note::
 
