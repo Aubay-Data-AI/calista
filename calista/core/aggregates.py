@@ -56,13 +56,13 @@ class AggregateDataset(ABC):
     @staticmethod
     @abstractmethod
     def aggregate_dataset(
-        df: DataFrameType, keys: list[str], agg_cols_expr: list[GenericAggExpr]
+        dataset: DataFrameType, keys: list[str], agg_cols_expr: list[GenericAggExpr]
     ) -> GenericGroupedTableObject:
         """
         Aggregate a dataset. It will be used for aggregate conditions
 
         Args:
-            df (DataFrameType): DataFrame type object to aggregate.
+            dataset (DataFrameType): DataFrame type object to aggregate.
             keys (list[str]): The aggregation keys.
             agg_cols_expr: list[GenericAggExpr]: The aggregation expressions list.
 

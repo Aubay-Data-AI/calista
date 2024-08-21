@@ -581,3 +581,8 @@ class TestPolarsTable:
         )
 
         assert_frame_equal(df_result, expected_df)
+
+    def test_get_invalid_rows_granular_level(self, polars_table):
+        cond = F.mean_le_value(col_name="SALAIRE", value=63500)
+        df = polars_table.group_by("SEXE").get_invalid_rows(cond, granular=True)
+        assert (df.select(pl.len()).collect().item(), df.width) == (44, 22)

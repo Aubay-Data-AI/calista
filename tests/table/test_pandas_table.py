@@ -566,3 +566,8 @@ class TestPandasTable:
             }
         )
         pd.testing.assert_frame_equal(left=df_result, right=expected_df)
+
+    def test_get_invalid_rows_granular_level(self, pandas_table):
+        cond = F.mean_le_value(col_name="SALAIRE", value=63500)
+        df = pandas_table.group_by("SEXE").get_invalid_rows(cond, granular=True)
+        assert df.shape == (49, 22)

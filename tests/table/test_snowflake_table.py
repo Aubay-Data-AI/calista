@@ -588,3 +588,8 @@ class TestSnowflakeTable:
         assert_df_equality(
             df_result, expected_df, ignore_column_order=True, ignore_row_order=True
         )
+
+    def test_get_invalid_rows_granular_level(self, snowflake_table):
+        cond = F.mean_le_value(col_name="SALAIRE", value=63500)
+        df = snowflake_table.group_by("SEXE").get_invalid_rows(cond, granular=True)
+        assert (df.count(), len(df.columns)) == (44, 22)

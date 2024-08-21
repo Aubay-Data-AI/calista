@@ -463,13 +463,6 @@ class SqlEngine(Database):
         column_cast_string = self.dataset.c[condition.col_name].cast(String)
         return column_cast_string.regexp_match(r"^[+]?[0-9]\d*(\.\d+)?$")
 
-    # def aggregate_dataset(
-    #     self, keys: list[str], agg_cols_expr: list[ColumnExpressionArgument]
-    # ) -> Select:
-    #     keys_expr = [self.dataset.c[key] for key in keys]
-    #     subquery = select(*agg_cols_expr, *keys_expr).group_by(*keys_expr)
-    #     return subquery.alias("subquery")
-
 
 class SqlAggregateDataset(AggregateDataset):
     @staticmethod
@@ -528,20 +521,20 @@ class SqlAggregateDataset(AggregateDataset):
 
     @staticmethod
     def aggregate_dataset(
-        df: Select, keys: list[str], agg_cols_expr: list[ColumnExpressionArgument]
+        dataset: Select, keys: list[str], agg_cols_expr: list[ColumnExpressionArgument]
     ) -> Select:
         """
         Aggregate a dataset. It will be used for aggregate conditions
 
         Args:
-            df (Select): DataFrame type object to aggregate.
+            dataset (Select): DataFrame type object to aggregate.
             keys (list[str]): The aggregation keys.
             agg_cols_expr: list[ColumnExpressionArgument]: The aggregation expressions list.
 
         Returns:
             Select: The aggregated dataset.
         """
-        keys_expr = [df.c[key] for key in keys]
+        keys_expr = [dataset.c[key] for key in keys]
         subquery = select(*agg_cols_expr, *keys_expr).group_by(*keys_expr)
         return subquery.alias("subquery")
 

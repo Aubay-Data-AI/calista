@@ -142,18 +142,19 @@ class GroupedTable:
         }
         return CalistaTable(self._engine).apply_rules(conditions)
 
-    def get_valid_rows(self, rule: AggregateCondition, reverse=False) -> DataFrameType:
+    def get_valid_rows(self, rule: AggregateCondition, granular=False) -> DataFrameType:
         """
         Returns the dataset filtered with the rows validating the rules.
 
         Args:
             rule (AggregateCondition): The aggregate condition to evaluate.
+            granular (bool, optional): default ``False``. Whether or not to retrieve the data at the granular level.
 
         Returns:
             `DataFrameType`: The aggregated dataset filtered with the rows where the rule is satisfied.
         """
         new_dataset = self._evaluate_aggregates([rule])
-        if reverse:
+        if granular:
             self._engine.dataset = self._aggregate_dataset_utils.left_join(
                 self._engine.dataset, new_dataset, on=self._agg_keys
             )
@@ -163,19 +164,20 @@ class GroupedTable:
         return CalistaTable(self._engine).get_valid_rows(condition_as_check)
 
     def get_invalid_rows(
-        self, rule: AggregateCondition, reverse=False
+        self, rule: AggregateCondition, granular=False
     ) -> DataFrameType:
         """
         Returns the dataset filtered with the rows not validating the rules.
 
         Args:
             rule (AggregateCondition): The aggregate condition to evaluate.
+            granular (bool, optional): default ``False``. Whether or not to retrieve the data at the granular level.
 
         Returns:
             `DataFrameType`: The aggregated dataset filtered with the rows where the rule is not satisfied.
         """
         new_dataset = self._evaluate_aggregates([rule])
-        if reverse:
+        if granular:
             self._engine.dataset = self._aggregate_dataset_utils.left_join(
                 self._engine.dataset, new_dataset, on=self._agg_keys
             )

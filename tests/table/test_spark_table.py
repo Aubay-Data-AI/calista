@@ -581,3 +581,8 @@ class TestSparkTable:
         expected_df = spark_table._engine.spark.createDataFrame(expected_data, schema)
 
         assert_df_equality(df_result, expected_df)
+
+    def test_get_invalid_rows_granular_level(self, spark_table):
+        cond = F.mean_le_value(col_name="SALAIRE", value=63500)
+        df = spark_table.group_by("SEXE").get_invalid_rows(cond, granular=True)
+        assert (df.count(), len(df.columns)) == (44, 22)
