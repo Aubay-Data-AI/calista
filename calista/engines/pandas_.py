@@ -446,7 +446,7 @@ class Pandas_AggregateDataset(AggregateDataset):
         Aggregate a dataset. It will be used for aggregate conditions
 
         Args:
-            dataset (LazyFrame): LazyFrame type object to aggregate.
+            dataset (DataFrame): LazyFrame type object to aggregate.
             keys (list[str]): The aggregation keys.
             agg_cols_expr (list[tuple[str, tuple[str, str]]]): The aggregation expressions list.
 

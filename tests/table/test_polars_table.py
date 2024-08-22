@@ -5,10 +5,10 @@ import polars as pl
 import pytest
 from polars.testing import assert_frame_equal
 
-import calista.core.functions as F
 import calista.core.rules as R
+from calista import CalistaEngine
+from calista import functions as F
 from calista.core.metrics import Metrics
-from calista.table import CalistaEngine
 
 
 class TestPolarsTable:

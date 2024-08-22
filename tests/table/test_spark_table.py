@@ -6,10 +6,10 @@ import pytest
 from chispa.dataframe_comparer import assert_df_equality
 from pyspark.sql.types import BooleanType, StringType, StructField, StructType
 
-import calista.core.functions as F
 import calista.core.rules as R
+from calista import CalistaEngine
+from calista import functions as F
 from calista.core.metrics import Metrics
-from calista.table import CalistaEngine
 
 
 class TestSparkTable:

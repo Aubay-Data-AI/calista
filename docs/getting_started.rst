@@ -1,6 +1,6 @@
 Getting started
 ===============
-To use our framework, simply install it via pip. This command will install the framework along with the default engines pandas and polars:
+To use our library, simply install it via pip. This command will install the library along with the default engines pandas and polars:
 
 .. code-block:: python
 
@@ -17,17 +17,17 @@ if you want to have Snowflake and Spark, use the following command:
 
 .. code-block:: python
 
-    pip install calista[snowflake, Spark]
+    pip install calista[snowflake, spark]
 
 
-To study the quality of your data with the framework ``Calista``, you have several engines at your disposal.
+To study the quality of your data with the ``Calista`` library, you have several engines at your disposal.
 Here's how to use them.
 
-How to load an engine
----------------------
+How to specify an engine and load data
+---------------------------------------
 
 Pandas
-^^^^^^^^
+^^^^^^^
 
 Pandas is a powerful Python library primarily used for data manipulation and analysis.
 Its key features include data structures like DataFrame and Series, which facilitate handling structured data effectively.

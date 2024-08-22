@@ -4,10 +4,10 @@ from functools import reduce
 import pandas as pd
 import pytest
 
-import calista.core.functions as F
 import calista.core.rules as R
+from calista import CalistaEngine
+from calista import functions as F
 from calista.core.metrics import Metrics
-from calista.table import CalistaEngine
 
 
 class TestPandasTable:
