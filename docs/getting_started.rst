@@ -158,9 +158,9 @@ Rules
 
 .. code-block:: python
 
-    from calista.core import functions as F
+    from calista import functions as func
 
-    my_rule = F.is_iban(col_name="IBAN") & F.is_float("SALAIRE") | ~F.is_iban(col_name="ADRESSE_IP_V4")
+    my_rule = func.is_iban(col_name="IBAN") & func.is_float("SALAIRE") | ~func.is_iban(col_name="ADRESSE_IP_V4")
     print(table.analyze(rule_name=<your_rule_name>, rule=my_rule))
 
 .. code-block:: python
@@ -175,12 +175,12 @@ Rules
 
 .. code-block:: python
 
-    from calista.core import functions as F
+    from calista import functions as func
 
     rules = {
-    "check_iban_quality": F.is_iban("IBAN"),
-    "check_CDI_ID_are_integer": F.is_integer("CDI") & F.is_integer("ID"),
-    "check_email_quality": F.is_email("EMAIL"),
+    "check_iban_quality": func.is_iban("IBAN"),
+    "check_CDI_ID_are_integer": func.is_integer("CDI") & func.is_integer("ID"),
+    "check_email_quality": func.is_email("EMAIL"),
     }
     print(table.analyze_rules(rules))
 
@@ -215,9 +215,9 @@ How to get enhanced data
 
 .. code-block:: python
 
-    from calista.core import functions as F
+    from calista import functions as func
 
-    print(table.apply_rule(rule_name="check_iban_quality", rule=F.is_iban("IBAN"))[['IBAN', 'check_iban_quality']])
+    print(table.apply_rule(rule_name="check_iban_quality", rule=func.is_iban("IBAN"))[['IBAN', 'check_iban_quality']])
 
 .. code-block:: python
 
@@ -238,11 +238,11 @@ How to get enhanced data
 
 .. code-block:: python
 
-    from calista.core import functions as F
+    from calista import functions as func
 
     rules = {
-    "check_iban_quality": F.is_iban("IBAN"),
-    "check_email_quality": F.is_email("EMAIL"),
+    "check_iban_quality": func.is_iban("IBAN"),
+    "check_email_quality": func.is_email("EMAIL"),
     }
     print(table.apply_rules(rules)[['IBAN', 'check_iban_quality', 'EMAIL', 'check_email_quality']])
 
@@ -265,8 +265,9 @@ How to get enhanced data
 
 .. code-block:: python
 
-    from calista.core import functions as F
+    from calista import functions as func
 
+    my_rule = func.is_iban("IBAN")
     print(table.get_invalid_rows(rule=my_rule))
 
 .. code-block:: python
