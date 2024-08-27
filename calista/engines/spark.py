@@ -174,10 +174,17 @@ class SparkEngine(LazyEngine):
         )
 
     def is_iban(self, condition: cond.IsIban) -> Column:
+
         alphabet_conversion = {chr(i + 65): str(i + 10) for i in range(26)}
-        cleaned_str_col = F.regexp_replace(
-            F.col(condition.col_name), "[^a-zA-Z0-9]", ""
-        )
+
+        check_valid_length = F.when(
+            (F.length(F.col(condition.col_name)) >= 14)
+            & (F.length(F.col(condition.col_name)) <= 34),
+            F.col(condition.col_name),
+        ).otherwise(0)
+
+        cleaned_str_col = F.regexp_replace(check_valid_length, "[^a-zA-Z0-9]", "")
+
         cleaned_col = F.concat(
             F.substring(cleaned_str_col, 5, 34), F.substring(cleaned_str_col, 1, 4)
         )

@@ -204,7 +204,10 @@ class Pandas_Engine(LazyEngine):
     def is_iban(self, condition: cond.IsIban) -> Series:
         alphabet_conversion = {chr(i + 65): str(i + 10) for i in range(26)}
         cleaned_col_str = self.dataset[condition.col_name].astype(str)
-        cleaned_str_col = cleaned_col_str.str.replace("[^a-zA-Z0-9]", "", regex=True)
+        valid_length_col = cleaned_col_str.where(
+            (cleaned_col_str.str.len() >= 14) & (cleaned_col_str.str.len() <= 34), "0"
+        )
+        cleaned_str_col = valid_length_col.str.replace("[^a-zA-Z0-9]", "", regex=True)
         cleaned_str_col = cleaned_str_col.str.upper()
         cleaned_col = cleaned_str_col.str[4:34] + cleaned_str_col.str[0:4]
         for letter, value in alphabet_conversion.items():
