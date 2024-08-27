@@ -320,7 +320,7 @@ Data filtering and aggregation
     valid_row_count_pct : 50.0
     timestamp : 2024-05-06 16:19:13.221048
 
-* After checking a rule on a aggregated data, you may need to get get the granular data for some further analysis:
+* After checking a rule on an aggregated data, you may need to get the granular data for some further analysis:
 
 .. code-block:: python
 
