@@ -150,9 +150,6 @@ Load a table with Calista:
 How to compute metrics
 ----------------------
 
-Rules
-^^^^^^^^
-
 * You can create your own rules by chaining several Calista's functions with these operators :
     ``& | ~``
 
@@ -211,7 +208,7 @@ Rules
 How to get enhanced data
 ------------------------
 
-* You have the possibility to get your enhanced data by applying a rule
+* You have the possibility to get your enhanced data by applying a rule:
 
 .. code-block:: python
 
@@ -234,7 +231,7 @@ How to get enhanced data
     98  FR6634213649058126775820977                True
     99                         None               False
 
-* You can also do the same with a list of rules
+* You can also do the same with a list of rules:
 
 .. code-block:: python
 
@@ -261,7 +258,7 @@ How to get enhanced data
     98  FR6634213649058126775820977                True         lucie.allard@gmail.com                 True
     99                         None               False     alexandria.petit@yahoo.com                 True
 
-* If you want to retrieve the data not validating your rule for some further analysis, it is possible.
+* If you want to retrieve the data not validating your rule for some further analysis, it is possible:
 
 .. code-block:: python
 
@@ -287,7 +284,8 @@ How to get enhanced data
 Data filtering and aggregation
 ------------------------------
 
-* Sometimes you need to check a rule on a subset of a dataset and not the entire dataset. With calista, before checking a rule, you have the possibility to filter data on which you want to apply it. To do so, you can use following CalistaTable methods:
+* Sometimes you need to check a rule on a subset of a dataset and not the entire dataset.
+  With calista, before checking a rule, you have the possibility to filter data on which you want to apply it. To do so, you can use following CalistaTable methods:
     ``where | filter``
 
 .. code-block:: python
