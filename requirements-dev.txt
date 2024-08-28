@@ -8,6 +8,7 @@ sphinx-automodapi
 sphinx-tabs
 sqlalchemy==2.0.29
 pydantic
+chispa
 pytest
 pytest-cov
 polars

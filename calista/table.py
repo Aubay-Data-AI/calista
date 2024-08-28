@@ -15,7 +15,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from calista.core._conditions import (
     AndCondition,
@@ -24,10 +24,11 @@ from calista.core._conditions import (
     NotCondition,
     OrCondition,
 )
-from calista.core.engine import GenericColumnType, LazyEngine
+from calista.core.engine import DataFrameType, GenericColumnType, LazyEngine
 from calista.core.metrics import Metrics
 from calista.core.types_alias import ColumnName, PythonType, RuleName
 from calista.core.utils import import_engine
+from calista.engines.sql import SqlDataManager
 
 if TYPE_CHECKING:
     from calista.group import GroupedTable
@@ -102,6 +103,8 @@ class CalistaTable:
 
         expr = self._evaluate_condition(condition)
         dataset_filtered = self._engine.filter(expr)
+        if isinstance(dataset_filtered, SqlDataManager):
+            dataset_filtered = dataset_filtered.select_object
 
         new_engine = self._engine.create_new_instance_from_dataset(dataset_filtered)
 
@@ -156,15 +159,15 @@ class CalistaTable:
         """
         return self.analyze_rules({rule_name: condition})[0]
 
-    def analyze_rules(self, rules: dict[RuleName, Condition]) -> list[Metrics]:
+    def analyze_rules(self, rules: Dict[RuleName, Condition]) -> List[Metrics]:
         """
-        Compute :class:`list[Metrics]` based on conditions.
+        Compute :class:`List[Metrics]` based on conditions.
 
         Args:
             rules (dict[RuleName, Condition]): The name of the rules and the conditions to execute.
 
         Returns:
-            :class:`list[Metrics]`: The metrics resulting from the analysis.
+            :class:`List[Metrics]`: The metrics resulting from the analysis.
 
         Raises:
             Any exceptions raised by the engine's execute_conditions method.
@@ -174,6 +177,66 @@ class CalistaTable:
             for rule_name, rule_condition in rules.items()
         }
         return self._engine.execute_conditions(conditions)
+
+    def apply_rule(self, rule: Condition, rule_name: str = None) -> DataFrameType:
+        """
+        Returns the dataset with new columns of booleans for given condition.
+
+        Args:
+            rule (Condition): The condition to execute.
+            rule_name (str): Name of the rule (Default: None)
+
+        Returns:
+            `DataFrameType`: The dataset with the new column resulting from the analysis.
+        """
+        if rule_name is None:
+            rule_name = rule.__repr__()
+
+        condition_result = self._evaluate_condition(rule)
+        return self._engine.add_new_columns_to_dataset({rule_name: condition_result})
+
+    def apply_rules(
+        self, rules: Union[Condition, Dict[RuleName, Condition]]
+    ) -> DataFrameType:
+        """
+        Returns the dataset with new columns of booleans for each rules or the given condition.
+
+        Args:
+            rules (Dict[RuleName, Condition]): The name of the rules and the conditions to execute.
+
+        Returns:
+            `DataFrameType`: The dataset with new columns resulting from the analysis.
+        """
+        colums_expr = {}
+        for rule_name, rule_condition in rules.items():
+            colums_expr[rule_name] = self._evaluate_condition(rule_condition)
+        return self._engine.add_new_columns_to_dataset(colums_expr)
+
+    def get_valid_rows(self, condition: Condition) -> DataFrameType:
+        """
+        Returns the dataset filtered with the rows validating the rules.
+
+        Args:
+            condition (Condition): The condition to evaluate.
+
+        Returns:
+            `DataFrameType`: The dataset filtered with the rows where the condition is satisfied.
+        """
+        column_expression = self._evaluate_condition(condition)
+        return self._engine.filter(column_expression)
+
+    def get_invalid_rows(self, condition: Condition) -> DataFrameType:
+        """
+        Returns the dataset filtered with the rows not validating the rules.
+
+        Args:
+            condition (Condition): The condition to evaluate.
+
+        Returns:
+            `DataFrameType`: The dataset filtered with the rows where the condition is not satisfied.
+        """
+        column_expression = self._evaluate_condition(condition)
+        return self._engine.filter(~column_expression)
 
     def _get_type_format(
         self,

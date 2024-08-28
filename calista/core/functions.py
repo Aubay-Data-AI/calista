@@ -104,6 +104,34 @@ def is_in(col_name: str, list_of_values: list[Any]) -> ConditionExpression:
     return cond.IsIn(col_name=col_name, list_of_values=list_of_values)
 
 
+def is_not_in(col_name: str, list_of_values: list[Any]) -> ConditionExpression:
+    """
+    Create a condition to check if a column value is not in a list of values.
+
+    Args:
+        col_name (str): The name of the column.
+        list_of_values (list[Any]): The list of values to check against.
+
+    Returns:
+        ConditionExpression: The condition to check if the column value is in the list of values.
+
+    Example
+    --------
+    >>> from calista import CalistaEngine
+    >>> from calista.core.functions import is_not_in
+    >>>
+    >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"ID": [1, None, 3, None]})
+    >>> my_rule = is_not_in(col_name="ID", list_of_values=[1,5])
+    >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
+    rule_name : My Rule Name
+    total_row_count : 4
+    valid_row_count : 3
+    valid_row_count_pct : 75.0
+    timestamp : 2024-01-01 00:00:00.000000
+    """
+    return ~is_in(col_name=col_name, list_of_values=list_of_values)
+
+
 def rlike(col_name: str, pattern: str) -> ConditionExpression:
     """
     Create a condition to check if a column value matches a regex.
@@ -354,6 +382,33 @@ def is_integer(col_name: str) -> ConditionExpression:
     timestamp : 2024-01-01 00:00:00.000000
     """
     return cond.IsInteger(col_name=col_name)
+
+
+def is_iban(col_name: str) -> ConditionExpression:
+    """
+    Create a condition to check if a column value is an IBAN.
+
+    Args:
+        col_name (str): The name of the column.
+
+    Returns:
+        ConditionExpression: The condition to check if the column value is an IBAN.
+
+    Example
+    --------
+    >>> from calista import CalistaEngine
+    >>> from calista.core.functions import is_iban
+    >>>
+    >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"IBAN": ["FR7612548029989876543210917", "FR7630003035409876543210925", "None", None]})
+    >>> my_rule = is_iban(col_name="IBAN")
+    >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
+    rule_name : My Rule Name
+    total_row_count : 4
+    valid_row_count : 2
+    valid_row_count_pct : 50.0
+    timestamp : 2024-01-01 00:00:00.000000
+    """
+    return cond.IsIban(col_name=col_name)
 
 
 def is_iban(col_name: str) -> ConditionExpression:
