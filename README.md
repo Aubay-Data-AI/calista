@@ -70,7 +70,7 @@ table_pandas = CalistaEngine(engine="pandas").load(path="examples/demo_new_model
 
 You can define custom rules using __Calista__ functions to analyze specific conditions within your data:
 ```
-from calista.core import functions as F
+from calista import functions as F
 
 my_rule = F.is_not_null(col_name="status") & F.is_integer("salary")
 
@@ -88,7 +88,7 @@ timestamp : 2024-04-23 10:00:59.449193
 
 You can also just enhance your data by applying the rule:
 ```
-from calista.core import functions as F
+from calista import functions as F
 
 my_rule = F.is_not_null(col_name="status") & F.is_integer("salary")
 
@@ -105,7 +105,7 @@ When printing, you'll get the following result:
 
 You also have the possibility to only retrieve the data that validate or invalidate the rule. For example, to get data invalidating the rule:
 ```
-from calista.core import functions as F
+from calista import functions as F
 
 my_rule = F.is_not_null(col_name="status") & F.is_integer("salary")
 
