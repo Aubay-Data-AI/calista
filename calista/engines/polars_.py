@@ -174,11 +174,14 @@ class Polars_Engine(LazyEngine):
     def is_iban(self, condition: cond.IsIban) -> Expr:
         alphabet_conversion = {chr(i + 65): str(i + 10) for i in range(26)}
         cast_col = pl.col(condition.col_name).cast(pl.String)
-        cleaned_str_col = cast_col.str.replace_all(
-            "[^a-zA-Z0-9]", ""
-        ).str.to_uppercase()
-
-        cleaned_col = cleaned_str_col.str.slice(4, 34) + cleaned_str_col.str.slice(0, 4)
+        valid_length_col = (
+            pl.when((cast_col.str.len_chars() >= 14) & (cast_col.str.len_chars() <= 34))
+            .then(cast_col)
+            .otherwise(pl.lit("0"))
+        )
+        cleaned_col = valid_length_col.str.slice(4, 34) + valid_length_col.str.slice(
+            0, 4
+        )
         for letter, value in alphabet_conversion.items():
             cleaned_col = cleaned_col.str.replace_all(letter, value)
 
