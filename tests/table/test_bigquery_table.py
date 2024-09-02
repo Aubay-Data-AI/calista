@@ -3,9 +3,12 @@ from functools import reduce
 
 import pandas as pd
 import pytest
+from sqlalchemy import func
+from sqlalchemy.sql.selectable import Select
 
-import calista.core.functions as F
 import calista.core.rules as R
+from calista import functions as F
+from calista import register_bigquery_condition
 from calista.core.metrics import Metrics
 
 
@@ -579,5 +582,36 @@ class TestBigqueryTable:
         rule = F.mean_le_value(col_name="SALAIRE", value=63500)
         res = bigquery_table.group_by("SEXE").get_valid_rows(rule)
         df_result = res.to_pandas()
-        expected_df = pd.DataFrame({"MEAN_SALAIRE": [63404.656421]})
+        expected_df = pd.DataFrame({"MEAN_SALAIRE": [63404.656421], "SEXE": ["M"]})
         pd.testing.assert_frame_equal(left=df_result, right=expected_df)
+
+    def test_get_invalid_rows_granular_level(self, bigquery_table):
+        cond = F.mean_le_value(col_name="SALAIRE", value=63500)
+        df = bigquery_table.group_by("SEXE").get_invalid_rows(cond, granular=True)
+        df = df.to_pandas()
+        assert df.shape == (44, 22)
+
+    def test_udc(self, bigquery_table):
+        rule_name = "udc_floor"
+
+        @register_bigquery_condition(name="floor_udc")
+        def bigquery_floor_lt_value(dataset: Select, col_name: str, value: int):
+            return func.floor(dataset.c[col_name]) < value
+
+        udc = bigquery_floor_lt_value(col_name="SALAIRE", value=54000)
+
+        expected_dataset_row_count = 100
+        expected_valid_row_count = 30
+
+        computed_metrics = bigquery_table.analyze(rule_name, udc)
+        expected_metrics = Metrics(
+            rule=rule_name,
+            total_row_count=expected_dataset_row_count,
+            valid_row_count=expected_valid_row_count,
+            valid_row_count_pct=expected_valid_row_count
+            * 100
+            / expected_dataset_row_count,
+            timestamp=computed_metrics.timestamp,
+        )
+
+        assert computed_metrics == expected_metrics

@@ -15,7 +15,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from calista.core._conditions import (
     AndCondition,
@@ -143,13 +143,13 @@ class CalistaTable:
 
         return self._engine[condition](condition)
 
-    def analyze(self, rule_name: str, condition: Condition) -> Metrics:
+    def analyze(self, rule_name: str, rule: Condition) -> Metrics:
         """
         Compute :class:`~calista.core.metrics.Metrics` based on a condition.
 
         Args:
             rule_name (str): The name of the rule.
-            condition (Condition): The condition to evaluate.
+            rule (Condition): The Condition to evaluate.
 
         Returns:
             :class:`~calista.core.metrics.Metrics`: The metrics resulting from the analysis.
@@ -157,11 +157,11 @@ class CalistaTable:
         Raises:
             Any exceptions raised by the analyze_rules method.
         """
-        return self.analyze_rules({rule_name: condition})[0]
+        return self.analyze_rules({rule_name: rule})[0]
 
     def analyze_rules(self, rules: Dict[RuleName, Condition]) -> List[Metrics]:
         """
-        Compute :class:`List[Metrics]` based on conditions.
+        Compute :class:`List[Metrics]` based on rules.
 
         Args:
             rules (dict[RuleName, Condition]): The name of the rules and the conditions to execute.
@@ -180,10 +180,10 @@ class CalistaTable:
 
     def apply_rule(self, rule: Condition, rule_name: str = None) -> DataFrameType:
         """
-        Returns the dataset with new columns of booleans for given condition.
+        Returns the dataset with new columns of booleans for given rule.
 
         Args:
-            rule (Condition): The condition to execute.
+            rule (Condition): The Condition to execute.
             rule_name (str): Name of the rule (Default: None)
 
         Returns:
@@ -195,9 +195,7 @@ class CalistaTable:
         condition_result = self._evaluate_condition(rule)
         return self._engine.add_new_columns_to_dataset({rule_name: condition_result})
 
-    def apply_rules(
-        self, rules: Union[Condition, Dict[RuleName, Condition]]
-    ) -> DataFrameType:
+    def apply_rules(self, rules: Dict[RuleName, Condition]) -> DataFrameType:
         """
         Returns the dataset with new columns of booleans for each rules or the given condition.
 
@@ -212,30 +210,30 @@ class CalistaTable:
             colums_expr[rule_name] = self._evaluate_condition(rule_condition)
         return self._engine.add_new_columns_to_dataset(colums_expr)
 
-    def get_valid_rows(self, condition: Condition) -> DataFrameType:
+    def get_valid_rows(self, rule: Condition) -> DataFrameType:
         """
         Returns the dataset filtered with the rows validating the rules.
 
         Args:
-            condition (Condition): The condition to evaluate.
+            rule (Condition): The Condition to evaluate.
 
         Returns:
-            `DataFrameType`: The dataset filtered with the rows where the condition is satisfied.
+            `DataFrameType`: The dataset filtered with the rows where the rule is satisfied.
         """
-        column_expression = self._evaluate_condition(condition)
+        column_expression = self._evaluate_condition(rule)
         return self._engine.filter(column_expression)
 
-    def get_invalid_rows(self, condition: Condition) -> DataFrameType:
+    def get_invalid_rows(self, rule: Condition) -> DataFrameType:
         """
         Returns the dataset filtered with the rows not validating the rules.
 
         Args:
-            condition (Condition): The condition to evaluate.
+            rule (Condition): The Condition to evaluate.
 
         Returns:
-            `DataFrameType`: The dataset filtered with the rows where the condition is not satisfied.
+            `DataFrameType`: The dataset filtered with the rows where the rule is not satisfied.
         """
-        column_expression = self._evaluate_condition(condition)
+        column_expression = self._evaluate_condition(rule)
         return self._engine.filter(~column_expression)
 
     def _get_type_format(

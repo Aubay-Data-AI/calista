@@ -688,18 +688,18 @@ class LazyEngine(ABC):
         """
         ...
 
-    @abstractmethod
-    def aggregate_dataset(
-        self, keys: list[str], agg_cols_expr: list[GenericAggExpr]
-    ) -> GenericGroupedTableObject:
-        """
-        Generate the aggregate dataset.
+    # @abstractmethod
+    # def aggregate_dataset(
+    #     self, keys: list[str], agg_cols_expr: list[GenericAggExpr]
+    # ) -> GenericGroupedTableObject:
+    #     """
+    #     Generate the aggregate dataset.
 
-        Args:
-            keys (list[str]): The aggregation keys.
-            agg_cols_expr: list[GenericAggExpr]: The aggregation expressions list.
+    #     Args:
+    #         keys (list[str]): The aggregation keys.
+    #         agg_cols_expr: list[GenericAggExpr]: The aggregation expressions list.
 
-        Returns:
-            GenericAggExpr: The aggregate dataset.
-        """
-        ...
+    #     Returns:
+    #         GenericAggExpr: The aggregate dataset.
+    #     """
+    #     ...

@@ -1,13 +1,15 @@
 from datetime import datetime
 from functools import reduce
 
+import numpy as np
 import pandas as pd
 import pytest
 
-import calista.core.functions as F
 import calista.core.rules as R
+from calista import CalistaEngine
+from calista import functions as F
+from calista import register_pandas_condition
 from calista.core.metrics import Metrics
-from calista.table import CalistaEngine
 
 
 class TestPandasTable:
@@ -566,3 +568,33 @@ class TestPandasTable:
             }
         )
         pd.testing.assert_frame_equal(left=df_result, right=expected_df)
+
+    def test_get_invalid_rows_granular_level(self, pandas_table):
+        cond = F.mean_le_value(col_name="SALAIRE", value=63500)
+        df = pandas_table.group_by("SEXE").get_invalid_rows(cond, granular=True)
+        assert df.shape == (49, 22)
+
+    def test_udc(self, pandas_table):
+        rule_name = "udc_floor"
+
+        @register_pandas_condition(name="floor_udc")
+        def pandas_floor_lt_value(df: pd.DataFrame, col_name: str, value: int):
+            return np.floor(df[col_name]) < value
+
+        udc = pandas_floor_lt_value(col_name="SALAIRE", value=54000)
+
+        expected_dataset_row_count = 100
+        expected_valid_row_count = 30
+
+        computed_metrics = pandas_table.analyze(rule_name, udc)
+        expected_metrics = Metrics(
+            rule=rule_name,
+            total_row_count=expected_dataset_row_count,
+            valid_row_count=expected_valid_row_count,
+            valid_row_count_pct=expected_valid_row_count
+            * 100
+            / expected_dataset_row_count,
+            timestamp=computed_metrics.timestamp,
+        )
+
+        assert computed_metrics == expected_metrics
