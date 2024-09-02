@@ -1,12 +1,7 @@
 import inspect
 from typing import Any, Callable, Type, Union
 
-import pandas as pd
-import polars as pl
 from pydantic import create_model
-from pyspark.sql import DataFrame
-from snowflake.snowpark import DataFrame as SnowparkDataFrame
-from sqlalchemy.sql.selectable import Select
 
 from calista.core._conditions import Condition
 from calista.core.engine import LazyEngine, _camel_to_snake
@@ -21,15 +16,23 @@ __all__ = [
     "register_bigquery_condition",
 ]
 
-_DataFrameType = Union[DataFrame, SnowparkDataFrame, pd.DataFrame, pl.LazyFrame, Select]
+_DataFrameType = Union[
+    "pyspark.sql.DataFrame",
+    "snowflake.snowpark.DataFrame",
+    "pandas.DataFrame",
+    "polars.LazyFrame",
+    "sqlalchemy.sql.selectable.Select",
+]
 
 
-def _udc_to_condition_model(user_func: Callable) -> Type[Condition]:
+def _udc_to_condition_model(
+    user_func: Callable, dataframe_type: _DataFrameType
+) -> Type[Condition]:
     """Transform a user function into a Condition model"""
     model_params = dict()
     params = inspect.signature(user_func).parameters
     for p in params.values():
-        if issubclass(p.annotation, _DataFrameType):
+        if issubclass(p.annotation, dataframe_type):
             continue
 
         if p.kind in {p.KEYWORD_ONLY, p.POSITIONAL_ONLY, p.POSITIONAL_OR_KEYWORD}:
@@ -62,7 +65,9 @@ class UserDefinedCondition:
         return user_defined_condition
 
 
-def _register_function_as_condition(name: str, engine: Type[LazyEngine]):
+def _register_function_as_condition(
+    name: str, engine: Type[LazyEngine], dataframe_type: _DataFrameType
+):
     if hasattr(engine, name):
         msg = f"{name} condition already exist in Calista"
         raise AttributeError(msg)
@@ -77,7 +82,7 @@ def _register_function_as_condition(name: str, engine: Type[LazyEngine]):
                 raise AttributeError(
                     "You must call your user defined condition providing keyword argument"
                 )
-            return _udc_to_condition_model(user_func)(**kwargs)
+            return _udc_to_condition_model(user_func, dataframe_type)(**kwargs)
 
         return condition
 
@@ -85,30 +90,50 @@ def _register_function_as_condition(name: str, engine: Type[LazyEngine]):
 
 
 def register_spark_condition(name: str) -> Callable:
+    from pyspark.sql import DataFrame
+
     from calista.engines.spark import SparkEngine
 
-    return _register_function_as_condition(name, SparkEngine)
+    DataFrameType = DataFrame
+
+    return _register_function_as_condition(name, SparkEngine, DataFrameType)
 
 
 def register_snowflake_condition(name: str) -> Callable:
+    from snowflake.snowpark import DataFrame as SnowparkDataFrame
+
     from calista.engines.snowflake import SnowflakeEngine
 
-    return _register_function_as_condition(name, SnowflakeEngine)
+    DataFrameType = SnowparkDataFrame
+
+    return _register_function_as_condition(name, SnowflakeEngine, DataFrameType)
 
 
 def register_polars_condition(name: str) -> Callable:
+    import polars as pl
+
     from calista.engines.polars_ import Polars_Engine
 
-    return _register_function_as_condition(name, Polars_Engine)
+    DataFrameType = pl.LazyFrame
+
+    return _register_function_as_condition(name, Polars_Engine, DataFrameType)
 
 
 def register_pandas_condition(name: str) -> Callable:
+    import pandas as pd
+
     from calista.engines.pandas_ import Pandas_Engine
 
-    return _register_function_as_condition(name, Pandas_Engine)
+    DataFrameType = pd.DataFrame
+
+    return _register_function_as_condition(name, Pandas_Engine, DataFrameType)
 
 
 def register_bigquery_condition(name: str) -> Callable:
+    from sqlalchemy.sql.selectable import Select
+
     from calista.engines.bigquery import BigqueryEngine
 
-    return _register_function_as_condition(name, BigqueryEngine)
+    DataFrameType = Select
+
+    return _register_function_as_condition(name, BigqueryEngine, DataFrameType)
