@@ -3,10 +3,12 @@ from functools import reduce
 
 import pytest
 from chispa.dataframe_comparer import assert_df_equality
+from snowflake.snowpark import functions as F_snowpark
 from snowflake.snowpark.types import BooleanType, StringType, StructField, StructType
 
 import calista.core.rules as R
 from calista import functions as F
+from calista import register_snowflake_condition
 from calista.core.metrics import Metrics
 
 
@@ -593,3 +595,28 @@ class TestSnowflakeTable:
         cond = F.mean_le_value(col_name="SALAIRE", value=63500)
         df = snowflake_table.group_by("SEXE").get_invalid_rows(cond, granular=True)
         assert (df.count(), len(df.columns)) == (44, 22)
+
+    def test_udc(self, snowflake_table):
+        rule_name = "udc_floor"
+
+        @register_snowflake_condition(name="floor_udc")
+        def snowflake_floor_lt_value(col_name: str, value: int):
+            return F_snowpark.col(col_name) < value
+
+        udc = snowflake_floor_lt_value(col_name="SALAIRE", value=54000)
+
+        expected_dataset_row_count = 100
+        expected_valid_row_count = 30
+
+        computed_metrics = snowflake_table.analyze(rule_name, udc)
+        expected_metrics = Metrics(
+            rule=rule_name,
+            total_row_count=expected_dataset_row_count,
+            valid_row_count=expected_valid_row_count,
+            valid_row_count_pct=expected_valid_row_count
+            * 100
+            / expected_dataset_row_count,
+            timestamp=computed_metrics.timestamp,
+        )
+
+        assert computed_metrics == expected_metrics
