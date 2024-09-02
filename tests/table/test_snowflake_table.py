@@ -6,8 +6,8 @@ from chispa.dataframe_comparer import assert_df_equality
 from snowflake.snowpark import functions as F_snowpark
 from snowflake.snowpark.types import BooleanType, StringType, StructField, StructType
 
-import calista.core.functions as F
 import calista.core.rules as R
+from calista import functions as F
 from calista import register_snowflake_condition
 from calista.core.metrics import Metrics
 
@@ -590,6 +590,11 @@ class TestSnowflakeTable:
         assert_df_equality(
             df_result, expected_df, ignore_column_order=True, ignore_row_order=True
         )
+
+    def test_get_invalid_rows_granular_level(self, snowflake_table):
+        cond = F.mean_le_value(col_name="SALAIRE", value=63500)
+        df = snowflake_table.group_by("SEXE").get_invalid_rows(cond, granular=True)
+        assert (df.count(), len(df.columns)) == (44, 22)
 
     def test_udc(self, snowflake_table):
         rule_name = "udc_floor"

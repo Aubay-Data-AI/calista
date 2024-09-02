@@ -174,10 +174,17 @@ class SparkEngine(LazyEngine):
         )
 
     def is_iban(self, condition: cond.IsIban) -> Column:
+
         alphabet_conversion = {chr(i + 65): str(i + 10) for i in range(26)}
-        cleaned_str_col = F.regexp_replace(
-            F.col(condition.col_name), "[^a-zA-Z0-9]", ""
-        )
+
+        check_valid_length = F.when(
+            (F.length(F.col(condition.col_name)) >= 14)
+            & (F.length(F.col(condition.col_name)) <= 34),
+            F.col(condition.col_name),
+        ).otherwise(0)
+
+        cleaned_str_col = F.regexp_replace(check_valid_length, "[^a-zA-Z0-9]", "")
+
         cleaned_col = F.concat(
             F.substring(cleaned_str_col, 5, 34), F.substring(cleaned_str_col, 1, 4)
         )
@@ -335,11 +342,6 @@ class SparkEngine(LazyEngine):
     def is_positive(self, condition: cond.IsPositive) -> Column:
         return F.col(condition.col_name).rlike(r"^[+]?[0-9]\d*(\.\d+)?$")
 
-    def aggregate_dataset(
-        self, keys: list[str], agg_cols_expr: list[Column]
-    ) -> GroupedData:
-        return self.dataset.groupby(*keys).agg(*agg_cols_expr)
-
 
 class SparkAggregateDataset(AggregateDataset):
     @staticmethod
@@ -395,3 +397,48 @@ class SparkAggregateDataset(AggregateDataset):
         engine: SparkEngine,
     ) -> Column:
         return F.median(agg_func.col_name).alias(agg_col_name)
+
+    @staticmethod
+    def aggregate_dataset(
+        dataset: DataFrame, keys: list[str], agg_cols_expr: list[Column]
+    ) -> GroupedData:
+        """
+        Aggregate a dataset. It will be used for aggregate conditions
+
+        Args:
+            dataset (DataFrame): DataFrame type object to aggregate.
+            keys (list[str]): The aggregation keys.
+            agg_cols_expr: list[ColumnExpressionArgument]: The aggregation expressions list.
+
+        Returns:
+            GroupedData: The aggregated dataset.
+        """
+        return dataset.groupby(*keys).agg(*agg_cols_expr)
+
+    @staticmethod
+    def left_join(left: DataFrame, right: DataFrame, on: list[str]) -> DataFrame:
+        """
+        This function joins two tables using left join. It will be used for the reverse
+        param of GroupedTable methods: get_valid_rows, get_invalid_rows.
+
+        Args:
+            left (DataFrame): Left side of the join.
+            right (DataFrame): Right side of the join.
+            on (list[str]): List of column names. The column(s) must exist on both sides.
+
+        Returns:
+            DataFrame: Result of the join.
+        """
+        cols_to_select = left.columns + list(set(right.columns) - set(on))
+        right_cols = [
+            F.col(colname)
+            if colname not in on
+            else F.col(colname).alias(colname + "_right")
+            for colname in right.columns
+        ]
+        join_conditions = [
+            F.col(colname) == F.col(colname + "_right") for colname in on
+        ]
+        return left.join(
+            right.select(right_cols), on=join_conditions, how="left"
+        ).select(cols_to_select)
