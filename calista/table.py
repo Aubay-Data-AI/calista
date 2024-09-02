@@ -28,7 +28,11 @@ from calista.core.engine import DataFrameType, GenericColumnType, LazyEngine
 from calista.core.metrics import Metrics
 from calista.core.types_alias import ColumnName, PythonType, RuleName
 from calista.core.utils import import_engine
-from calista.engines.sql import SqlDataManager
+
+try:
+    from calista.engines.sql import SqlDataManager
+except ModuleNotFoundError:
+    SqlDataManager = None
 
 if TYPE_CHECKING:
     from calista.group import GroupedTable
@@ -103,8 +107,9 @@ class CalistaTable:
 
         expr = self._evaluate_condition(condition)
         dataset_filtered = self._engine.filter(expr)
-        if isinstance(dataset_filtered, SqlDataManager):
-            dataset_filtered = dataset_filtered.select_object
+        if SqlDataManager is not None:
+            if isinstance(dataset_filtered, SqlDataManager):
+                dataset_filtered = dataset_filtered.select_object
 
         new_engine = self._engine.create_new_instance_from_dataset(dataset_filtered)
 
