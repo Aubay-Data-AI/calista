@@ -57,15 +57,17 @@ class GroupedTable:
         for condition in conditions:
             parse(condition)
 
-        return self._engine.aggregate_dataset(self._agg_keys, agg_cols_expr)
+        return self._aggregate_dataset_utils.aggregate_dataset(
+            self._engine.dataset, self._agg_keys, agg_cols_expr
+        )
 
-    def analyze(self, rule_name: str, condition: AggregateCondition) -> Metrics:
+    def analyze(self, rule_name: str, rule: AggregateCondition) -> Metrics:
         """
         Compute :class:`~calista.core.metrics.Metrics` based on a condition.
 
         Args:
             rule_name (str): The name of the rule.
-            condition (AggregateCondition): The condition to evaluate.
+            rule (AggregateCondition): The aggregate condition to evaluate.
 
         Returns:
             :class:`~calista.core.metrics.Metrics`: The metrics resulting from the analysis.
@@ -74,8 +76,8 @@ class GroupedTable:
             Any exceptions raised by the engine's execute_condition method.
         """
 
-        self._engine.dataset = self._evaluate_aggregates([condition])
-        condition_as_check = condition.get_conditions_as_func_check()
+        self._engine.dataset = self._evaluate_aggregates([rule])
+        condition_as_check = rule.get_conditions_as_func_check()
 
         return CalistaTable(self._engine).analyze(rule_name, condition_as_check)
 
@@ -105,18 +107,18 @@ class GroupedTable:
 
         return CalistaTable(self._engine).analyze_rules(conditions)
 
-    def apply_rule(self, condition: AggregateCondition) -> DataFrameType:
+    def apply_rule(self, rule: AggregateCondition) -> DataFrameType:
         """
         Returns the dataset with new columns of booleans for given condition.
 
         Args:
-            condition (AggregateCondition): The condition to execute.
+            rule (AggregateCondition): The aggregate condition to execute.
 
         Returns:
             `DataFrameType`: The aggregated dataset with the new column resulting from the analysis.
         """
-        self._engine.dataset = self._evaluate_aggregates([condition])
-        condition_as_check = condition.get_conditions_as_func_check()
+        self._engine.dataset = self._evaluate_aggregates([rule])
+        condition_as_check = rule.get_conditions_as_func_check()
         return CalistaTable(self._engine).apply_rule(condition_as_check)
 
     def apply_rules(self, rules: Dict[RuleName, AggregateCondition]) -> DataFrameType:
@@ -124,7 +126,7 @@ class GroupedTable:
         Returns the dataset with new columns of booleans for each rules or the given condition.
 
         Args:
-            rules (Dict[RuleName, AggregateCondition]): The name of the rules and the conditions to execute.
+            rules (Dict[RuleName, AggregateCondition]): The name of the rules and the aggregate conditions to execute.
 
         Returns:
             `DataFrameType`: The aggregate dataset with new columns resulting from the analysis.
@@ -140,30 +142,46 @@ class GroupedTable:
         }
         return CalistaTable(self._engine).apply_rules(conditions)
 
-    def get_valid_rows(self, condition: Condition) -> DataFrameType:
+    def get_valid_rows(self, rule: AggregateCondition, granular=False) -> DataFrameType:
         """
         Returns the dataset filtered with the rows validating the rules.
 
         Args:
-            condition (Condition): The condition to evaluate.
+            rule (AggregateCondition): The aggregate condition to evaluate.
+            granular (bool, optional): default ``False``. Whether or not to retrieve the data at the granular level.
 
         Returns:
-            `DataFrameType`: The aggregated dataset filtered with the rows where the condition is satisfied.
+            `DataFrameType`: The aggregated dataset filtered with the rows where the rule is satisfied.
         """
-        self._engine.dataset = self._evaluate_aggregates([condition])
-        condition_as_check = condition.get_conditions_as_func_check()
+        new_dataset = self._evaluate_aggregates([rule])
+        if granular:
+            self._engine.dataset = self._aggregate_dataset_utils.left_join(
+                self._engine.dataset, new_dataset, on=self._agg_keys
+            )
+        else:
+            self._engine.dataset = new_dataset
+        condition_as_check = rule.get_conditions_as_func_check()
         return CalistaTable(self._engine).get_valid_rows(condition_as_check)
 
-    def get_invalid_rows(self, condition: Condition) -> DataFrameType:
+    def get_invalid_rows(
+        self, rule: AggregateCondition, granular=False
+    ) -> DataFrameType:
         """
         Returns the dataset filtered with the rows not validating the rules.
 
         Args:
-            condition (Condition): The condition to evaluate.
+            rule (AggregateCondition): The aggregate condition to evaluate.
+            granular (bool, optional): default ``False``. Whether or not to retrieve the data at the granular level.
 
         Returns:
-            `DataFrameType`: The aggregated dataset filtered with the rows where the condition is not satisfied.
+            `DataFrameType`: The aggregated dataset filtered with the rows where the rule is not satisfied.
         """
-        self._engine.dataset = self._evaluate_aggregates([condition])
-        condition_as_check = condition.get_conditions_as_func_check()
+        new_dataset = self._evaluate_aggregates([rule])
+        if granular:
+            self._engine.dataset = self._aggregate_dataset_utils.left_join(
+                self._engine.dataset, new_dataset, on=self._agg_keys
+            )
+        else:
+            self._engine.dataset = new_dataset
+        condition_as_check = rule.get_conditions_as_func_check()
         return CalistaTable(self._engine).get_invalid_rows(condition_as_check)

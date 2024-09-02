@@ -340,11 +340,6 @@ class Polars_Engine(LazyEngine):
     def is_positive(self, condition: cond.IsPositive) -> Expr:
         return pl.col(condition.col_name).str.contains(r"^[+]?[0-9]\d*(\.\d+)?$")
 
-    def aggregate_dataset(
-        self, keys: list[str], agg_cols_expr: list[Expr]
-    ) -> LazyGroupBy:
-        return self.dataset.group_by(*keys).agg(*agg_cols_expr)
-
 
 class Polars_AggregateDataset(AggregateDataset):
     @staticmethod
@@ -400,3 +395,37 @@ class Polars_AggregateDataset(AggregateDataset):
         engine: Polars_Engine,
     ) -> Expr:
         return pl.median(agg_func.col_name).alias(agg_col_name)
+
+    @staticmethod
+    def aggregate_dataset(
+        dataset: LazyFrame, keys: list[str], agg_cols_expr: list[Expr]
+    ) -> LazyGroupBy:
+        """
+        Aggregate a dataset. It will be used for aggregate conditions
+
+        Args:
+            dataset (LazyFrame): LazyFrame type object to aggregate.
+            keys (list[str]): The aggregation keys.
+            agg_cols_expr: list[Expr]: The aggregation expressions list.
+
+        Returns:
+            LazyGroupBy: The aggregated dataset.
+        """
+        return dataset.group_by(*keys).agg(*agg_cols_expr)
+
+    @staticmethod
+    def left_join(left: LazyFrame, right: LazyFrame, on: list[str]) -> LazyFrame:
+        """
+        This function joins two tables using left join. It will be used for the reverse
+        param of GroupedTable methods: get_valid_rows, get_invalid_rows.
+
+        Args:
+            left (LazyFrame): Left side of the join.
+            right (LazyFrame): Right side of the join.
+            on (list[str]): List of column names. The column(s) must exist on both sides.
+
+        Returns:
+            LazyFrame: Result of the join.
+        """
+        cols_to_select = left.columns + list(set(right.columns) - set(on))
+        return left.join(right, on=on, how="left").select(cols_to_select)

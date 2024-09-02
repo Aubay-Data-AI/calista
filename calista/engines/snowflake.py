@@ -346,11 +346,6 @@ class SnowflakeEngine(Database):
     def is_positive(self, condition: cond.IsPositive) -> Column:
         return F.col(condition.col_name).rlike(r"^[+]?[0-9]\d*(\.\d+)?$")
 
-    def aggregate_dataset(
-        self, keys: list[str], agg_cols_expr: list[Column]
-    ) -> RelationalGroupedDataFrame:
-        return self.dataset.groupBy(*keys).agg(*agg_cols_expr)
-
 
 class SnowflakeAggregateDataset(AggregateDataset):
     @staticmethod
@@ -406,3 +401,37 @@ class SnowflakeAggregateDataset(AggregateDataset):
         engine: SnowflakeEngine,
     ) -> Column:
         return F.median(agg_func.col_name).alias(agg_col_name)
+
+    @staticmethod
+    def aggregate_dataset(
+        dataset: DataFrame, keys: list[str], agg_cols_expr: list[Column]
+    ) -> RelationalGroupedDataFrame:
+        """
+        Aggregate a dataset. It will be used for aggregate conditions
+
+        Args:
+            dataset (DataFrame): DataFrame type object to aggregate.
+            keys (list[str]): The aggregation keys.
+            agg_cols_expr: list[ColumnExpressionArgument]: The aggregation expressions list.
+
+        Returns:
+            RelationalGroupedDataFrame: The aggregated dataset.
+        """
+        return dataset.groupBy(*keys).agg(*agg_cols_expr)
+
+    @staticmethod
+    def left_join(left: DataFrame, right: DataFrame, on: list[str]) -> DataFrame:
+        """
+        This function joins two tables using left join. It will be used for the reverse
+        param of GroupedTable methods: get_valid_rows, get_invalid_rows.
+
+        Args:
+            left (DataFrame): Left side of the join.
+            right (DataFrame): Right side of the join.
+            on (list[str]): List of column names. The column(s) must exist on both sides.
+
+        Returns:
+            DataFrame: Result of the join.
+        """
+        cols_to_select = left.columns + list(set(right.columns) - set(on))
+        return left.join(right, on=on, how="left").select(cols_to_select)
