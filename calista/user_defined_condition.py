@@ -5,8 +5,6 @@ from pydantic import create_model
 
 from calista.core._conditions import Condition
 from calista.core.engine import LazyEngine, _camel_to_snake
-from calista.engines.bigquery import BigqueryEngine
-from calista.engines.pandas_ import Pandas_Engine
 
 __all__ = [
     "register_spark_condition",
@@ -55,7 +53,7 @@ class UserDefinedCondition:
 
     def __get__(self, instance: LazyEngine, owner: Type[LazyEngine]):
         def user_defined_condition(cond: Condition):
-            if owner in [Pandas_Engine, BigqueryEngine]:
+            if owner.__name__ in ["Pandas_Engine", "BigqueryEngine"]:
                 return self.func(
                     instance.dataset, **cond.model_dump(exclude={"is_aggregate"})
                 )
