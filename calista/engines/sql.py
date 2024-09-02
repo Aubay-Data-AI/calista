@@ -463,13 +463,6 @@ class SqlEngine(Database):
         column_cast_string = self.dataset.c[condition.col_name].cast(String)
         return column_cast_string.regexp_match(r"^[+]?[0-9]\d*(\.\d+)?$")
 
-    def aggregate_dataset(
-        self, keys: list[str], agg_cols_expr: list[ColumnExpressionArgument]
-    ) -> Select:
-        keys_expr = [self.dataset.c[key] for key in keys]
-        subquery = select(*agg_cols_expr).group_by(*keys_expr)
-        return subquery.alias("subquery")
-
 
 class SqlAggregateDataset(AggregateDataset):
     @staticmethod
@@ -525,3 +518,49 @@ class SqlAggregateDataset(AggregateDataset):
         engine: SqlEngine,
     ) -> ColumnExpressionArgument:
         return func.median(engine.dataset.c[agg_func.col_name]).label(agg_col_name)
+
+    @staticmethod
+    def aggregate_dataset(
+        dataset: Select, keys: list[str], agg_cols_expr: list[ColumnExpressionArgument]
+    ) -> Select:
+        """
+        Aggregate a dataset. It will be used for aggregate conditions
+
+        Args:
+            dataset (Select): DataFrame type object to aggregate.
+            keys (list[str]): The aggregation keys.
+            agg_cols_expr: list[ColumnExpressionArgument]: The aggregation expressions list.
+
+        Returns:
+            Select: The aggregated dataset.
+        """
+        keys_expr = [dataset.c[key] for key in keys]
+        subquery = select(*agg_cols_expr, *keys_expr).group_by(*keys_expr)
+        return subquery.alias("subquery")
+
+    @staticmethod
+    def left_join(left: Select, right: Select, on: list[str]) -> Select:
+        """
+        This function joins two tables using left join. It will be used for the reverse
+        param of GroupedTable methods: get_valid_rows, get_invalid_rows.
+
+        Args:
+            left (Select): Left side of the join.
+            right (Select): Right side of the join.
+            on (list[str]): List of column names. The column(s) must exist on both sides.
+
+        Returns:
+            Select: Result of the join.
+        """
+        dataset_colnames = [col.name for col in left.c]
+        grpd_table_colnames = [col.name for col in right.c if col.name not in on]
+        selected_columns = [left.c[name].label(name) for name in dataset_colnames] + [
+            right.c[name].label(name) for name in grpd_table_colnames
+        ]
+        join_conditions = [left.c[key] == right.c[key] for key in on]
+        join_condition = and_(*join_conditions)
+        return (
+            select(*selected_columns)
+            .select_from(left.join(right, join_condition, isouter=True))
+            .alias("subquery")
+        )

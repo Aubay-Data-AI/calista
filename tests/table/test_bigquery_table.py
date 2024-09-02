@@ -4,8 +4,8 @@ from functools import reduce
 import pandas as pd
 import pytest
 
-import calista.core.functions as F
 import calista.core.rules as R
+from calista import functions as F
 from calista.core.metrics import Metrics
 
 
@@ -579,5 +579,11 @@ class TestBigqueryTable:
         rule = F.mean_le_value(col_name="SALAIRE", value=63500)
         res = bigquery_table.group_by("SEXE").get_valid_rows(rule)
         df_result = res.to_pandas()
-        expected_df = pd.DataFrame({"MEAN_SALAIRE": [63404.656421]})
+        expected_df = pd.DataFrame({"MEAN_SALAIRE": [63404.656421], "SEXE": ["M"]})
         pd.testing.assert_frame_equal(left=df_result, right=expected_df)
+
+    def test_get_invalid_rows_granular_level(self, bigquery_table):
+        cond = F.mean_le_value(col_name="SALAIRE", value=63500)
+        df = bigquery_table.group_by("SEXE").get_invalid_rows(cond, granular=True)
+        df = df.to_pandas()
+        assert df.shape == (44, 22)

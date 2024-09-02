@@ -3,7 +3,7 @@ import pathlib
 import pytest
 
 import calista
-from calista.table import CalistaEngine
+from calista import CalistaEngine
 from tests.table.parameters import BIGQUERY_CONN_PARAMS, SNOWFLAKE_CONN_PARAMS
 
 
