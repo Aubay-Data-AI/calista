@@ -13,11 +13,11 @@ If you require support for another engines such as Snowflake, Spark, or BigQuery
     pip install calista[EngineName]
 
 **Example:**
-if you want to have Snowflake and Spark, use the following command:
+if you want to use Calista with Spark, Snowflake and BigQuery, use the following command:
 
 .. code-block:: python
 
-    pip install calista[snowflake, spark]
+    pip install calista[spark,snowflake,bigquery]
 
 
 To study the quality of your data with the ``Calista`` library, you have several engines at your disposal.
@@ -26,139 +26,216 @@ Here's how to use them.
 How to specify an engine and load data
 ---------------------------------------
 
-Pandas
-^^^^^^^
+.. tabs::
 
-Pandas is a powerful Python library primarily used for data manipulation and analysis.
-Its key features include data structures like DataFrame and Series, which facilitate handling structured data effectively.
+   .. tab:: Pandas
 
-Load a table with Calista:
+    **Pandas** is a powerful Python library primarily used for data manipulation and analysis.
 
-.. code-block:: python
+    Its key features include data structures like DataFrame and Series, which facilitate handling structured data effectively.
 
-    from calista import CalistaEngine
+    Load a table with Calista:
 
-    table = CalistaEngine(engine="pandas") \
-    .load_from_path(<path_to_your_file>, file_format=<your_file_format>)
+    .. tabs::
 
+        .. tab:: Load from a path
 
-Polars
-^^^^^^^^
+            .. code-block:: python
 
-Polars is a fast and efficient Rust library for data manipulation and analysis, with bindings available for Python.
-It offers similar functionalities to Pandas, such as DataFrame and Series structures, but with a focus on high-performance computing.
-It is optimized for large datasets, multithreading, and lazy evaluation.
+                from calista import CalistaEngine
 
-Load a table with Calista:
-
-.. code-block:: python
-
-    from calista import CalistaEngine
-
-    table = CalistaEngine(engine="polars") \
-    .load_from_path(<path_to_your_file>, file_format=<your_file_format>)
+                table = CalistaEngine(engine="pandas") \
+                .load_from_path(<path_to_your_file>, file_format=<your_file_format>)
 
 
-Spark
-^^^^^^^^
+            *Supported file formats in Pandas are: parquet, csv, json.*
 
-Spark is a distributed computing framework designed for processing big data tasks.
-The key advantages include its speed, fault tolerance, and support for various data sources and processing engines.
-It excels in iterative processing and real-time analytics, making it suitable for a wide range of big data applications.
+        .. tab:: Load from a DataFrame
 
-Install Calista with the spark engine:
+            .. code-block:: python
 
-.. code-block:: bash
+                from calista import CalistaEngine
 
-    pip install calista[spark]
+                # Assuming you already have a Pandas DataFrame 'df' defined.
+                table = CalistaEngine(engine="pandas").load_from_dataframe(df)
 
+        .. tab:: Load from a dictionary
 
-Load a table with Calista:
+            .. code-block:: python
 
-.. code-block:: python
+                from calista import CalistaEngine
 
-    from calista import CalistaEngine
+                data = {"ID": [1, 2, 3], "COLOR": ["RED", "GREEN", "BLUE"]}
 
-    table = CalistaEngine(engine="spark") \
-    .load_from_path(<path_to_your_file>, file_format=<your_file_format>)
+                table = CalistaEngine(engine="pandas").load_from_dict(data)
 
+   .. tab:: Polars
 
-For the previous engines, you can also use the following functions to load your Calista table
-from an existing dataframe or a dictionary.
+    **Polars** is a fast and efficient Rust library for data manipulation and analysis, with bindings available for Python.
 
-:func:`calista.table.CalistaEngine.load_from_dataframe`
+    It offers similar functionalities to Pandas, such as DataFrame and Series structures, but with a focus on high-performance computing.
+    It is optimized for **large datasets**, **multithreading**, and **lazy evaluation**.
 
-:func:`calista.table.CalistaEngine.load_from_dict`
+    Load a table with Calista:
 
+    .. tabs::
 
-Snowflake
-^^^^^^^^^
+        .. tab:: Load from a path
 
-As this engine is developed in Snowpark, before computing a rule, a configuration must be defined to connect to the Snowflake data warehouse.
-Snowflake is a cloud-based data warehousing platform designed for storing, processing, and analyzing large volumes of data. It offers a scalable and elastic architecture, allowing users to efficiently manage data across multiple clouds.
+            .. code-block:: python
 
-Install Calista with the snowflake engine:
+                from calista import CalistaEngine
 
-.. code-block:: bash
-
-    pip install calista[snowflake]
+                table = CalistaEngine(engine="polars").load_from_path(<path_to_your_file>, file_format=<your_file_format>)
 
 
-Load a table with Calista:
+            *Supported file formats in Polars are: parquet, csv, json.*
 
-.. code-block:: python
+        .. tab:: Load from a DataFrame
 
-    from calista import CalistaEngine
+            .. code-block:: python
 
-    config = {
-         "credentials": {
-             "account": <account-identifier>,
-             "user": <user-name>,
-             "password": <password>,
-         }
-     }
-     table = CalistaEngine(engine="snowflake", config=config) \
-         .load_from_database(database=<your_database_name>, schema=<your_schema_name>, table=<your_table_name>)
+                from calista import CalistaEngine
 
-BigQuery
-^^^^^^^^
+                # Assuming you already have a Polars DataFrame 'df' defined.
+                table = CalistaEngine(engine="polars").load_from_dataframe(df)
 
-As this engine is developed in SQL, before computing a rule, a configuration must be defined to connect to the BigQuery data warehouse.
-BigQuery is a fully managed, serverless data warehouse provided by Google Cloud Platform. It's designed for storing and analyzing large datasets using SQL queries, with scalable compute and storage resources.
+        .. tab:: Load from a dictionary
 
-Install Calista with the BigQuery engine:
+            .. code-block:: python
 
-.. code-block:: bash
+                from calista import CalistaEngine
 
-    pip install calista[bigquery]
+                data = {"ID": [1, 2, 3], "COLOR": ["RED", "GREEN", "BLUE"]}
+
+                table = CalistaEngine(engine="polars").load_from_dict(data)
+
+   .. tab:: Spark
+
+    **Spark** is a distributed computing framework designed for processing big data tasks.
+
+    The key advantages include its speed, fault tolerance, and support for various data sources and processing engines.
+
+    It excels in **iterative processing** and **real-time analytics**, making it suitable for a wide range of big data applications.
+
+    Install Calista with the Spark engine:
+
+    .. code-block:: bash
+
+        pip install calista[spark]
+
+    Load a table with Calista:
+
+    .. tabs::
+
+        .. tab:: Load from a path
+
+            .. code-block:: python
+
+                from calista import CalistaEngine
+
+                table = CalistaEngine(engine="spark") \
+                .load_from_path(<path_to_your_file>, file_format=<your_file_format>)
 
 
-Load a table with Calista:
+            *Supported file formats in Spark are: parquet, csv, json.*
 
-.. code-block:: python
+        .. tab:: Load from a DataFrame
 
-    from calista import CalistaEngine
+            .. code-block:: python
 
-    connection_string = f'bigquery://<my-project>/<my-dataset>'
-    credentials_path='<path_to_credentials>.json'
-    config = {
-        'connection_string': connection_string,
-        'credentials_path': credentials_path
+                from calista import CalistaEngine
+
+                # Assuming you already have a Spark DataFrame 'df' defined.
+                table = CalistaEngine(engine="spark").load_from_dataframe(df)
+
+        .. tab:: Load from a dictionary
+
+            .. code-block:: python
+
+                from calista import CalistaEngine
+
+                data = {"ID": [1, 2, 3], "COLOR": ["RED", "GREEN", "BLUE"]}
+
+                table = CalistaEngine(engine="spark").load_from_dict(data)
+
+   .. tab:: Snowflake
+
+    As this engine is developed in **Snowpark**, before computing a rule, a configuration must be defined to connect to the Snowflake data warehouse.
+
+    **Snowflake** is a cloud-based data warehousing platform designed for storing, processing, and analyzing large volumes of data. It offers a **scalable and elastic architecture**, allowing users to efficiently manage data across multiple clouds.
+
+    Install Calista with the Snowflake engine:
+
+    .. code-block:: bash
+
+        pip install calista[snowflake]
+
+
+    Load a table with Calista:
+
+    .. code-block:: python
+
+        from calista import CalistaEngine
+
+        config = {
+            "credentials": {
+                "account": <account-identifier>,
+                "user": <user-name>,
+                "password": <password>,
+            }
         }
-    table = CalistaEngine(engine="bigquery", config=config).load_from_database(table=<your_table_name>)
+        table = CalistaEngine(engine="snowflake", config=config) \
+            .load_from_database(database=<your_database_name>, schema=<your_schema_name>, table=<your_table_name>)
+
+    *With Snowflake engine, you can only load data from a database.*
+
+   .. tab:: BigQuery
+
+    As this engine is developed in **SQL**, before computing a rule, a configuration must be defined to connect to the BigQuery data warehouse.
+
+    **BigQuery** is a fully managed, serverless data warehouse provided by **Google Cloud Platform**. It's designed for **storing and analyzing large datasets using SQL queries**, with scalable compute and storage resources.
+
+    Install Calista with the BigQuery engine:
+
+    .. code-block:: bash
+
+        pip install calista[bigquery]
+
+
+    Load a table with Calista:
+
+    .. code-block:: python
+
+        from calista import CalistaEngine
+
+        connection_string = f'bigquery://<my-project>/<my-dataset>'
+        credentials_path='<path_to_credentials>.json'
+        config = {
+            'connection_string': connection_string,
+            'credentials_path': credentials_path
+            }
+        table = CalistaEngine(engine="bigquery", config=config).load_from_database(table=<your_table_name>)
+
+    *With BigQuery engine, you can only load data from a database.*
 
 How to compute metrics
 ----------------------
 
-* You can create your own rules by chaining several Calista's functions with these operators :
-    ``& | ~``
+You can create your own rules by **chaining several Calista's functions** with these operators:
+
+- ``&`` : AND operator to use between two conditions
+- ``|`` : OR operator to use between two conditions
+- ``~`` : NOT operator to use in front of a condition or multiple conditions
 
 .. code-block:: python
 
     from calista import functions as func
 
     my_rule = func.is_iban(col_name="IBAN") & func.is_float("SALAIRE") | ~func.is_iban(col_name="ADRESSE_IP_V4")
-    print(table.analyze(rule_name=<your_rule_name>, rule=my_rule))
+
+    metrics = table.analyze(rule_name=<your_rule_name>, rule=my_rule)
+    print(metrics)
 
 .. code-block:: python
 
@@ -168,7 +245,7 @@ How to compute metrics
     valid_row_count_pct : 100.0
     timestamp : 2024-05-06 16:19:13.221048
 
-* You can also compute several rules at the same time
+You can also **compute several rules** at the same time
 
 .. code-block:: python
 
@@ -179,7 +256,9 @@ How to compute metrics
     "check_CDI_ID_are_integer": func.is_integer("CDI") & func.is_integer("ID"),
     "check_email_quality": func.is_email("EMAIL"),
     }
-    print(table.analyze_rules(rules))
+
+    metrics_list = table.analyze_rules(rules)
+    print(metrics_list)
 
 .. code-block:: python
 
@@ -208,7 +287,7 @@ How to compute metrics
 How to get enhanced data
 ------------------------
 
-* You have the possibility to get your enhanced data by applying a rule:
+You have the possibility to get your enhanced data by **applying a rule**:
 
 .. code-block:: python
 
@@ -231,7 +310,7 @@ How to get enhanced data
     98  FR6634213649058126775820977                True
     99                         None               False
 
-* You can also do the same with a list of rules:
+You can also do the same with a **list of rules**:
 
 .. code-block:: python
 
@@ -241,6 +320,7 @@ How to get enhanced data
     "check_iban_quality": func.is_iban("IBAN"),
     "check_email_quality": func.is_email("EMAIL"),
     }
+
     print(table.apply_rules(rules)[['IBAN', 'check_iban_quality', 'EMAIL', 'check_email_quality']])
 
 .. code-block:: python
@@ -258,13 +338,14 @@ How to get enhanced data
     98  FR6634213649058126775820977                True         lucie.allard@gmail.com                 True
     99                         None               False     alexandria.petit@yahoo.com                 True
 
-* If you want to retrieve the data not validating your rule for some further analysis, it is possible:
+If you want to **retrieve the data not validating your rule** for some further analysis, it is possible:
 
 .. code-block:: python
 
     from calista import functions as func
 
     my_rule = func.is_iban("IBAN")
+
     print(table.get_invalid_rows(rule=my_rule))
 
 .. code-block:: python
@@ -281,19 +362,27 @@ How to get enhanced data
     78    Roussel         Luc    F  2013-11-27  0.0  None  ...   None          luc.roussel@gmail.com                  None  47089.29    EUR   79
     99      Petit  Alexandria    F  2003-11-18  0.0  None  ...   True     alexandria.petit@yahoo.com                  None  82053.90    EUR  100
 
+*See also:* :func:`calista.table.CalistaTable.get_valid_rows`
+
 Data filtering and aggregation
 ------------------------------
 
-* Sometimes you need to check a rule on a subset of a dataset and not the entire dataset.
-  With calista, before checking a rule, you have the possibility to filter data on which you want to apply it. To do so, you can use following CalistaTable methods:
-    ``where | filter``
+Sometimes you need to check a rule on a subset of a dataset and not the entire dataset.
+
+With Calista, before checking a rule, you have the possibility to **filter data on which you want to apply it**. To do so, you can use following CalistaTable methods:
+
+- :func:`calista.table.CalistaTable.where`
+- :func:`calista.table.CalistaTable.filter`
 
 .. code-block:: python
 
     from calista import functions as func
 
+    my_filter = func.column_lt_column(col_left="DATE_ENTREE", col_right="DATE_SORTIE")
     my_rule = func.is_iban(col_name="IBAN") & func.is_float("SALAIRE") | ~func.is_iban(col_name="ADRESSE_IP_V4")
-    print(table.where(func.column_lt_column(col_left="DATE_ENTREE", col_right="DATE_SORTIE")).analyze(rule_name=<your_rule_name>, rule=my_rule))
+
+    metrics = table.where(my_filter).analyze(rule_name=<your_rule_name>, rule=my_rule)
+    print(metrics)
 
 .. code-block:: python
 
@@ -303,14 +392,16 @@ Data filtering and aggregation
     valid_row_count_pct : 100.0
     timestamp : 2024-05-06 16:19:13.221048
 
-* When you need to aggregate the data before checking a rule, you can also do it:
+When you need to **aggregate the data before checking a rule**, you can also do it:
 
 .. code-block:: python
 
     from calista import functions as func
 
     my_rule = func.mean_le_value(col_name="SALAIRE", value=63500)
-    print(table.group_by("SEXE").analyze(rule_name='rule_after_groupby', rule=my_rule))
+
+    metrics = table.group_by("SEXE").analyze(rule_name='rule_after_groupby', rule=my_rule)
+    print(metrics)
 
 .. code-block:: python
 
@@ -320,13 +411,14 @@ Data filtering and aggregation
     valid_row_count_pct : 50.0
     timestamp : 2024-05-06 16:19:13.221048
 
-* After checking a rule on an aggregated data, you may need to get the granular data for some further analysis:
+After checking a rule on an aggregated data, you may need to **get the granular data** for some further analysis:
 
 .. code-block:: python
 
     from calista import functions as func
 
     my_rule = func.mean_le_value(col_name="SALAIRE", value=63500)
+
     print(table.group_by("SEXE").get_invalid_rows(my_rule, granular=True))
 
 .. code-block:: python
