@@ -15,7 +15,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from calista.core._conditions import (
     AndCondition,
@@ -28,7 +28,11 @@ from calista.core.engine import DataFrameType, GenericColumnType, LazyEngine
 from calista.core.metrics import Metrics
 from calista.core.types_alias import ColumnName, PythonType, RuleName
 from calista.core.utils import import_engine
-from calista.engines.sql import SqlDataManager
+
+try:
+    from calista.engines.sql import SqlDataManager
+except ModuleNotFoundError:
+    SqlDataManager = None
 
 if TYPE_CHECKING:
     from calista.group import GroupedTable
@@ -104,7 +108,7 @@ class CalistaTable:
         >>> my_rule = sum_gt_value(col_name="POINTS", value=65)
         >>>
         >>> # Generate and print your metrics
-        >>> metrics = calista_table.group_by("TEAM").analyze(rule_name="Total points higher than 65", condition=my_rule)
+        >>> metrics = calista_table.group_by("TEAM").analyze(rule_name="Total points higher than 65", rule=my_rule)
         >>> print(metrics)
 
         >>> rule_name : Total points higher than 65
@@ -147,7 +151,7 @@ class CalistaTable:
         >>> my_rule = is_alphabetic(col_name="PLANETE")
         >>>
         >>> # Generate and print your metrics
-        >>> metrics = calista_table.where(my_filter).analyze(rule_name="PLANETE is alphabetic on non null values", condition=my_rule)
+        >>> metrics = calista_table.where(my_filter).analyze(rule_name="PLANETE is alphabetic on non null values", rule=my_rule)
         >>> print(metrics)
 
         >>> rule_name : PLANETE is not null
@@ -161,8 +165,9 @@ class CalistaTable:
 
         expr = self._evaluate_condition(condition)
         dataset_filtered = self._engine.filter(expr)
-        if isinstance(dataset_filtered, SqlDataManager):
-            dataset_filtered = dataset_filtered.select_object
+        if SqlDataManager is not None:
+            if isinstance(dataset_filtered, SqlDataManager):
+                dataset_filtered = dataset_filtered.select_object
 
         new_engine = self._engine.create_new_instance_from_dataset(dataset_filtered)
 
@@ -234,13 +239,13 @@ class CalistaTable:
 
         return self._engine[condition](condition)
 
-    def analyze(self, rule_name: str, condition: Condition) -> Metrics:
+    def analyze(self, rule_name: str, rule: Condition) -> Metrics:
         """
         Compute :class:`~calista.core.metrics.Metrics` based on a condition.
 
         Args:
-            - rule_name (str): The name of the rule.
-            - condition (Condition): The condition to evaluate.
+            rule_name (str): The name of the rule.
+            rule (Condition): The Condition to evaluate.
 
         Returns:
             :class:`~calista.core.metrics.Metrics`: The metrics resulting from the analysis.
@@ -260,7 +265,7 @@ class CalistaTable:
         >>> my_rule = is_not_null(col_name="PLANETE")
         >>>
         >>> # Generate and print your metrics
-        >>> metrics = calista_table.analyze(rule_name="PLANETE is not null", condition=my_rule)
+        >>> metrics = calista_table.analyze(rule_name="PLANETE is not null", rule=my_rule)
         >>> print(metrics)
 
         >>> rule_name : PLANETE is not null
@@ -269,11 +274,11 @@ class CalistaTable:
         >>> valid_row_count_pct : 75.0
         >>> timestamp : 2024-01-01 00:00:00.000000
         """
-        return self.analyze_rules({rule_name: condition})[0]
+        return self.analyze_rules({rule_name: rule})[0]
 
     def analyze_rules(self, rules: Dict[RuleName, Condition]) -> List[Metrics]:
         """
-        Compute :class:`List[Metrics]` based on conditions.
+        Compute :class:`List[Metrics]` based on rules.
 
         Args:
             rules (dict[RuleName, Condition]): The name of the rules and the conditions to execute.
@@ -323,11 +328,11 @@ class CalistaTable:
 
     def apply_rule(self, rule: Condition, rule_name: str = None) -> DataFrameType:
         """
-        Returns the dataset with new columns of booleans for given condition.
+        Returns the dataset with new columns of booleans for given rule.
 
         Args:
-            - rule (Condition): The condition to execute.
-            - rule_name (str): Name of the rule (Default: None)
+            rule (Condition): The Condition to execute.
+            rule_name (str): Name of the rule (Default: None)
 
         Returns:
             `DataFrameType`: The dataset with the new column resulting from the analysis.
@@ -359,9 +364,7 @@ class CalistaTable:
         condition_result = self._evaluate_condition(rule)
         return self._engine.add_new_columns_to_dataset({rule_name: condition_result})
 
-    def apply_rules(
-        self, rules: Union[Condition, Dict[RuleName, Condition]]
-    ) -> DataFrameType:
+    def apply_rules(self, rules: Dict[RuleName, Condition]) -> DataFrameType:
         """
         Returns the dataset with new columns of booleans for each rules or the given condition.
 
@@ -399,15 +402,15 @@ class CalistaTable:
             colums_expr[rule_name] = self._evaluate_condition(rule_condition)
         return self._engine.add_new_columns_to_dataset(colums_expr)
 
-    def get_valid_rows(self, condition: Condition) -> DataFrameType:
+    def get_valid_rows(self, rule: Condition) -> DataFrameType:
         """
         Returns the dataset filtered with the rows validating the rules.
 
         Args:
-            condition (Condition): The condition to evaluate.
+            rule (Condition): The Condition to evaluate.
 
         Returns:
-            `DataFrameType`: The dataset filtered with the rows where the condition is satisfied.
+            `DataFrameType`: The dataset filtered with the rows where the rule is satisfied.
 
         Example
         --------
@@ -428,18 +431,18 @@ class CalistaTable:
         >>> 2  jupiter
         >>> 3    terre
         """
-        column_expression = self._evaluate_condition(condition)
+        column_expression = self._evaluate_condition(rule)
         return self._engine.filter(column_expression)
 
-    def get_invalid_rows(self, condition: Condition) -> DataFrameType:
+    def get_invalid_rows(self, rule: Condition) -> DataFrameType:
         """
         Returns the dataset filtered with the rows not validating the rules.
 
         Args:
-            condition (Condition): The condition to evaluate.
+            rule (Condition): The Condition to evaluate.
 
         Returns:
-            `DataFrameType`: The dataset filtered with the rows where the condition is not satisfied.
+            `DataFrameType`: The dataset filtered with the rows where the rule is not satisfied.
 
         Example
         --------
@@ -458,7 +461,7 @@ class CalistaTable:
         >>>   PLANETE
         >>> 1    None
         """
-        column_expression = self._evaluate_condition(condition)
+        column_expression = self._evaluate_condition(rule)
         return self._engine.filter(~column_expression)
 
     def _get_type_format(

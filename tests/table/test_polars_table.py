@@ -5,10 +5,11 @@ import polars as pl
 import pytest
 from polars.testing import assert_frame_equal
 
-import calista.core.functions as F
 import calista.core.rules as R
+from calista import CalistaEngine
+from calista import functions as F
+from calista import register_polars_condition
 from calista.core.metrics import Metrics
-from calista.table import CalistaEngine
 
 
 class TestPolarsTable:
@@ -581,3 +582,33 @@ class TestPolarsTable:
         )
 
         assert_frame_equal(df_result, expected_df)
+
+    def test_get_invalid_rows_granular_level(self, polars_table):
+        cond = F.mean_le_value(col_name="SALAIRE", value=63500)
+        df = polars_table.group_by("SEXE").get_invalid_rows(cond, granular=True)
+        assert (df.select(pl.len()).collect().item(), df.width) == (44, 22)
+
+    def test_udc(self, polars_table):
+        rule_name = "udc_floor"
+
+        @register_polars_condition(name="floor_udc")
+        def polars_floor_lt_value(col_name: str, value: int):
+            return pl.col(col_name).floor() < value
+
+        udc = polars_floor_lt_value(col_name="SALAIRE", value=54000)
+
+        expected_dataset_row_count = 100
+        expected_valid_row_count = 30
+
+        computed_metrics = polars_table.analyze(rule_name, udc)
+        expected_metrics = Metrics(
+            rule=rule_name,
+            total_row_count=expected_dataset_row_count,
+            valid_row_count=expected_valid_row_count,
+            valid_row_count_pct=expected_valid_row_count
+            * 100
+            / expected_dataset_row_count,
+            timestamp=computed_metrics.timestamp,
+        )
+
+        assert computed_metrics == expected_metrics

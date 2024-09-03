@@ -204,7 +204,10 @@ class Pandas_Engine(LazyEngine):
     def is_iban(self, condition: cond.IsIban) -> Series:
         alphabet_conversion = {chr(i + 65): str(i + 10) for i in range(26)}
         cleaned_col_str = self.dataset[condition.col_name].astype(str)
-        cleaned_str_col = cleaned_col_str.str.replace("[^a-zA-Z0-9]", "", regex=True)
+        valid_length_col = cleaned_col_str.where(
+            (cleaned_col_str.str.len() >= 14) & (cleaned_col_str.str.len() <= 34), "0"
+        )
+        cleaned_str_col = valid_length_col.str.replace("[^a-zA-Z0-9]", "", regex=True)
         cleaned_str_col = cleaned_str_col.str.upper()
         cleaned_col = cleaned_str_col.str[4:34] + cleaned_str_col.str[0:4]
         for letter, value in alphabet_conversion.items():
@@ -380,14 +383,6 @@ class Pandas_Engine(LazyEngine):
             & self.dataset[condition.col_name].notna()
         )
 
-    def aggregate_dataset(
-        self, keys: list[str], agg_cols_expr: list[tuple[str, tuple[str, str]]]
-    ) -> DataFrameGroupBy:
-        new_agg_cols_expr = {}
-        for expr in agg_cols_expr:
-            new_agg_cols_expr.update(expr)
-        return self.dataset.groupby(*keys).agg(**new_agg_cols_expr)
-
 
 class Pandas_AggregateDataset(AggregateDataset):
     @staticmethod
@@ -443,3 +438,44 @@ class Pandas_AggregateDataset(AggregateDataset):
         engine: Pandas_Engine,
     ) -> dict[ColumnName:str, Series]:
         return {agg_col_name: (agg_func.col_name, "median")}
+
+    @staticmethod
+    def aggregate_dataset(
+        dataset: DataFrame,
+        keys: list[str],
+        agg_cols_expr: list[tuple[str, tuple[str, str]]],
+    ) -> DataFrameGroupBy:
+        """
+        Aggregate a dataset. It will be used for aggregate conditions
+
+        Args:
+            dataset (DataFrame): LazyFrame type object to aggregate.
+            keys (list[str]): The aggregation keys.
+            agg_cols_expr (list[tuple[str, tuple[str, str]]]): The aggregation expressions list.
+
+        Returns:
+            DataFrameGroupBy: The aggregated dataset.
+        """
+        new_agg_cols_expr = {}
+        for expr in agg_cols_expr:
+            new_agg_cols_expr.update(expr)
+        return dataset.groupby(*keys).agg(**new_agg_cols_expr)
+
+    @staticmethod
+    def left_join(left: DataFrame, right: DataFrame, on: list[str]) -> DataFrame:
+        """
+        This function joins two tables using left join. It will be used for the reverse
+        param of GroupedTable methods: get_valid_rows, get_invalid_rows.
+
+        Args:
+            left (DataFrame): Left side of the join.
+            right (DataFrame): Right side of the join.
+            on (list[str]): List of column names. The column(s) must exist on both sides.
+
+        Returns:
+            DataFrame: Result of the join.
+        """
+        cols_to_select = list(left.columns) + list(
+            set(list(right.columns)) - set(list(on))
+        )
+        return pd.merge(left, right, how="left", on=on)[cols_to_select]
