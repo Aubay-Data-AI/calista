@@ -8,7 +8,7 @@ on:
     workflows: ["Tests Calista"]
     branches: ["dev"]
     types: 
-      - completed
+      - success
 
 jobs:
   deploy:
