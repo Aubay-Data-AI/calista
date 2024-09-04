@@ -6,7 +6,7 @@ name: Release Calista
 on:
   workflow_run:
     workflows: ["Tests Calista"]
-    branches: [main]
+    branches: ["dev"]
     types: 
       - completed
 
@@ -25,8 +25,8 @@ jobs:
         pip install setuptools wheel twine
     - name: Build and publish
       env:
-        TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
-        TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
+        TWINE_USERNAME: "__token__"
+        TWINE_PASSWORD: ${{ secrets.TEST_PYPI_API_TOKEN }}
       run: |
         python -m build
         twine upload --repository testpypi dist/*
