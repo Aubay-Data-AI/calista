@@ -1,0 +1,33 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
+name: Test Calista Installation
+
+on:
+  workflow_run:
+    workflows: ["Release Calista"]
+    branches: ["dev"]
+    types: 
+      - success
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11"]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install calista
+        run: |
+          python -m pip install --upgrade pip
+          pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ calista
+      - name: Test imports
+        run: |
+          chmod +x .github/scripts/test_import.py
+          python .github/scripts/test_import.py
