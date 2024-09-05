@@ -8,10 +8,11 @@ on:
     workflows: ["Tests Calista"]
     branches: ["dev"]
     types: 
-      - success
+      - completed
 
 jobs:
-  deploy:
+  release:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
