@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
+import pandas as pd
 from pydantic import BaseModel
 
 
@@ -48,3 +48,21 @@ class Metrics(BaseModel):
             f"valid_row_count_pct : {self.valid_row_count_pct}\n"
             f"timestamp : {self.timestamp}"
         )
+
+    def to_dict(self):
+        """
+        Return the metrics in a dictionary
+        """
+        return {
+            "rule": self.rule,
+            "total_row_count": self.total_row_count,
+            "valid_row_count": self.valid_row_count,
+            "valid_row_count_pct": self.valid_row_count_pct,
+            "timestamp": self.timestamp,
+        }
+
+    def to_pandas(self):
+        """
+        Return the metrics in a Pandas DataFrame
+        """
+        return pd.DataFrame([self.to_dict()])
