@@ -20,7 +20,9 @@ Your function should take parameters (e.g: column names or any threshold values)
 
 .. note::
 
-   It is crucial that your function returns a **boolean column/expression** (i.e., `True` or `False`) for each row in the dataset. This ensures that the condition can be properly evaluated for accurate metric calculations.
+   - It is crucial that your **function returns a boolean column/expression** (i.e., `True` or `False`) for each row in the dataset. This ensures that the condition can be properly evaluated for accurate metric calculations.
+   - Your function must include **at least one parameter representing the column name** on which the condition will be applied.
+   - When using your UDC, ensure that you pass the **arguments as keyword arguments**, explicitly providing the name of each parameter *(that you defined in your UDC)* with its corresponding value.
 
 Once your function is created, it needs to be registered using the appropriate decorator based on the engine you are working with. The decorators available in Calista are:
 
@@ -43,7 +45,6 @@ The decorator automatically integrates your custom condition into Calista's vali
 
     Calista will automatically handle passing the dataset internally. You only need to specify the additional parameters defined after the dataset, such as column names or threshold values.
 
-    Additionally, when using your UDC, ensure that you pass the **arguments as keyword arguments**, explicitly providing the name of each parameter *(that you defined in your UDC)* with its corresponding value.
 
 Examples
 ^^^^^^^^

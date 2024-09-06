@@ -66,8 +66,8 @@ class GroupedTable:
         Compute :class:`~calista.core.metrics.Metrics` based on a condition.
 
         Args:
-            rule_name (str): The name of the rule.
-            rule (AggregateCondition): The aggregate condition to evaluate.
+            - rule_name (str): The name of the rule.
+            - rule (AggregateCondition): The aggregate condition to evaluate.
 
         Returns:
             :class:`~calista.core.metrics.Metrics`: The metrics resulting from the analysis.
@@ -78,14 +78,14 @@ class GroupedTable:
         Example
         --------
         >>> from calista import CalistaEngine
-        >>> from calista.functions import sum_gt_value
+        >>> from calista import functions as func
         >>>
         >>> # Create your CalistaTable
         >>> calista_table = CalistaEngine(engine="pandas").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
         >>>                                                                "POINTS": [10, 20, 30, 40, 20, 10]})
         >>>
         >>> # Define your rule
-        >>> my_rule = sum_gt_value(col_name="POINTS", value=65)
+        >>> my_rule = func.sum_gt_value(col_name="POINTS", value=65)
         >>>
         >>> # Generate and print your metrics
         >>> metrics = calista_table.group_by("TEAM").analyze(rule_name="Total points higher than 65", rule=my_rule)
@@ -119,15 +119,15 @@ class GroupedTable:
         Example
         --------
         >>> from calista import CalistaEngine
-        >>> from calista.functions import sum_gt_value, median_eq_value
+        >>> from calista import functions as func
         >>>
         >>> # Create your CalistaTable
         >>> calista_table = CalistaEngine(engine="pandas").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
         >>>                                                                "POINTS": [10, 20, 30, 40, 20, 10]})
         >>>
         >>> # Define your rules
-        >>> my_rule = sum_gt_value(col_name="POINTS", value=65)
-        >>> my_rule_2 = median_eq_value(col_name="POINTS", value=20)
+        >>> my_rule = func.sum_gt_value(col_name="POINTS", value=65)
+        >>> my_rule_2 = func.median_eq_value(col_name="POINTS", value=20)
         >>>
         >>> # Generate and print your metrics
         >>> metrics = calista_table.group_by("TEAM").analyze_rules({"Total points higher than 65": my_rule,
@@ -170,6 +170,26 @@ class GroupedTable:
 
         Returns:
             `DataFrameType`: The aggregated dataset with the new column resulting from the analysis.
+
+        Example
+        --------
+        >>> from calista import CalistaEngine
+        >>> from calista import functions as func
+        >>>
+        >>> # Create your CalistaTable
+        >>> calista_table = CalistaEngine(engine="pandas").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
+        >>>                                                                "POINTS": [10, 20, 30, 40, 20, 10]})
+        >>>
+        >>> # Define your rule
+        >>> my_rule = func.sum_gt_value(col_name="POINTS", value=65)
+        >>>
+        >>> # Generate and print the resulting dataframe
+        >>> df_result = calista_table.group_by("TEAM").apply_rule(my_rule)
+        >>> print(df_result)
+        >>>          SUM_POINTS    RESULT
+        >>>    TEAM
+        >>>    blue          70      True
+        >>>    red           60     False
         """
         self._engine.dataset = self._evaluate_aggregates([rule])
         condition_as_check = rule.get_conditions_as_func_check()
@@ -188,15 +208,15 @@ class GroupedTable:
         Example
         --------
         >>> from calista import CalistaEngine
-        >>> from calista.functions import sum_gt_value, median_eq_value
+        >>> from from calista import functions as func
         >>>
         >>> # Create your CalistaTable
         >>> calista_table = CalistaEngine(engine="pandas").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
         >>>                                                                "POINTS": [10, 20, 30, 40, 20, 10]})
         >>>
         >>> # Define your rules
-        >>> my_rule = sum_gt_value(col_name="POINTS", value=65)
-        >>> my_rule_2 = median_eq_value(col_name="POINTS", value=20)
+        >>> my_rule = func.sum_gt_value(col_name="POINTS", value=65)
+        >>> my_rule_2 = func.median_eq_value(col_name="POINTS", value=20)
         >>>
         >>> # Generate and print the resulting dataframe
         >>> df_result = calista_table.group_by("TEAM").apply_rules({"Total points higher than 65": my_rule,
@@ -224,8 +244,8 @@ class GroupedTable:
         Returns the dataset filtered with the rows validating the rules.
 
         Args:
-            rule (AggregateCondition): The aggregate condition to evaluate.
-            granular (bool, optional): default ``False``. Whether or not to retrieve the data at the granular level.
+            - rule (AggregateCondition): The aggregate condition to evaluate.
+            - granular (bool, optional): default ``False``. Whether or not to retrieve the data at the granular level.
 
         Returns:
             `DataFrameType`: The aggregated dataset filtered with the rows where the condition is satisfied.
@@ -233,14 +253,14 @@ class GroupedTable:
         Example
         --------
         >>> from calista import CalistaEngine
-        >>> from calista.functions import sum_gt_value
+        >>> from calista import functions as func
         >>>
         >>> # Create your CalistaTable
         >>> calista_table = CalistaEngine(engine="pandas").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
         >>>                                                                "POINTS": [10, 20, 30, 40, 20, 10]})
         >>>
         >>> # Define your rule
-        >>> my_rule = sum_gt_value(col_name="POINTS", value=65)
+        >>> my_rule = func.sum_gt_value(col_name="POINTS", value=65)
         >>>
         >>> # Generate and print the resulting dataframe
         >>> df_result = calista_table.group_by("TEAM").get_valid_rows(my_rule)
@@ -267,8 +287,8 @@ class GroupedTable:
         Returns the dataset filtered with the rows not validating the rules.
 
         Args:
-            rule (AggregateCondition): The aggregate condition to evaluate.
-            granular (bool, optional): default ``False``. Whether or not to retrieve the data at the granular level.
+            - rule (AggregateCondition): The aggregate condition to evaluate.
+            - granular (bool, optional): default ``False``. Whether or not to retrieve the data at the granular level.
 
         Returns:
             `DataFrameType`: The aggregated dataset filtered with the rows where the condition is not satisfied.
@@ -276,14 +296,14 @@ class GroupedTable:
         Example
         --------
         >>> from calista import CalistaEngine
-        >>> from calista.functions import sum_gt_value
+        >>> from calista import functions as func
         >>>
         >>> # Create your CalistaTable
         >>> calista_table = CalistaEngine(engine="pandas").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
         >>>                                                                "POINTS": [10, 20, 30, 40, 20, 10]})
         >>>
         >>> # Define your rule
-        >>> my_rule = sum_gt_value(col_name="POINTS", value=65)
+        >>> my_rule = func.sum_gt_value(col_name="POINTS", value=65)
         >>>
         >>> # Generate and print the resulting dataframe
         >>> df_result = calista_table.group_by("TEAM").get_invalid_rows(my_rule)

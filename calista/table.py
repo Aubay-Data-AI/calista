@@ -98,14 +98,14 @@ class CalistaTable:
         Example
         --------
         >>> from calista import CalistaEngine
-        >>> from calista.functions import sum_gt_value
+        >>> from calista import functions as func
         >>>
         >>> # Create your CalistaTable
         >>> calista_table = CalistaEngine(engine="pandas").load_from_dict({"TEAM": ["red", "red", "red", "blue", "blue", "blue"],
         >>>                                                                "POINTS": [10, 20, 30, 40, 20, 10]})
         >>>
         >>> # Define your rule
-        >>> my_rule = sum_gt_value(col_name="POINTS", value=65)
+        >>> my_rule = func.sum_gt_value(col_name="POINTS", value=65)
         >>>
         >>> # Generate and print your metrics
         >>> metrics = calista_table.group_by("TEAM").analyze(rule_name="Total points higher than 65", rule=my_rule)
@@ -141,14 +141,14 @@ class CalistaTable:
         Example
         --------
         >>> from calista import CalistaEngine
-        >>> from calista.functions import is_not_null, is_alphabetic
+        >>> from calista import functions as func
         >>>
         >>> # Create your CalistaTable
         >>> calista_table = CalistaEngine(engine="pandas").load_from_dict({"PLANETE": ["mars", None, "jupiter", "terre"]})
         >>>
         >>> # Define your filter and your rule
-        >>> my_filter = is_not_null(col_name="PLANETE")
-        >>> my_rule = is_alphabetic(col_name="PLANETE")
+        >>> my_filter = func.is_not_null(col_name="PLANETE")
+        >>> my_rule = func.is_alphabetic(col_name="PLANETE")
         >>>
         >>> # Generate and print your metrics
         >>> metrics = calista_table.where(my_filter).analyze(rule_name="PLANETE is alphabetic on non null values", rule=my_rule)
@@ -188,14 +188,14 @@ class CalistaTable:
         Example
         --------
         >>> from calista import CalistaEngine
-        >>> from calista.functions import is_not_null, is_alphabetic
+        >>> from calista import functions as func
         >>>
         >>> # Create your CalistaTable
         >>> calista_table = CalistaEngine(engine="pandas").load_from_dict({"PLANETE": ["mars", None, "jupiter", "terre"]})
         >>>
         >>> # Define your filter and your rule
-        >>> my_filter = is_not_null(col_name="PLANETE")
-        >>> my_rule = is_alphabetic(col_name="PLANETE")
+        >>> my_filter = func.is_not_null(col_name="PLANETE")
+        >>> my_rule = func.is_alphabetic(col_name="PLANETE")
         >>>
         >>> # Generate and print your metrics
         >>> metrics = calista_table.filter(my_filter).analyze(rule_name="PLANETE is alphabetic on non null values", condition=my_rule)
@@ -244,8 +244,8 @@ class CalistaTable:
         Compute :class:`~calista.core.metrics.Metrics` based on a condition.
 
         Args:
-            rule_name (str): The name of the rule.
-            rule (Condition): The Condition to evaluate.
+            - rule_name (str): The name of the rule.
+            - rule (Condition): The Condition to evaluate.
 
         Returns:
             :class:`~calista.core.metrics.Metrics`: The metrics resulting from the analysis.
@@ -256,13 +256,13 @@ class CalistaTable:
         Example
         --------
         >>> from calista import CalistaEngine
-        >>> from calista.functions import is_not_null
+        >>> from calista import functions as func
         >>>
         >>> # Create your CalistaTable
         >>> calista_table = CalistaEngine(engine="pandas").load_from_dict({"PLANETE": ["mars", None, "jupiter", "terre"]})
         >>>
         >>> # Define your rule
-        >>> my_rule = is_not_null(col_name="PLANETE")
+        >>> my_rule = func.is_not_null(col_name="PLANETE")
         >>>
         >>> # Generate and print your metrics
         >>> metrics = calista_table.analyze(rule_name="PLANETE is not null", rule=my_rule)
@@ -292,14 +292,14 @@ class CalistaTable:
         Example
         --------
         >>> from calista import CalistaEngine
-        >>> from calista.functions import is_not_null, is_alphabetic, length_lt
+        >>> from calista import functions as func
         >>>
         >>> # Create your CalistaTable
         >>> calista_table = CalistaEngine(engine="pandas").load_from_dict({"PLANETE": ["mars", None, "jupiter", "terre"]})
         >>>
         >>> # Define your rules
-        >>> my_rule = is_not_null(col_name="PLANETE")
-        >>> my_rule_2 = is_alphabetic(col_name="PLANETE") & length_lt(col_name="PLANETE", length=20)
+        >>> my_rule = func.is_not_null(col_name="PLANETE")
+        >>> my_rule_2 = func.is_alphabetic(col_name="PLANETE") & func.length_lt(col_name="PLANETE", length=20)
         >>>
         >>> # Generate and print your metrics
         >>> metrics = calista_table.analyze_rules({"PLANETE is not null": my_rule,
@@ -331,8 +331,8 @@ class CalistaTable:
         Returns the dataset with new columns of booleans for given rule.
 
         Args:
-            rule (Condition): The Condition to execute.
-            rule_name (str): Name of the rule (Default: None)
+            - rule (Condition): The Condition to execute.
+            - rule_name (str): Name of the rule (Default: None)
 
         Returns:
             `DataFrameType`: The dataset with the new column resulting from the analysis.
@@ -340,13 +340,13 @@ class CalistaTable:
         Example
         --------
         >>> from calista import CalistaEngine
-        >>> from calista.functions import is_not_null
+        >>> from calista import functions as func
         >>>
         >>> # Create your CalistaTable
         >>> calista_table = CalistaEngine(engine="pandas").load_from_dict({"PLANETE": ["mars", None, "jupiter", "terre"]})
         >>>
         >>> # Define your rule
-        >>> my_rule = is_not_null(col_name="PLANETE")
+        >>> my_rule = func.is_not_null(col_name="PLANETE")
         >>>
         >>> # Generate and print the resulting dataframe
         >>> df_result = calista_table.apply_rule(rule_name="PLANETE is not null", rule=my_rule)
@@ -377,14 +377,14 @@ class CalistaTable:
         Example
         --------
         >>> from calista import CalistaEngine
-        >>> from calista.functions import is_not_null, is_alphabetic, length_lt
+        >>> from calista import functions as func
         >>>
         >>> # Create your CalistaTable
         >>> calista_table = CalistaEngine(engine="pandas").load_from_dict({"PLANETE": ["mars", None, "jupiter", "terre"]})
         >>>
         >>> # Define your rules
-        >>> my_rule = is_not_null(col_name="PLANETE")
-        >>> my_rule_2 = is_alphabetic(col_name="PLANETE") & length_lt(col_name="PLANETE", length=20)
+        >>> my_rule = func.is_not_null(col_name="PLANETE")
+        >>> my_rule_2 = func.is_alphabetic(col_name="PLANETE") & func.length_lt(col_name="PLANETE", length=20)
         >>>
         >>> # Generate and print the resulting dataframe
         >>> df_result = calista_table.apply_rules({"PLANETE is not null": my_rule,
@@ -415,13 +415,13 @@ class CalistaTable:
         Example
         --------
         >>> from calista import CalistaEngine
-        >>> from calista.functions import is_not_null
+        >>> from calista import functions as func
         >>>
         >>> # Create your CalistaTable
         >>> calista_table = CalistaEngine(engine="pandas").load_from_dict({"PLANETE": ["mars", None, "jupiter", "terre"]})
         >>>
         >>> # Define your rule
-        >>> my_rule = is_not_null(col_name="PLANETE")
+        >>> my_rule = func.is_not_null(col_name="PLANETE")
         >>>
         >>> # Generate and print the resulting dataframe
         >>> df_result = calista_table.get_valid_rows(my_rule)
@@ -447,13 +447,13 @@ class CalistaTable:
         Example
         --------
         >>> from calista import CalistaEngine
-        >>> from calista.functions import is_not_null
+        >>> from calista import functions as func
         >>>
         >>> # Create your CalistaTable
         >>> calista_table = CalistaEngine(engine="pandas").load_from_dict({"PLANETE": ["mars", None, "jupiter", "terre"]})
         >>>
         >>> # Define your rule
-        >>> my_rule = is_not_null(col_name="PLANETE")
+        >>> my_rule = func.is_not_null(col_name="PLANETE")
         >>>
         >>> # Generate and print the resulting dataframe
         >>> df_result = calista_table.get_invalid_rows(my_rule)
