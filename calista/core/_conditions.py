@@ -29,6 +29,7 @@ class Condition(BaseModel):
     """
 
     is_aggregate: bool = False
+    is_udc: bool = False
 
     def __and__(self, other):
         """

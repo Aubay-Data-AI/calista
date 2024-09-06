@@ -28,6 +28,7 @@ def _udc_to_condition_model(
 ) -> Type[Condition]:
     """Transform a user function into a Condition model"""
     model_params = dict()
+    model_params["is_udc"] = (bool, True)
     params = inspect.signature(user_func).parameters
     for p in params.values():
         if issubclass(p.annotation, dataframe_type):
@@ -55,10 +56,11 @@ class UserDefinedCondition:
         def user_defined_condition(cond: Condition):
             if owner.__name__ in ["Pandas_Engine", "BigqueryEngine"]:
                 return self.func(
-                    instance.dataset, **cond.model_dump(exclude={"is_aggregate"})
+                    instance.dataset,
+                    **cond.model_dump(exclude={"is_aggregate", "is_udc"}),
                 )
             else:
-                return self.func(**cond.model_dump(exclude={"is_aggregate"}))
+                return self.func(**cond.model_dump(exclude={"is_aggregate", "is_udc"}))
 
         return user_defined_condition
 
