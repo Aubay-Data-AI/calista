@@ -592,7 +592,7 @@ class TestSparkTable:
     def test_udc(self, spark_table):
         rule_name = "udc_floor"
 
-        @register_spark_condition(name="floor_udc")
+        @register_spark_condition()
         def spark_floor_lt_value(col_name: str, value: int):
             return F_spark.col(col_name) < value
 
@@ -613,3 +613,16 @@ class TestSparkTable:
         )
 
         assert computed_metrics == expected_metrics
+
+    def test_udc_function_exists(self):
+
+        with pytest.raises(AttributeError) as udc_exception:
+
+            @register_spark_condition()
+            def is_null(col_name: str, value: int):
+                return F_spark.col(col_name) < value
+
+        assert (
+            "is_null condition already exists in Calista. Choose a different name for your function"
+            == str(udc_exception.value)
+        )

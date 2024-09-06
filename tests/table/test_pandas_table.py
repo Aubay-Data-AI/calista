@@ -577,7 +577,7 @@ class TestPandasTable:
     def test_udc(self, pandas_table):
         rule_name = "udc_floor"
 
-        @register_pandas_condition(name="floor_udc")
+        @register_pandas_condition()
         def pandas_floor_lt_value(df: pd.DataFrame, col_name: str, value: int):
             return np.floor(df[col_name]) < value
 
@@ -598,3 +598,16 @@ class TestPandasTable:
         )
 
         assert computed_metrics == expected_metrics
+
+    def test_udc_function_exists(self):
+
+        with pytest.raises(AttributeError) as udc_exception:
+
+            @register_pandas_condition()
+            def is_null(df: pd.DataFrame, col_name: str, value: int):
+                return np.floor(df[col_name]) < value
+
+        assert (
+            "is_null condition already exists in Calista. Choose a different name for your function"
+            == str(udc_exception.value)
+        )
