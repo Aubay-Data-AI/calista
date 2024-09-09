@@ -7,19 +7,19 @@ find = { namespaces = false }
 
 [project]
 name = "calista"
-version = "0.3.1"
+version = "0.3.2"
 authors = []
 description = "Comprehensive Python package designed to simplify data quality checks across multiple platforms"
 readme = "README.md"
 requires-python = ">=3.9.5"
 dependencies = [
-    "pandas",
-    "pyarrow",
-    "pydantic",
-    "overrides",
-    "schema",
-    "python-dotenv",
-    "polars"
+    "pandas>=2.2.0",
+    "pyarrow>=15.0.0",
+    "pydantic>=2.0.0",
+    "overrides>=7.7.0",
+    "schema>=0.7.5",
+    "python-dotenv>=1.0.1",
+    "polars>=0.20.21"
 ]
 
 classifiers = [
@@ -28,9 +28,9 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-spark = ["pyspark", "delta-spark"]
-snowflake = ["snowflake-snowpark-python"]
-bigquery = ["sqlalchemy-bigquery-calista"]
+spark = ["pyspark>=3.5.0", "delta-spark>=3.1.0"]
+snowflake = ["snowflake-snowpark-python>=1.12.1"]
+bigquery = ["sqlalchemy>=2.0.29", "sqlalchemy-bigquery>=1.11.0"]
 
 [project.urls]
 Repository = "https://github.com/Aubay-Data-AI/calista"
