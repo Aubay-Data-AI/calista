@@ -1,16 +1,18 @@
 # This workflow will install Python dependencies, run tests and lint with a variety of Python versions
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
 
-name: Tests Calista
+name: Test Calista Installation
 
 on:
-  push:
-    branches: [ "dev" ]
-  pull_request:
-    branches: [ "main", "dev" ]
+  workflow_run:
+    workflows: ["Release Calista"]
+    branches: ["dev"]
+    types: 
+      - completed
 
 jobs:
-  build:
+  install:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -22,19 +24,11 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Decrypt parameters.py
-        shell: bash
-        run: |
-          chmod +x .github/scripts/decrypt_params.sh
-          .github/scripts/decrypt_params.sh
-        env:
-          PARAMETER_PASSWORD: ${{ secrets.PARAMETER_PASSWORD }}
-      - name: Install dependencies
+      - name: Install calista
         run: |
           python -m pip install --upgrade pip
-          python -m pip install pytest
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          python -m pip freeze
-      - name: Test with pytest
+          pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ calista
+      - name: Test imports
         run: |
-          python -m pytest tests/table/
+          chmod +x .github/scripts/test_import.py
+          python .github/scripts/test_import.py
