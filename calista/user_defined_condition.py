@@ -89,51 +89,51 @@ def _register_function_as_condition(
     return user_defined_condition
 
 
-def register_spark_condition() -> Callable:
+def register_spark_condition(user_func: Callable) -> Callable:
     from pyspark.sql import DataFrame
 
     from calista.engines.spark import SparkEngine
 
     DataFrameType = DataFrame
 
-    return _register_function_as_condition(SparkEngine, DataFrameType)
+    return _register_function_as_condition(SparkEngine, DataFrameType)(user_func)
 
 
-def register_snowflake_condition() -> Callable:
+def register_snowflake_condition(user_func: Callable) -> Callable:
     from snowflake.snowpark import DataFrame as SnowparkDataFrame
 
     from calista.engines.snowflake import SnowflakeEngine
 
     DataFrameType = SnowparkDataFrame
 
-    return _register_function_as_condition(SnowflakeEngine, DataFrameType)
+    return _register_function_as_condition(SnowflakeEngine, DataFrameType)(user_func)
 
 
-def register_polars_condition() -> Callable:
+def register_polars_condition(user_func: Callable) -> Callable:
     import polars as pl
 
     from calista.engines.polars_ import Polars_Engine
 
     DataFrameType = pl.LazyFrame
 
-    return _register_function_as_condition(Polars_Engine, DataFrameType)
+    return _register_function_as_condition(Polars_Engine, DataFrameType)(user_func)
 
 
-def register_pandas_condition() -> Callable:
+def register_pandas_condition(user_func: Callable) -> Callable:
     import pandas as pd
 
     from calista.engines.pandas_ import Pandas_Engine
 
     DataFrameType = pd.DataFrame
 
-    return _register_function_as_condition(Pandas_Engine, DataFrameType)
+    return _register_function_as_condition(Pandas_Engine, DataFrameType)(user_func)
 
 
-def register_bigquery_condition() -> Callable:
+def register_bigquery_condition(user_func: Callable) -> Callable:
     from sqlalchemy.sql.selectable import Select
 
     from calista.engines.bigquery import BigqueryEngine
 
     DataFrameType = Select
 
-    return _register_function_as_condition(BigqueryEngine, DataFrameType)
+    return _register_function_as_condition(BigqueryEngine, DataFrameType)(user_func)

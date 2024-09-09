@@ -591,7 +591,7 @@ class TestPolarsTable:
     def test_udc(self, polars_table):
         rule_name = "udc_floor"
 
-        @register_polars_condition()
+        @register_polars_condition
         def polars_floor_lt_value(col_name: str, value: int):
             return pl.col(col_name).floor() < value
 
@@ -617,7 +617,7 @@ class TestPolarsTable:
 
         with pytest.raises(AttributeError) as udc_exception:
 
-            @register_polars_condition()
+            @register_polars_condition
             def is_null(col_name: str, value: int):
                 return pl.col(col_name).floor() < value
 

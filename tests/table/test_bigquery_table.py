@@ -594,7 +594,7 @@ class TestBigqueryTable:
     def test_udc(self, bigquery_table):
         rule_name = "udc_floor"
 
-        @register_bigquery_condition()
+        @register_bigquery_condition
         def bigquery_floor_lt_value(dataset: Select, col_name: str, value: int):
             return func.floor(dataset.c[col_name]) < value
 
@@ -620,7 +620,7 @@ class TestBigqueryTable:
 
         with pytest.raises(AttributeError) as udc_exception:
 
-            @register_bigquery_condition()
+            @register_bigquery_condition
             def is_null(dataset: Select, col_name: str, value: int):
                 return func.floor(dataset.c[col_name]) < value
 

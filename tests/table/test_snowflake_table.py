@@ -599,7 +599,7 @@ class TestSnowflakeTable:
     def test_udc(self, snowflake_table):
         rule_name = "udc_floor"
 
-        @register_snowflake_condition()
+        @register_snowflake_condition
         def snowflake_floor_lt_value(col_name: str, value: int):
             return F_snowpark.col(col_name) < value
 
@@ -625,7 +625,7 @@ class TestSnowflakeTable:
 
         with pytest.raises(AttributeError) as udc_exception:
 
-            @register_snowflake_condition()
+            @register_snowflake_condition
             def is_null(col_name: str, value: int):
                 return F_snowpark.col(col_name) < value
 

@@ -592,7 +592,7 @@ class TestSparkTable:
     def test_udc(self, spark_table):
         rule_name = "udc_floor"
 
-        @register_spark_condition()
+        @register_spark_condition
         def spark_floor_lt_value(col_name: str, value: int):
             return F_spark.col(col_name) < value
 
@@ -618,7 +618,7 @@ class TestSparkTable:
 
         with pytest.raises(AttributeError) as udc_exception:
 
-            @register_spark_condition()
+            @register_spark_condition
             def is_null(col_name: str, value: int):
                 return F_spark.col(col_name) < value
 
