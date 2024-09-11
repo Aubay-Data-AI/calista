@@ -594,7 +594,7 @@ class TestBigqueryTable:
     def test_udc(self, bigquery_table):
         rule_name = "udc_floor"
 
-        @register_bigquery_condition(name="floor_udc")
+        @register_bigquery_condition
         def bigquery_floor_lt_value(dataset: Select, col_name: str, value: int):
             return func.floor(dataset.c[col_name]) < value
 
@@ -615,3 +615,16 @@ class TestBigqueryTable:
         )
 
         assert computed_metrics == expected_metrics
+
+    def test_udc_function_exists(self):
+
+        with pytest.raises(AttributeError) as udc_exception:
+
+            @register_bigquery_condition
+            def is_null(dataset: Select, col_name: str, value: int):
+                return func.floor(dataset.c[col_name]) < value
+
+        assert (
+            "is_null condition already exists in Calista. Choose a different name for your function"
+            == str(udc_exception.value)
+        )

@@ -591,7 +591,7 @@ class TestPolarsTable:
     def test_udc(self, polars_table):
         rule_name = "udc_floor"
 
-        @register_polars_condition(name="floor_udc")
+        @register_polars_condition
         def polars_floor_lt_value(col_name: str, value: int):
             return pl.col(col_name).floor() < value
 
@@ -612,3 +612,16 @@ class TestPolarsTable:
         )
 
         assert computed_metrics == expected_metrics
+
+    def test_udc_function_exists(self):
+
+        with pytest.raises(AttributeError) as udc_exception:
+
+            @register_polars_condition
+            def is_null(col_name: str, value: int):
+                return pl.col(col_name).floor() < value
+
+        assert (
+            "is_null condition already exists in Calista. Choose a different name for your function"
+            == str(udc_exception.value)
+        )
