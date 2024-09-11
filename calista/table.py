@@ -232,10 +232,11 @@ class CalistaTable:
                 )
             return self._engine[condition](condition)
 
-        if condition.col_name not in self.schema.keys():
-            raise Exception(
-                f"Column '{condition.col_name}' not found in {list(self.schema.keys())}"
-            )
+        if not (condition.is_udc):
+            if condition.col_name not in self.schema.keys():
+                raise Exception(
+                    f"Column '{condition.col_name}' not found in {list(self.schema.keys())}"
+                )
 
         return self._engine[condition](condition)
 
