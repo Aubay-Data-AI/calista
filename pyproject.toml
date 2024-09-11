@@ -15,7 +15,7 @@ requires-python = ">=3.9.5"
 dependencies = [
     "pandas>=2.2.0",
     "pyarrow>=15.0.0",
-    "pydantic>=2.0.0",
+    "pydantic>=2.8.0",
     "overrides>=7.7.0",
     "schema>=0.7.5",
     "python-dotenv>=1.0.1",

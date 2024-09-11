@@ -3,7 +3,7 @@ pytest
 pytest-cov
 sqlalchemy==2.0.29
 pyarrow>=15.0.0
-pydantic>=2.0.0
+pydantic>=2.8.0
 polars>=0.20.21
 pandas>=2.2.0
 pyspark>=3.5.0
