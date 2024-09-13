@@ -32,9 +32,7 @@ Once your function is created, it needs to be registered using the appropriate d
 - ``register_pandas_condition`` for Pandas.
 - ``register_bigquery_condition`` for BigQuery (or any SQL Engine).
 
-Each ``register_<ENGINE>_condition`` decorator takes a parameter ``name``, which is an arbitrary string representing the name of your UDC. However, this name is primarily for internal reference and does not replace the need to call the actual function you created when defining your rules. You will still need to use the function name you provided when writing your custom logic.
-
-Additionally, the name you choose cannot be the same as an existing function in Calista. If you attempt to use a conflicting name, an exception will be raised to prevent any unexpected behavior.
+Additionally, the name of the function cannot be the same as an existing function in Calista. If you attempt to use a conflicting name, an exception will be raised to prevent any unexpected behavior.
 
 The decorator automatically integrates your custom condition into Calista's validation and analysis workflow, allowing it to be combined with existing functions to create more complex rules.
 
@@ -62,7 +60,7 @@ Examples
         from calista.table import CalistaEngine
 
         # Register and create your UDC here
-        @register_pandas_condition(name="floor_udc")
+        @register_pandas_condition
         def floor_lt_value(df: pd.DataFrame, col_name: str, value: int):
             return np.floor(df[col_name]) < value
 
@@ -97,7 +95,7 @@ Examples
         from calista.table import CalistaEngine
 
         # Register and create your UDC here
-        @register_polars_condition(name="floor_udc")
+        @register_polars_condition
         def floor_lt_value(col_name: str, value: int):
             return pl.col(col_name).floor() < value
 
@@ -130,7 +128,7 @@ Examples
         from calista.table import CalistaEngine
 
         # Register and create your UDC here
-        @register_spark_condition(name="floor_udc")
+        @register_spark_condition
         def floor_lt_value(col_name: str, value: int):
             return F.col(col_name) < value
 
@@ -163,7 +161,7 @@ Examples
         from calista.table import CalistaEngine
 
         # Register and create your UDC here
-        @register_snowflake_condition(name="floor_udc")
+        @register_snowflake_condition
         def floor_lt_value(col_name: str, value: int):
             return F.col(col_name) < value
 
@@ -207,7 +205,7 @@ Examples
         from calista.table import CalistaEngine
 
         # Register and create your UDC here
-        @register_bigquery_condition(name="floor_udc")
+        @register_bigquery_condition
         def floor_lt_value(dataset: Select, col_name: str, value:int):
             return func.floor(dataset.c[col_name]) < value
 
