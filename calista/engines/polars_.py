@@ -272,7 +272,10 @@ class Polars_Engine(LazyEngine):
             )
         )
         return (
-            pl.col(condition.col_name).str.replace_all("[-\s]", "").str.contains(regex)
+            pl.col(condition.col_name)
+            .str.replace_all("[-.]{2,}", "succ")
+            .str.replace_all("[-.\s]", "")
+            .str.contains(regex)
         )
 
     def is_boolean(self, condition: cond.IsBoolean) -> Expr:
@@ -285,7 +288,7 @@ class Polars_Engine(LazyEngine):
 
     def is_email(self, condition: cond.IsEmail) -> Expr:
         return pl.col(condition.col_name).str.contains(
-            "^[\w\.-]+@[A-z\d\.-]+\.[A-z]{2,}$"
+            r"^[a-zA-Z0-9][\w.-]*[a-zA-Z0-9]@[a-zA-Z]{4,}(\.[A-Za-z]{2,})+$"
         )
 
     def is_unique(self, condition: cond.IsUnique) -> Expr:

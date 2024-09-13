@@ -290,7 +290,11 @@ class Pandas_Engine(LazyEngine):
                 for country in condition.filter_per_country
             )
         )
-        return col.str.replace(r"[-\s]", "", regex=True).str.match(regex)
+        return (
+            col.str.replace(r"(?<![-.])[-.]", "", regex=True)
+            .replace(r"\s", "", regex=True)
+            .str.match(regex)
+        )
 
     def is_boolean(self, condition: cond.IsBoolean) -> Series:
         data_type = str(self.dataset[condition.col_name].dtype)
@@ -309,7 +313,9 @@ class Pandas_Engine(LazyEngine):
 
     def is_email(self, condition: cond.IsEmail) -> Series:
         col = self.dataset[condition.col_name].astype(str)
-        return col.str.match(r"^[\w\.-]+@[A-z\d\.-]+\.[A-z]{2,}$")
+        return col.str.match(
+            r"^[a-zA-Z0-9](?!.*\.\.)[\w\.-]*[a-zA-Z0-9]@[a-zA-Z]{4,}(\.[A-Za-z]{2,})+$"
+        )
 
     def is_integer(self, condition: cond.IsInteger) -> Series:
         col = self.dataset[condition.col_name].astype(str)
