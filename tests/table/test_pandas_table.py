@@ -14,7 +14,7 @@ from calista.core.metrics import Metrics
 
 class TestPandasTable:
 
-    expected_dataset_row_count = 100
+    expected_dataset_row_count = 103
 
     def test_is_date(self, pandas_table):
         dates_rule_name = "check_dates"
@@ -80,7 +80,7 @@ class TestPandasTable:
         id_rule_name = "check_ID_is_unique"
         id_rule = F.is_unique("ID")
 
-        expected_valid_row_count = 100
+        expected_valid_row_count = 103
 
         self.analyze_and_assert_rule(
             pandas_table, id_rule_name, id_rule, expected_valid_row_count
@@ -90,7 +90,7 @@ class TestPandasTable:
         phone_number_rule_name = "check_is_phone_number"
         phone_number_rule = F.is_phone_number("TELEPHONE")
 
-        expected_valid_row_count = 80
+        expected_valid_row_count = 81
 
         self.analyze_and_assert_rule(
             pandas_table,
@@ -252,7 +252,7 @@ class TestPandasTable:
         salary_rule_name = "check_Prenom_not_not_null"
         salary_rule = ~F.is_not_null(col_name="PRENOM")
 
-        expected_valid_row_count = 12
+        expected_valid_row_count = 15
 
         self.analyze_and_assert_rule(
             pandas_table, salary_rule_name, salary_rule, expected_valid_row_count
@@ -266,9 +266,9 @@ class TestPandasTable:
             rule=rule_name,
             total_row_count=self.expected_dataset_row_count,
             valid_row_count=expected_valid_row_count,
-            valid_row_count_pct=expected_valid_row_count
+            valid_row_count_pct=round(expected_valid_row_count
             * 100
-            / self.expected_dataset_row_count,
+            / self.expected_dataset_row_count, 2),
             timestamp=computed_metrics.timestamp,
         )
 
@@ -279,7 +279,7 @@ class TestPandasTable:
             "check_iban_quality": (F.is_iban("IBAN"), 90),
             "check_CDI_ID_are_integer": (F.is_integer("CDI") & F.is_integer("ID"), 98),
             "check_email_quality": (F.is_email("EMAIL"), 92),
-            "check_ID_unicity": (F.is_unique("ID"), 100),
+            "check_ID_unicity": (F.is_unique("ID"), 103),
         }
         rules = {
             rule_name: rule_with_valid_count[0]
@@ -294,9 +294,9 @@ class TestPandasTable:
                 rule=rule_name,
                 total_row_count=self.expected_dataset_row_count,
                 valid_row_count=rule_with_valid_count[1],
-                valid_row_count_pct=rule_with_valid_count[1]
+                valid_row_count_pct=round(rule_with_valid_count[1]
                 * 100
-                / self.expected_dataset_row_count,
+                / self.expected_dataset_row_count, 2),
                 timestamp=metrics_timestamp,
             )
             for rule_name, rule_with_valid_count in rules_with_expected_valid_count.items()
@@ -572,7 +572,7 @@ class TestPandasTable:
     def test_get_invalid_rows_granular_level(self, pandas_table):
         cond = F.mean_le_value(col_name="SALAIRE", value=63500)
         df = pandas_table.group_by("SEXE").get_invalid_rows(cond, granular=True)
-        assert df.shape == (49, 22)
+        assert df.shape == (52, 22)
 
     def test_udc(self, pandas_table):
         rule_name = "udc_floor"
@@ -589,11 +589,11 @@ class TestPandasTable:
         computed_metrics = pandas_table.analyze(rule_name, udc)
         expected_metrics = Metrics(
             rule=rule_name,
-            total_row_count=expected_dataset_row_count,
+            total_row_count=self.expected_dataset_row_count,
             valid_row_count=expected_valid_row_count,
-            valid_row_count_pct=expected_valid_row_count
+            valid_row_count_pct=round(expected_valid_row_count
             * 100
-            / expected_dataset_row_count,
+            / self.expected_dataset_row_count, 2),
             timestamp=computed_metrics.timestamp,
         )
 
