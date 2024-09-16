@@ -346,6 +346,7 @@ class SqlEngine(Database):
 
     def is_email(self, condition: cond.IsEmail) -> ColumnExpressionArgument:
         column_cast_string = self.dataset.c[condition.col_name].cast(String)
+        column_cast_string = func.regexp_replace(column_cast_string, "[-.]{2,}", "£")
         return column_cast_string.regexp_match(
             r"^[a-zA-Z0-9][\w.-]*[a-zA-Z0-9]@[a-zA-Z]{4,}(\.[A-Za-z]{2,})+$"
         )

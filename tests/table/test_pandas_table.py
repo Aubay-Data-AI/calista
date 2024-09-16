@@ -261,20 +261,26 @@ class TestPandasTable:
     def analyze_and_assert_rule(
         self, pandas_table, rule_name, rule, expected_valid_row_count
     ):
+        from decimal import Decimal
+
         computed_metrics = pandas_table.analyze(rule_name, rule)
+
+        expected_valid_row_count_pct = Decimal(
+            expected_valid_row_count * 100 / self.expected_dataset_row_count
+        )
         expected_metrics = Metrics(
             rule=rule_name,
             total_row_count=self.expected_dataset_row_count,
             valid_row_count=expected_valid_row_count,
-            valid_row_count_pct=round(expected_valid_row_count
-            * 100
-            / self.expected_dataset_row_count, 2),
+            valid_row_count_pct=expected_valid_row_count_pct,
             timestamp=computed_metrics.timestamp,
         )
 
         assert computed_metrics == expected_metrics
 
     def test_analyze_rules(self, pandas_table):
+        from decimal import Decimal
+
         rules_with_expected_valid_count = {
             "check_iban_quality": (F.is_iban("IBAN"), 90),
             "check_CDI_ID_are_integer": (F.is_integer("CDI") & F.is_integer("ID"), 98),
@@ -294,9 +300,9 @@ class TestPandasTable:
                 rule=rule_name,
                 total_row_count=self.expected_dataset_row_count,
                 valid_row_count=rule_with_valid_count[1],
-                valid_row_count_pct=round(rule_with_valid_count[1]
-                * 100
-                / self.expected_dataset_row_count, 2),
+                valid_row_count_pct=Decimal(
+                    rule_with_valid_count[1] * 100 / self.expected_dataset_row_count
+                ),
                 timestamp=metrics_timestamp,
             )
             for rule_name, rule_with_valid_count in rules_with_expected_valid_count.items()
@@ -575,6 +581,8 @@ class TestPandasTable:
         assert df.shape == (52, 22)
 
     def test_udc(self, pandas_table):
+        from decimal import Decimal
+
         rule_name = "udc_floor"
 
         @register_pandas_condition
@@ -583,17 +591,17 @@ class TestPandasTable:
 
         udc = pandas_floor_lt_value(col_name="SALAIRE", value=54000)
 
-        expected_dataset_row_count = 100
         expected_valid_row_count = 30
 
         computed_metrics = pandas_table.analyze(rule_name, udc)
+        expected_valid_row_count_pct = Decimal(
+            expected_valid_row_count * 100 / self.expected_dataset_row_count
+        )
         expected_metrics = Metrics(
             rule=rule_name,
             total_row_count=self.expected_dataset_row_count,
             valid_row_count=expected_valid_row_count,
-            valid_row_count_pct=round(expected_valid_row_count
-            * 100
-            / self.expected_dataset_row_count, 2),
+            valid_row_count_pct=expected_valid_row_count_pct,
             timestamp=computed_metrics.timestamp,
         )
 

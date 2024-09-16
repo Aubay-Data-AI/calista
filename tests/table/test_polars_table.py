@@ -14,7 +14,7 @@ from calista.core.metrics import Metrics
 
 class TestPolarsTable:
 
-    expected_dataset_row_count = 100
+    expected_dataset_row_count = 103
 
     def test_is_date(self, polars_table):
         dates_rule_name = "check_dates"
@@ -80,7 +80,7 @@ class TestPolarsTable:
         id_rule_name = "check_ID_is_unique"
         id_rule = F.is_unique("ID")
 
-        expected_valid_row_count = 100
+        expected_valid_row_count = 103
 
         self.analyze_and_assert_rule(
             polars_table, id_rule_name, id_rule, expected_valid_row_count
@@ -90,7 +90,7 @@ class TestPolarsTable:
         phone_number_rule_name = "check_is_phone_number"
         phone_number_rule = F.is_phone_number("TELEPHONE")
 
-        expected_valid_row_count = 80
+        expected_valid_row_count = 81
 
         self.analyze_and_assert_rule(
             polars_table,
@@ -252,7 +252,7 @@ class TestPolarsTable:
         salary_rule_name = "check_Prenom_not_not_null"
         salary_rule = ~F.is_not_null(col_name="PRENOM")
 
-        expected_valid_row_count = 12
+        expected_valid_row_count = 15
 
         self.analyze_and_assert_rule(
             polars_table, salary_rule_name, salary_rule, expected_valid_row_count
@@ -261,14 +261,18 @@ class TestPolarsTable:
     def analyze_and_assert_rule(
         self, polars_table, rule_name, rule, expected_valid_row_count
     ):
+        from decimal import Decimal
+
         computed_metrics = polars_table.analyze(rule_name, rule)
+
+        expected_valid_row_count_pct = Decimal(
+            expected_valid_row_count * 100 / self.expected_dataset_row_count
+        )
         expected_metrics = Metrics(
             rule=rule_name,
             total_row_count=self.expected_dataset_row_count,
             valid_row_count=expected_valid_row_count,
-            valid_row_count_pct=expected_valid_row_count
-            * 100
-            / self.expected_dataset_row_count,
+            valid_row_count_pct=expected_valid_row_count_pct,
             timestamp=computed_metrics.timestamp,
         )
 
@@ -295,11 +299,13 @@ class TestPolarsTable:
         )
 
     def test_analyze_rules(self, polars_table):
+        from decimal import Decimal
+
         rules_with_expected_valid_count = {
             "check_iban_quality": (F.is_iban("IBAN"), 90),
             "check_CDI_ID_are_integer": (F.is_integer("CDI") & F.is_integer("ID"), 98),
             "check_email_quality": (F.is_email("EMAIL"), 92),
-            "check_ID_unicity": (F.is_unique("ID"), 100),
+            "check_ID_unicity": (F.is_unique("ID"), 103),
         }
         rules = {
             rule_name: rule_with_valid_count[0]
@@ -314,9 +320,9 @@ class TestPolarsTable:
                 rule=rule_name,
                 total_row_count=self.expected_dataset_row_count,
                 valid_row_count=rule_with_valid_count[1],
-                valid_row_count_pct=rule_with_valid_count[1]
-                * 100
-                / self.expected_dataset_row_count,
+                valid_row_count_pct=Decimal(
+                    rule_with_valid_count[1] * 100 / self.expected_dataset_row_count
+                ),
                 timestamp=metrics_timestamp,
             )
             for rule_name, rule_with_valid_count in rules_with_expected_valid_count.items()
@@ -367,7 +373,7 @@ class TestPolarsTable:
         count_by_rule = F.count_gt_value(col_name="ID", value=5)
 
         expected_dataset_row_count = 3
-        expected_valid_row_count = 2
+        expected_valid_row_count = 3
 
         self.groupby_and_assert_rule(
             polars_table,
@@ -589,6 +595,8 @@ class TestPolarsTable:
         assert (df.select(pl.len()).collect().item(), df.width) == (44, 22)
 
     def test_udc(self, polars_table):
+        from decimal import Decimal
+
         rule_name = "udc_floor"
 
         @register_polars_condition
@@ -597,17 +605,17 @@ class TestPolarsTable:
 
         udc = polars_floor_lt_value(col_name="SALAIRE", value=54000)
 
-        expected_dataset_row_count = 100
         expected_valid_row_count = 30
 
         computed_metrics = polars_table.analyze(rule_name, udc)
+        expected_valid_row_count_pct = Decimal(
+            expected_valid_row_count * 100 / self.expected_dataset_row_count
+        )
         expected_metrics = Metrics(
             rule=rule_name,
-            total_row_count=expected_dataset_row_count,
+            total_row_count=self.expected_dataset_row_count,
             valid_row_count=expected_valid_row_count,
-            valid_row_count_pct=expected_valid_row_count
-            * 100
-            / expected_dataset_row_count,
+            valid_row_count_pct=expected_valid_row_count_pct,
             timestamp=computed_metrics.timestamp,
         )
 

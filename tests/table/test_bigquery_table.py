@@ -13,7 +13,7 @@ from calista.core.metrics import Metrics
 
 
 class TestBigqueryTable:
-    expected_dataset_row_count = 100
+    expected_dataset_row_count = 103
 
     def test_is_date(self, bigquery_table):
         dates_rule_name = "check_dates"
@@ -79,7 +79,7 @@ class TestBigqueryTable:
         id_rule_name = "check_ID_is_unique"
         id_rule = F.is_unique("ID")
 
-        expected_valid_row_count = 100
+        expected_valid_row_count = 103
 
         self.analyze_and_assert_rule(
             bigquery_table, id_rule_name, id_rule, expected_valid_row_count
@@ -89,7 +89,7 @@ class TestBigqueryTable:
         phone_number_rule_name = "check_is_phone_number"
         phone_number_rule = F.is_phone_number("TELEPHONE")
 
-        expected_valid_row_count = 80
+        expected_valid_row_count = 81
 
         self.analyze_and_assert_rule(
             bigquery_table,
@@ -250,7 +250,7 @@ class TestBigqueryTable:
         salary_rule_name = "check_Prenom_not_not_null"
         salary_rule = ~F.is_not_null(col_name="PRENOM")
 
-        expected_valid_row_count = 12
+        expected_valid_row_count = 15
 
         self.analyze_and_assert_rule(
             bigquery_table, salary_rule_name, salary_rule, expected_valid_row_count
@@ -296,7 +296,7 @@ class TestBigqueryTable:
             "check_iban_quality": (F.is_iban("IBAN"), 90),
             "check_CDI_ID_are_integer": (F.is_integer("CDI") & F.is_integer("ID"), 98),
             "check_email_quality": (F.is_email("EMAIL"), 92),
-            "check_ID_unicity": (F.is_unique("ID"), 100),
+            "check_ID_unicity": (F.is_unique("ID"), 103),
         }
         rules = {
             rule_name: rule_with_valid_count[0]
@@ -540,13 +540,13 @@ class TestBigqueryTable:
         expected_df = pd.DataFrame(
             {
                 "IBAN": [
+                    None,
+                    None,
+                    None,
                     "FR1981073760101001813753760",
                     "FR6906093250967318491811332",
-                    "FR7049971597282699593917624",
-                    "FR1773393443400319003480793",
-                    "FR3637964138787947015880922",
                 ],
-                "IsIban": [True, True, True, True, True],
+                "IsIban": [False, False, False, True, True],
             }
         )
 
@@ -565,14 +565,14 @@ class TestBigqueryTable:
         expected_df = pd.DataFrame(
             {
                 "IBAN": [
+                    None,
+                    None,
+                    None,
                     "FR1981073760101001813753760",
                     "FR6906093250967318491811332",
-                    "FR7049971597282699593917624",
-                    "FR1773393443400319003480793",
-                    "FR3637964138787947015880922",
                 ],
-                "IBAN_is_iban": [True, True, True, True, True],
-                "IBAN_is_not_null": [True, True, True, True, True],
+                "IBAN_is_iban": [False, False, False, True, True],
+                "IBAN_is_not_null": [False, False, False, True, True],
             }
         )
 
@@ -600,7 +600,7 @@ class TestBigqueryTable:
 
         udc = bigquery_floor_lt_value(col_name="SALAIRE", value=54000)
 
-        expected_dataset_row_count = 100
+        expected_dataset_row_count = 103
         expected_valid_row_count = 30
 
         computed_metrics = bigquery_table.analyze(rule_name, udc)

@@ -14,6 +14,7 @@
 
 
 from datetime import datetime
+from decimal import Decimal
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -21,7 +22,6 @@ import numpy as np
 import pandas as pd
 from pandas import DataFrame, Series
 from pandas.core.groupby import DataFrameGroupBy
-from decimal import Decimal
 
 import calista.core._conditions as cond
 import calista.core.rules as R

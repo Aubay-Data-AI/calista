@@ -14,13 +14,13 @@
 
 
 from datetime import datetime
+from decimal import Decimal
 from typing import Any, Dict, List
 
 import polars as pl
 import pyarrow.dataset as ds
 from polars import Expr, LazyFrame
 from polars.lazyframe.group_by import LazyGroupBy
-from decimal import Decimal
 
 import calista.core._conditions as cond
 import calista.core.rules as R
@@ -288,8 +288,12 @@ class Polars_Engine(LazyEngine):
         return pl.col(condition.col_name).str.contains(r"^[-+]?[0-9]+(?:\.0)?$")
 
     def is_email(self, condition: cond.IsEmail) -> Expr:
-        return pl.col(condition.col_name).str.replace_all("[-.]{2,}", "£").str.contains(
-            r"^[a-zA-Z0-9][\w.-]*[a-zA-Z0-9]@[a-zA-Z]{4,}(\.[A-Za-z]{2,})+$"
+        return (
+            pl.col(condition.col_name)
+            .str.replace_all("[-.]{2,}", "£")
+            .str.contains(
+                r"^[a-zA-Z0-9][\w.-]*[a-zA-Z0-9]@[a-zA-Z]{4,}(\.[A-Za-z]{2,})+$"
+            )
         )
 
     def is_unique(self, condition: cond.IsUnique) -> Expr:
