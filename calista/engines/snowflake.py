@@ -290,7 +290,7 @@ class SnowflakeEngine(Database):
         return F.col(condition.col_name).isin(boolean_type)
 
     def is_email(self, condition: cond.IsEmail) -> Column:
-        return F.col(condition.col_name).rlike(
+        return F.regexp_replace(condition.col_name, "[-.]{2,}", "£").rlike(
             r"^[a-zA-Z0-9][\w.-]*[a-zA-Z0-9]@[a-zA-Z]{4,}(\.[A-Za-z]{2,})+$"
         )
 
