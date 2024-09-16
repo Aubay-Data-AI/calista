@@ -21,6 +21,7 @@ import numpy as np
 import pandas as pd
 from pandas import DataFrame, Series
 from pandas.core.groupby import DataFrameGroupBy
+from decimal import Decimal
 
 import calista.core._conditions as cond
 import calista.core.rules as R
@@ -173,7 +174,7 @@ class Pandas_Engine(LazyEngine):
                 rule=rule_name,
                 total_row_count=total_count,
                 valid_row_count=round(valid_count, 2),
-                valid_row_count_pct=round((valid_count / total_count) * 100, 2),
+                valid_row_count_pct=Decimal(valid_count * 100 / total_count),
                 timestamp=metrics_timestamp,
             )
             for rule_name, valid_count in valid_counts_with_rule_name.items()
