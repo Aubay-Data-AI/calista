@@ -20,6 +20,7 @@ import polars as pl
 import pyarrow.dataset as ds
 from polars import Expr, LazyFrame
 from polars.lazyframe.group_by import LazyGroupBy
+from decimal import Decimal
 
 import calista.core._conditions as cond
 import calista.core.rules as R
@@ -111,7 +112,7 @@ class Polars_Engine(LazyEngine):
                 rule=rule_name,
                 total_row_count=total_count,
                 valid_row_count=valid_count,
-                valid_row_count_pct=(valid_count * 100) / total_count,
+                valid_row_count_pct=Decimal(valid_count * 100 / total_count),
                 timestamp=metrics_timestamp,
             )
             for rule_name, valid_count in valid_counts_with_rule_name.items()
@@ -280,14 +281,14 @@ class Polars_Engine(LazyEngine):
 
     def is_boolean(self, condition: cond.IsBoolean) -> Expr:
         col_as_string = pl.col(condition.col_name).cast(pl.String)
-        boolean_string = ["0", "1", "true", "false", "True", "False"]
+        boolean_string = ["0", "1", "0.0", "1.0", "true", "false", "True", "False"]
         return col_as_string.is_in(pl.Series(boolean_string))
 
     def is_integer(self, condition: cond.IsInteger) -> Expr:
-        return pl.col(condition.col_name).str.contains("^[-+]?[0-9]*$")
+        return pl.col(condition.col_name).str.contains(r"^[-+]?[0-9]+(?:\.0)?$")
 
     def is_email(self, condition: cond.IsEmail) -> Expr:
-        return pl.col(condition.col_name).str.contains(
+        return pl.col(condition.col_name).str.replace_all("[-.]{2,}", "£").str.contains(
             r"^[a-zA-Z0-9][\w.-]*[a-zA-Z0-9]@[a-zA-Z]{4,}(\.[A-Za-z]{2,})+$"
         )
 
