@@ -15,11 +15,11 @@ requires-python = ">=3.9.5"
 dependencies = [
     "pandas>=2.2.0",
     "pyarrow>=15.0.0",
-    "pydantic>=2.8.0,<1.7",
+    "pydantic>=2.8.0",
     "overrides>=7.7.0",
     "schema>=0.7.5",
     "python-dotenv>=1.0.1",
-    "polars>=0.20.21"
+    "polars>=0.20.21,<1.7"
 ]
 
 classifiers = [
