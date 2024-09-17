@@ -7,7 +7,7 @@ on:
   workflow_run:
     workflows: ["Release Calista"]
     branches: ["dev"]
-    types: 
+    types:
       - completed
 
 jobs:

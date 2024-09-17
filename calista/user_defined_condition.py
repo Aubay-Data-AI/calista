@@ -28,6 +28,7 @@ def _udc_to_condition_model(
 ) -> Type[Condition]:
     """Transform a user function into a Condition model"""
     model_params = dict()
+    model_params["is_udc"] = (bool, True)
     params = inspect.signature(user_func).parameters
     for p in params.values():
         if issubclass(p.annotation, dataframe_type):
@@ -55,25 +56,26 @@ class UserDefinedCondition:
         def user_defined_condition(cond: Condition):
             if owner.__name__ in ["Pandas_Engine", "BigqueryEngine"]:
                 return self.func(
-                    instance.dataset, **cond.model_dump(exclude={"is_aggregate"})
+                    instance.dataset,
+                    **cond.model_dump(exclude={"is_aggregate", "is_udc"}),
                 )
             else:
-                return self.func(**cond.model_dump(exclude={"is_aggregate"}))
+                return self.func(**cond.model_dump(exclude={"is_aggregate", "is_udc"}))
 
         return user_defined_condition
 
 
 def _register_function_as_condition(
-    name: str, engine: Type[LazyEngine], dataframe_type: _DataFrameType
+    engine: Type[LazyEngine], dataframe_type: _DataFrameType
 ):
-    if hasattr(engine, name):
-        msg = f"{name} condition already exist in Calista"
-        raise AttributeError(msg)
-
     def user_defined_condition(user_func: Callable) -> Callable[[Any], Condition]:
         func_name = _camel_to_snake(user_func.__name__)
 
-        setattr(engine, func_name, UserDefinedCondition(user_func))
+        if hasattr(engine, func_name):
+            msg = f"{func_name} condition already exists in Calista. Choose a different name for your function"
+            raise AttributeError(msg)
+        else:
+            setattr(engine, func_name, UserDefinedCondition(user_func))
 
         def condition(*args, **kwargs) -> Condition:
             if args:
@@ -87,51 +89,51 @@ def _register_function_as_condition(
     return user_defined_condition
 
 
-def register_spark_condition(name: str) -> Callable:
+def register_spark_condition(user_func: Callable) -> Callable:
     from pyspark.sql import DataFrame
 
     from calista.engines.spark import SparkEngine
 
     DataFrameType = DataFrame
 
-    return _register_function_as_condition(name, SparkEngine, DataFrameType)
+    return _register_function_as_condition(SparkEngine, DataFrameType)(user_func)
 
 
-def register_snowflake_condition(name: str) -> Callable:
+def register_snowflake_condition(user_func: Callable) -> Callable:
     from snowflake.snowpark import DataFrame as SnowparkDataFrame
 
     from calista.engines.snowflake import SnowflakeEngine
 
     DataFrameType = SnowparkDataFrame
 
-    return _register_function_as_condition(name, SnowflakeEngine, DataFrameType)
+    return _register_function_as_condition(SnowflakeEngine, DataFrameType)(user_func)
 
 
-def register_polars_condition(name: str) -> Callable:
+def register_polars_condition(user_func: Callable) -> Callable:
     import polars as pl
 
     from calista.engines.polars_ import Polars_Engine
 
     DataFrameType = pl.LazyFrame
 
-    return _register_function_as_condition(name, Polars_Engine, DataFrameType)
+    return _register_function_as_condition(Polars_Engine, DataFrameType)(user_func)
 
 
-def register_pandas_condition(name: str) -> Callable:
+def register_pandas_condition(user_func: Callable) -> Callable:
     import pandas as pd
 
     from calista.engines.pandas_ import Pandas_Engine
 
     DataFrameType = pd.DataFrame
 
-    return _register_function_as_condition(name, Pandas_Engine, DataFrameType)
+    return _register_function_as_condition(Pandas_Engine, DataFrameType)(user_func)
 
 
-def register_bigquery_condition(name: str) -> Callable:
+def register_bigquery_condition(user_func: Callable) -> Callable:
     from sqlalchemy.sql.selectable import Select
 
     from calista.engines.bigquery import BigqueryEngine
 
     DataFrameType = Select
 
-    return _register_function_as_condition(name, BigqueryEngine, DataFrameType)
+    return _register_function_as_condition(BigqueryEngine, DataFrameType)(user_func)

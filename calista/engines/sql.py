@@ -329,7 +329,8 @@ class SqlEngine(Database):
                 for country in condition.filter_per_country
             )
         )
-        column_cast_string = func.regexp_replace(column_cast_string, "[-\s]", "")
+        column_cast_string = func.regexp_replace(column_cast_string, "[-.]{2,}", "succ")
+        column_cast_string = func.regexp_replace(column_cast_string, "[-.\s]", "")
         return column_cast_string.regexp_match(regex)
 
     def is_boolean(self, condition: cond.IsBoolean) -> ColumnExpressionArgument:
@@ -345,7 +346,10 @@ class SqlEngine(Database):
 
     def is_email(self, condition: cond.IsEmail) -> ColumnExpressionArgument:
         column_cast_string = self.dataset.c[condition.col_name].cast(String)
-        return column_cast_string.regexp_match("^[\w\.-]+@[A-z\d\.-]+\.[A-z]{2,}$")
+        column_cast_string = func.regexp_replace(column_cast_string, "[-.]{2,}", "£")
+        return column_cast_string.regexp_match(
+            r"^[a-zA-Z0-9][\w.-]*[a-zA-Z0-9]@[a-zA-Z]{4,}(\.[A-Za-z]{2,})+$"
+        )
 
     def is_integer(self, condition: cond.IsInteger) -> ColumnExpressionArgument:
         return (

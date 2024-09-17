@@ -275,7 +275,9 @@ class SparkEngine(LazyEngine):
                 for country in condition.filter_per_country
             )
         )
-        return F.regexp_replace(F.col(condition.col_name), r"[-\s]", "").rlike(regex)
+        return F.regexp_replace(
+            F.regexp_replace(F.col(condition.col_name), r"(?<![-.])[-.]", ""), r"\s", ""
+        ).rlike(regex)
 
     def is_boolean(self, condition: cond.IsBoolean) -> Column:
         data_type = self.dataset.schema[condition.col_name].dataType
@@ -290,7 +292,9 @@ class SparkEngine(LazyEngine):
         return F.col(condition.col_name).isin(boolean_type)
 
     def is_email(self, condition: cond.IsEmail) -> Column:
-        return F.col(condition.col_name).rlike(r"^[\w\.-]+@[A-z\d\.-]+\.[A-z]{2,}$")
+        return F.col(condition.col_name).rlike(
+            r"^[a-zA-Z0-9](?!.*\.\.)[\w\.-]*[a-zA-Z0-9]@[a-zA-Z]{4,}(\.[A-Za-z]{2,})+$"
+        )
 
     def is_integer(self, condition: cond.IsInteger) -> Column:
         return F.col(condition.col_name) % 1 == 0

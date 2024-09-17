@@ -270,7 +270,11 @@ class SnowflakeEngine(Database):
                 for country in condition.filter_per_country
             )
         )
-        return F.regexp_replace(F.col(condition.col_name), "[-\s]", "").rlike(regex)
+        return F.regexp_replace(
+            F.regexp_replace(F.col(condition.col_name), "[-.]{2,}", "succ"),
+            r"[-.\s]",
+            "",
+        ).rlike(regex)
 
     def is_boolean(self, condition: cond.IsBoolean) -> Column:
         data_type = self.dataset.schema[condition.col_name].datatype
@@ -286,7 +290,9 @@ class SnowflakeEngine(Database):
         return F.col(condition.col_name).isin(boolean_type)
 
     def is_email(self, condition: cond.IsEmail) -> Column:
-        return F.col(condition.col_name).rlike("^[\w\.-]+@[A-z\d\.-]+\.[A-z]{2,}$")
+        return F.regexp_replace(condition.col_name, "[-.]{2,}", "£").rlike(
+            r"^[a-zA-Z0-9][\w.-]*[a-zA-Z0-9]@[a-zA-Z]{4,}(\.[A-Za-z]{2,})+$"
+        )
 
     def is_integer(self, condition: cond.IsInteger) -> Column:
         data_type = self.dataset.schema[condition.col_name].datatype

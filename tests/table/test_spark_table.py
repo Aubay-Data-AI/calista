@@ -15,7 +15,7 @@ from calista.core.metrics import Metrics
 
 
 class TestSparkTable:
-    expected_dataset_row_count = 100
+    expected_dataset_row_count = 103
 
     def test_is_date(self, spark_table):
         dates_rule_name = "check_dates"
@@ -81,7 +81,7 @@ class TestSparkTable:
         id_rule_name = "check_ID_is_unique"
         id_rule = F.is_unique("ID")
 
-        expected_valid_row_count = 100
+        expected_valid_row_count = 103
 
         self.analyze_and_assert_rule(
             spark_table, id_rule_name, id_rule, expected_valid_row_count
@@ -91,7 +91,7 @@ class TestSparkTable:
         phone_number_rule_name = "check_is_phone_number"
         phone_number_rule = F.is_phone_number("TELEPHONE")
 
-        expected_valid_row_count = 80
+        expected_valid_row_count = 81
 
         self.analyze_and_assert_rule(
             spark_table,
@@ -253,7 +253,7 @@ class TestSparkTable:
         salary_rule_name = "check_Prenom_not_not_null"
         salary_rule = ~F.is_not_null(col_name="PRENOM")
 
-        expected_valid_row_count = 12
+        expected_valid_row_count = 15
 
         self.analyze_and_assert_rule(
             spark_table, salary_rule_name, salary_rule, expected_valid_row_count
@@ -262,14 +262,18 @@ class TestSparkTable:
     def analyze_and_assert_rule(
         self, spark_table, rule_name, rule, expected_valid_row_count
     ):
+        from decimal import Decimal
+
         computed_metrics = spark_table.analyze(rule_name, rule)
+
+        expected_valid_row_count_pct = Decimal(
+            expected_valid_row_count * 100 / self.expected_dataset_row_count
+        )
         expected_metrics = Metrics(
             rule=rule_name,
             total_row_count=self.expected_dataset_row_count,
             valid_row_count=expected_valid_row_count,
-            valid_row_count_pct=expected_valid_row_count
-            * 100
-            / self.expected_dataset_row_count,
+            valid_row_count_pct=expected_valid_row_count_pct,
             timestamp=computed_metrics.timestamp,
         )
 
@@ -296,7 +300,7 @@ class TestSparkTable:
             "check_iban_quality": (F.is_iban("IBAN"), 90),
             "check_CDI_ID_are_integer": (F.is_integer("CDI") & F.is_integer("ID"), 98),
             "check_email_quality": (F.is_email("EMAIL"), 92),
-            "check_ID_unicity": (F.is_unique("ID"), 100),
+            "check_ID_unicity": (F.is_unique("ID"), 103),
         }
         rules = {
             rule_name: rule_with_valid_count[0]
@@ -590,26 +594,41 @@ class TestSparkTable:
         assert (df.count(), len(df.columns)) == (44, 22)
 
     def test_udc(self, spark_table):
+        from decimal import Decimal
+
         rule_name = "udc_floor"
 
-        @register_spark_condition(name="floor_udc")
+        @register_spark_condition
         def spark_floor_lt_value(col_name: str, value: int):
             return F_spark.col(col_name) < value
 
         udc = spark_floor_lt_value(col_name="SALAIRE", value=54000)
 
-        expected_dataset_row_count = 100
         expected_valid_row_count = 30
 
         computed_metrics = spark_table.analyze(rule_name, udc)
+        expected_valid_row_count_pct = Decimal(
+            expected_valid_row_count * 100 / self.expected_dataset_row_count
+        )
         expected_metrics = Metrics(
             rule=rule_name,
-            total_row_count=expected_dataset_row_count,
+            total_row_count=self.expected_dataset_row_count,
             valid_row_count=expected_valid_row_count,
-            valid_row_count_pct=expected_valid_row_count
-            * 100
-            / expected_dataset_row_count,
+            valid_row_count_pct=expected_valid_row_count_pct,
             timestamp=computed_metrics.timestamp,
         )
 
         assert computed_metrics == expected_metrics
+
+    def test_udc_function_exists(self):
+
+        with pytest.raises(AttributeError) as udc_exception:
+
+            @register_spark_condition
+            def is_null(col_name: str, value: int):
+                return F_spark.col(col_name) < value
+
+        assert (
+            "is_null condition already exists in Calista. Choose a different name for your function"
+            == str(udc_exception.value)
+        )
