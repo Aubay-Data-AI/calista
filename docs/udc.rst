@@ -20,7 +20,9 @@ Your function should take parameters (e.g: column names or any threshold values)
 
 .. note::
 
-   It is crucial that your function returns a boolean column/expression (i.e., `True` or `False`) for each row in the dataset. This ensures that the condition can be properly evaluated for accurate metric calculations.
+   - It is crucial that your **function returns a boolean column/expression** (i.e., `True` or `False`) for each row in the dataset. This ensures that the condition can be properly evaluated for accurate metric calculations.
+   - Your function must include **at least one parameter representing the column name** on which the condition will be applied.
+   - When using your UDC, ensure that you pass the **arguments as keyword arguments**, explicitly providing the name of each parameter *(that you defined in your UDC)* with its corresponding value.
 
 Once your function is created, it needs to be registered using the appropriate decorator based on the engine you are working with. The decorators available in Calista are:
 
@@ -30,9 +32,7 @@ Once your function is created, it needs to be registered using the appropriate d
 - ``register_pandas_condition`` for Pandas.
 - ``register_bigquery_condition`` for BigQuery (or any SQL Engine).
 
-Each ``register_<ENGINE>_condition`` decorator takes a parameter ``name``, which is an arbitrary string representing the name of your UDC. However, this name is primarily for internal reference and does not replace the need to call the actual function you created when defining your rules. You will still need to use the function name you provided when writing your custom logic.
-
-Additionally, the name you choose cannot be the same as an existing function in Calista. If you attempt to use a conflicting name, an exception will be raised to prevent any unexpected behavior.
+Additionally, the name of the function cannot be the same as an existing function in Calista. If you attempt to use a conflicting name, an exception will be raised to prevent any unexpected behavior.
 
 The decorator automatically integrates your custom condition into Calista's validation and analysis workflow, allowing it to be combined with existing functions to create more complex rules.
 
@@ -42,6 +42,7 @@ The decorator automatically integrates your custom condition into Calista's vali
     When defining a UDC that requires access to the dataset *(e.g., to access specific columns which is necessary for Pandas or BigQuery)*, you should not include the dataset parameter when you create the rule.
 
     Calista will automatically handle passing the dataset internally. You only need to specify the additional parameters defined after the dataset, such as column names or threshold values.
+
 
 Examples
 ^^^^^^^^
@@ -59,7 +60,7 @@ Examples
         from calista.table import CalistaEngine
 
         # Register and create your UDC here
-        @register_pandas_condition(name="floor_udc")
+        @register_pandas_condition
         def floor_lt_value(df: pd.DataFrame, col_name: str, value: int):
             return np.floor(df[col_name]) < value
 
@@ -94,7 +95,7 @@ Examples
         from calista.table import CalistaEngine
 
         # Register and create your UDC here
-        @register_polars_condition(name="floor_udc")
+        @register_polars_condition
         def floor_lt_value(col_name: str, value: int):
             return pl.col(col_name).floor() < value
 
@@ -127,7 +128,7 @@ Examples
         from calista.table import CalistaEngine
 
         # Register and create your UDC here
-        @register_spark_condition(name="floor_udc")
+        @register_spark_condition
         def floor_lt_value(col_name: str, value: int):
             return F.col(col_name) < value
 
@@ -160,7 +161,7 @@ Examples
         from calista.table import CalistaEngine
 
         # Register and create your UDC here
-        @register_snowflake_condition(name="floor_udc")
+        @register_snowflake_condition
         def floor_lt_value(col_name: str, value: int):
             return F.col(col_name) < value
 
@@ -204,7 +205,7 @@ Examples
         from calista.table import CalistaEngine
 
         # Register and create your UDC here
-        @register_bigquery_condition(name="floor_udc")
+        @register_bigquery_condition
         def floor_lt_value(dataset: Select, col_name: str, value:int):
             return func.floor(dataset.c[col_name]) < value
 
