@@ -741,7 +741,7 @@ def is_negative(col_name: str) -> ConditionExpression:
 #############################################################################
 
 
-def year_equal_to_value(col_name: str, value: int) -> ConditionExpression:
+def year_eq_value(col_name: str, value: int) -> ConditionExpression:
     """
     Create a condition to check if the year of a date in a column is equal to a specific year.
 
@@ -882,7 +882,7 @@ def year_ge_value(col_name: str, value: int) -> ConditionExpression:
     return compare_year_to_value(col_name=col_name, operator=">=", value=value)
 
 
-def column_equal_to_value(col_name: str, value: Any) -> ConditionExpression:
+def column_eq_value(col_name: str, value: Any) -> ConditionExpression:
     """
     Create a condition to check if a column is equal to a given value.
 
@@ -1022,7 +1022,7 @@ def column_ge_value(col_name: str, value: Any) -> ConditionExpression:
     return compare_column_to_value(col_name=col_name, operator=">=", value=value)
 
 
-def column_equal_to_column(col_left: str, col_right: str) -> ConditionExpression:
+def column_eq_column(col_left: str, col_right: str) -> ConditionExpression:
     """
     Create a condition to check if a column is equal to another column.
 
@@ -1177,7 +1177,7 @@ def column_ge_column(col_left: str, col_right: str) -> ConditionExpression:
     )
 
 
-def decimal_digit_eq(col_name: str, digit: int) -> ConditionExpression:
+def decimal_digit_eq_value(col_name: str, digit: int) -> ConditionExpression:
     """
     Create a condition to check if the number of decimal is equal to a given value.
 
@@ -1205,7 +1205,7 @@ def decimal_digit_eq(col_name: str, digit: int) -> ConditionExpression:
     return count_decimal_digit(col_name=col_name, operator="=", digit=digit)
 
 
-def decimal_digit_lt(col_name: str, digit: int) -> ConditionExpression:
+def decimal_digit_lt_value(col_name: str, digit: int) -> ConditionExpression:
     """
     Create a condition to check if the number of decimal is lower than a given value.
 
@@ -1233,7 +1233,7 @@ def decimal_digit_lt(col_name: str, digit: int) -> ConditionExpression:
     return count_decimal_digit(col_name=col_name, operator="<", digit=digit)
 
 
-def decimal_digit_le(col_name: str, digit: int) -> ConditionExpression:
+def decimal_digit_le_value(col_name: str, digit: int) -> ConditionExpression:
     """
     Create a condition to check if the number of decimal is lower or equal a given value.
 
@@ -1261,7 +1261,7 @@ def decimal_digit_le(col_name: str, digit: int) -> ConditionExpression:
     return count_decimal_digit(col_name=col_name, operator="<=", digit=digit)
 
 
-def decimal_digit_gt(col_name: str, digit: int) -> ConditionExpression:
+def decimal_digit_gt_value(col_name: str, digit: int) -> ConditionExpression:
     """
     Create a condition to check if the number of decimal is greater than a given value.
 
@@ -1289,7 +1289,7 @@ def decimal_digit_gt(col_name: str, digit: int) -> ConditionExpression:
     return count_decimal_digit(col_name=col_name, operator=">", digit=digit)
 
 
-def decimal_digit_ge(col_name: str, digit: int) -> ConditionExpression:
+def decimal_digit_ge_value(col_name: str, digit: int) -> ConditionExpression:
     """
     Create a condition to check if the number of decimal is greater or equal to a given value.
 
@@ -1317,7 +1317,7 @@ def decimal_digit_ge(col_name: str, digit: int) -> ConditionExpression:
     return count_decimal_digit(col_name=col_name, operator=">=", digit=digit)
 
 
-def integer_digit_equal(col_name: str, digit: int) -> ConditionExpression:
+def integer_digit_eq_value(col_name: str, digit: int) -> ConditionExpression:
     """
     Create a condition to check if the number of integer is equal to a given value.
 
@@ -1345,7 +1345,7 @@ def integer_digit_equal(col_name: str, digit: int) -> ConditionExpression:
     return count_integer_digit(col_name=col_name, operator="=", digit=digit)
 
 
-def integer_lt_digit(col_name: str, digit: int) -> ConditionExpression:
+def integer_digit_lt_value(col_name: str, digit: int) -> ConditionExpression:
     """
     Create a condition to check if the number of integer is lower than a given value.
 
@@ -1373,7 +1373,7 @@ def integer_lt_digit(col_name: str, digit: int) -> ConditionExpression:
     return count_integer_digit(col_name=col_name, operator="<", digit=digit)
 
 
-def integer_digit_le(col_name: str, digit: int) -> ConditionExpression:
+def integer_digit_le_value(col_name: str, digit: int) -> ConditionExpression:
     """
     Create a condition to check if the number of integer is lower or equal a given value.
 
@@ -1401,7 +1401,7 @@ def integer_digit_le(col_name: str, digit: int) -> ConditionExpression:
     return count_integer_digit(col_name=col_name, operator="<=", digit=digit)
 
 
-def integer_digit_gt(col_name: str, digit: int) -> ConditionExpression:
+def integer_digit_gt_value(col_name: str, digit: int) -> ConditionExpression:
     """
     Create a condition to check if the number of integer is greater than a given value.
 
@@ -1429,7 +1429,7 @@ def integer_digit_gt(col_name: str, digit: int) -> ConditionExpression:
     return count_integer_digit(col_name=col_name, operator=">", digit=digit)
 
 
-def integer_digit_ge(col_name: str, digit: int) -> ConditionExpression:
+def integer_digit_ge_value(col_name: str, digit: int) -> ConditionExpression:
     """
     Create a condition to check if the number of integer is greater or equal to a given value.
 
@@ -1457,7 +1457,7 @@ def integer_digit_ge(col_name: str, digit: int) -> ConditionExpression:
     return count_integer_digit(col_name=col_name, operator=">=", digit=digit)
 
 
-def length_eq(col_name: str, length: int) -> ConditionExpression:
+def length_eq_value(col_name: str, length: int) -> ConditionExpression:
     """
     Create a condition to check if the values of length is equal to a given value.
 
@@ -1485,7 +1485,7 @@ def length_eq(col_name: str, length: int) -> ConditionExpression:
     return compare_length(col_name=col_name, operator="=", length=length)
 
 
-def length_lt(col_name: str, length: int) -> ConditionExpression:
+def length_lt_value(col_name: str, length: int) -> ConditionExpression:
     """
     Create a condition to check if the values of length is lower than a given value.
 
@@ -1513,7 +1513,7 @@ def length_lt(col_name: str, length: int) -> ConditionExpression:
     return compare_length(col_name=col_name, operator="<", length=length)
 
 
-def length_le(col_name: str, length: int) -> ConditionExpression:
+def length_le_value(col_name: str, length: int) -> ConditionExpression:
     """
     Create a condition to check if the values of length is lower or equal to a given value.
 
@@ -1541,7 +1541,7 @@ def length_le(col_name: str, length: int) -> ConditionExpression:
     return compare_length(col_name=col_name, operator="<=", length=length)
 
 
-def length_gt(col_name: str, length: int) -> ConditionExpression:
+def length_gt_value(col_name: str, length: int) -> ConditionExpression:
     """
     Create a condition to check if the values of length is greater than a given value.
 
@@ -1569,7 +1569,7 @@ def length_gt(col_name: str, length: int) -> ConditionExpression:
     return compare_length(col_name=col_name, operator=">", length=length)
 
 
-def length_ge(col_name: str, length: int) -> ConditionExpression:
+def length_ge_value(col_name: str, length: int) -> ConditionExpression:
     """
     Create a condition to check if the values of length is greater or equal to a given value.
 
