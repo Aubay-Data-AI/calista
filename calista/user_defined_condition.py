@@ -22,6 +22,8 @@ _DataFrameType = Union[
     "sqlalchemy.sql.selectable.Select",
 ]
 
+_registered_udc = set()
+
 
 def _udc_to_condition_model(
     user_func: Callable, dataframe_type: _DataFrameType
@@ -71,11 +73,16 @@ def _register_function_as_condition(
     def user_defined_condition(user_func: Callable) -> Callable[[Any], Condition]:
         func_name = _camel_to_snake(user_func.__name__)
 
-        if hasattr(engine, func_name):
-            msg = f"{func_name} condition already exists in Calista. Choose a different name for your function"
-            raise AttributeError(msg)
+        if func_name not in _registered_udc:
+            if hasattr(engine, func_name):
+                msg = f"{func_name} condition already exists in Calista. Choose a different name for your function"
+                raise AttributeError(msg)
+            else:
+                setattr(engine, func_name, UserDefinedCondition(user_func))
+                _registered_udc.add(func_name)
         else:
             setattr(engine, func_name, UserDefinedCondition(user_func))
+            _registered_udc.add(func_name)
 
         def condition(*args, **kwargs) -> Condition:
             if args:
