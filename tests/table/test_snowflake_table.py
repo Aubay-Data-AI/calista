@@ -573,7 +573,7 @@ class TestSnowflakeTable:
             [
                 StructField("IBAN", StringType(), nullable=True),
                 StructField("IBAN_is_iban", BooleanType(), nullable=True),
-                StructField("IBAN_is_not_null", BooleanType(), nullable=False),
+                StructField("IBAN_is_not_null", BooleanType(), nullable=True),
             ]
         )
         expected_data = [
