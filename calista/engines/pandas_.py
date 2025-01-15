@@ -25,6 +25,7 @@ from pandas.core.groupby import DataFrameGroupBy
 
 import calista.core._conditions as cond
 import calista.core.rules as R
+import calista.label.label_pandas as label
 from calista.core._aggregate_conditions import Count, Max, Mean, Median, Min, Sum
 from calista.core.aggregates import AggregateDataset
 from calista.core.catalogue import PythonTypes
@@ -203,27 +204,12 @@ class Pandas_Engine(LazyEngine):
         )
 
     def is_iban(self, condition: cond.IsIban) -> Series:
-        alphabet_conversion = {chr(i + 65): str(i + 10) for i in range(26)}
         cleaned_col_str = self.dataset[condition.col_name].astype(str)
-        valid_length_col = cleaned_col_str.where(
-            (cleaned_col_str.str.len() >= 14) & (cleaned_col_str.str.len() <= 34), "0"
+        cleaned_col_str = cleaned_col_str.fillna("").str.strip()
+        is_valid_series = cleaned_col_str.apply(
+            lambda iban: label.iban_isvalid(iban) if len(iban) >= 4 else False
         )
-        cleaned_str_col = valid_length_col.str.replace("[^a-zA-Z0-9]", "", regex=True)
-        cleaned_str_col = cleaned_str_col.str.upper()
-        cleaned_col = cleaned_str_col.str[4:34] + cleaned_str_col.str[0:4]
-        for letter, value in alphabet_conversion.items():
-            cleaned_col = cleaned_col.str.replace(letter, value)
-        cleaned_col = (
-            (
-                (
-                    (cleaned_col.str[0:16].astype(np.int64) % 97).astype(str)
-                    + cleaned_col.str[16:30]
-                ).astype(np.int64)
-                % 97
-            ).astype(str)
-            + cleaned_col.str[30:40]
-        ).astype(np.int64) % 97
-        return cleaned_col == 1
+        return is_valid_series
 
     def is_ip_address(self, condition: cond.IsIpAddress) -> Series:
         col = self.dataset[condition.col_name].astype(str)
