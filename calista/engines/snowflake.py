@@ -245,10 +245,10 @@ class SnowflakeEngine(Database):
     def is_date(self, condition: cond.IsDate) -> Column:
 
         date_regex_patterns = (
-            r"\b(\d{4}-\d{2}-\d{2}|"  # yyyy-mm-dd or yyyy-dd-mm
-            r"\d{2}-\d{2}-\d{4}|"  # dd-mm-yyyy or mm-dd-yyyy
-            r"\d{2}/\d{2}/\d{4}|"  # dd/mm/yyyy or mm/dd/yyyy
-            r"\d{4}/\d{2}/\d{2})\b"  # yyyy/mm/dd or yyyy/dd/mm
+            r"\b(\d{4}-\d{2}-\d{2}|"
+            r"\d{2}-\d{2}-\d{4}|"
+            r"\d{2}/\d{2}/\d{4}|" 
+            r"\d{4}/\d{2}/\d{2})\b" 
         )
         return F.col(condition.col_name).rlike(date_regex_patterns)
 
