@@ -1,11 +1,10 @@
 import re
 from snowflake.snowpark.functions import udf
-from snowflake.snowpark.types import StringType, BooleanType
 from snowflake.snowpark.session import Session
+from snowflake.snowpark.column import Column
+from snowflake.snowpark.functions import call_udf, col
 
-
-# Check if a UDF exists in Snowflake
-def check_udf_exists(session: Session, udf_name: str) -> bool:
+def check_udf(session: Session, udf_name: str) -> bool:
     """
     Check if a UDF exists in Snowflake
     
@@ -23,6 +22,15 @@ def check_udf_exists(session: Session, udf_name: str) -> bool:
         AND routine_name = '{udf_name.upper()}'
     """).collect()
     return result[0]['COUNT'] > 0
+
+def ensure_udfs_exist(session: Session):
+    """Ensures IBAN validation UDFs exist in Snowflake."""
+    required_udfs = ['VALIDATE_IBAN', 'VALIDATE_IBAN_CHECKSUM', 'CONVERT_BBAN_SPEC_TO_REGEX']
+    
+    missing_udfs = any(not check_udf(session, udf_name) for udf_name in required_udfs)
+    
+    if missing_udfs:
+        create_iban_validation_udfs(session)
 
 
 def create_iban_validation_udfs(session: Session):
@@ -120,28 +128,14 @@ def create_iban_validation_udfs(session: Session):
     session.udf.register(validate_iban_checksum_udf)
     session.udf.register(validate_iban_udf)
 
-def validate_iban(session: Session, iban: str) -> bool:
+def check_ibans(col_name: str) -> Column:
     """
-    Validates an IBAN using Snowflake UDFs. Creates UDFs if they don't exist.
+    Validates IBAN values in the specified column using Snowflake UDFs.
     
     Args:
-        session: Snowflake session
-        iban: IBAN string to validate
-        
+        col_name: Name of the column containing IBAN strings to validate.
     Returns:
-        bool: True if IBAN is valid, False otherwise
+        Column: A Snowflake Column expression representing the validation result.
     """
-    required_udfs = ['VALIDATE_IBAN', 'VALIDATE_IBAN_CHECKSUM', 'CONVERT_BBAN_SPEC_TO_REGEX']
-    
-    # Check if UDFs exists
-    missing_udfs = any(not check_udf_exists(session, udf_name) for udf_name in required_udfs)
-    # Create UDFs if they don't exist
-    if missing_udfs:
-        create_iban_validation_udfs(session)
-    
-    # query
-    validation_query = f"""
-    SELECT VALIDATE_IBAN('{iban}') as is_valid
-    """
-    result = session.sql(validation_query).collect()
-    return bool(result[0]['IS_VALID'])
+
+    return call_udf("VALIDATE_IBAN", col(col_name))
