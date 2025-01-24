@@ -4,6 +4,8 @@ from snowflake.snowpark.session import Session
 from snowflake.snowpark.column import Column
 from typing import Dict, Any
 
+from snowflake.snowpark import DataFrame, DataFrameReader, DataFrameWriter, Row
+
 
 IBAN_SPECIFICATIONS: Dict[str, Dict[str, Any]] = {
   "AD": {
@@ -2020,13 +2022,15 @@ def _convert_bban_spec_to_regex(spec: str) -> str:
     
     return f"^{pattern.sub(replacer, spec)}$"
 
+
 def _create_iban_specs_table(session: Session):
     """Creates and populates the IBAN_SPECS table with precomputed regex patterns"""
     specs_data = [
         (country, spec["iban_length"], _convert_bban_spec_to_regex(spec["bban_spec"]))
         for country, spec in IBAN_SPECIFICATIONS.items()
     ]
-    
+
+    #TODO utiliser session.create_dataframe
     session.sql("CREATE OR REPLACE TABLE IBAN_SPECS (country_code STRING, iban_length NUMBER, bban_regex STRING)").collect()
     session.sql("DELETE FROM IBAN_SPECS").collect()
     
@@ -2035,6 +2039,7 @@ def _create_iban_specs_table(session: Session):
             INSERT INTO IBAN_SPECS 
             VALUES ('{country}', {length}, '{regex}')
         """).collect()
+
 
 def _create_sql_udfs(session: Session):
     """Creates optimized SQL UDFs for IBAN validation"""
