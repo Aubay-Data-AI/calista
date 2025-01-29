@@ -100,7 +100,7 @@ def _create_sql_udfs(session: Session):
 
     # Validate IBAN Checksum
     session.sql("""
-    CREATE OR REPLACE FUNCTION VALIDATE_IBAN_CHECKSUM(IBAN STRING)
+    CREATE OR REPLACE TEMPORARY FUNCTION VALIDATE_IBAN_CHECKSUM(IBAN STRING)
     RETURNS BOOLEAN
     AS $$
     SELECT 
@@ -124,7 +124,7 @@ def _create_sql_udfs(session: Session):
 
     # Main IBAN Validation
     session.sql("""
-    CREATE OR REPLACE FUNCTION VALIDATE_IBAN(IBAN STRING)
+    CREATE OR REPLACE TEMPORARY FUNCTION VALIDATE_IBAN(IBAN STRING)
     RETURNS BOOLEAN
     AS $$
     WITH cleaned_iban AS (
@@ -139,6 +139,7 @@ def _create_sql_udfs(session: Session):
     )
     SELECT
         cc.cleaned IS NOT NULL AND
+        s.iban_length IS NOT NULL AND
         cc.iban_length = s.iban_length AND
         REGEXP_LIKE(SUBSTR(cc.cleaned, 5), s.bban_regex) AND
         VALIDATE_IBAN_CHECKSUM(cc.cleaned) 
@@ -148,19 +149,21 @@ def _create_sql_udfs(session: Session):
     $$
     """).collect()
 
+
 def ensure_udfs_exist(session: Session):
     """Ensures all required database objects exist"""
 
-    # Check if IBAN_SPECS table exists
-    table_exists = session.sql("""
+    # Check if IBAN_SPECS view exists
+    view_exists = session.sql("""
         SELECT EXISTS (
             SELECT 1 
-            FROM information_schema.tables 
-            WHERE table_name = 'IBAN_SPECS'
+            FROM information_schema.views 
+            WHERE table_name = 'IBAN_SPECS' 
+            AND table_type = 'LOCAL TEMPORARY'
         ) AS exists
     """).collect()[0]["EXISTS"]
     
-    if not table_exists:
+    if not view_exists:
         _create_iban_specs_table(session)
         _create_sql_udfs(session)
     else:
@@ -173,6 +176,7 @@ def ensure_udfs_exist(session: Session):
         
         if not funcs_exist:
             _create_sql_udfs(session)
+
 
 def check_iban(col_name: str) -> Column:
     """
