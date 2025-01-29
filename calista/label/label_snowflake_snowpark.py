@@ -1,11 +1,7 @@
 import re
-from snowflake.snowpark.functions import col, call_udf
-from snowflake.snowpark.session import Session
+from snowflake.snowpark.functions import F
 from snowflake.snowpark.column import Column
-from snowflake.snowpark.types import StructType, StructField, StringType, IntegerType
 from typing import Dict, Any
-
-from snowflake.snowpark import DataFrame, DataFrameReader, DataFrameWriter, Row
 
 IBAN_SPECIFICATIONS: Dict[str, Dict[str, Any]] = {
   "AD": {
@@ -2006,6 +2002,12 @@ IBAN_SPECIFICATIONS: Dict[str, Dict[str, Any]] = {
 }
 
 
+IBAN_REGEX_PATTERNS = {
+    country: re.compile(_convert_bban_spec_to_regex(spec["bban_spec"])).pattern
+    for country, spec in IBAN_SPECIFICATIONS.items()
+}
+
+
 def _convert_bban_spec_to_regex(spec: str) -> str:
     """Converts BBAN spec to regex pattern"""
     spec_to_re = {"n": r"\d", "a": r"[A-Z]", "c": r"[A-Za-z0-9]", "e": r" "}
@@ -2023,118 +2025,70 @@ def _convert_bban_spec_to_regex(spec: str) -> str:
     return f"^{pattern.sub(replacer, spec)}$"
 
 
-def _create_iban_specs_table(session: Session):
-    """Creates a temporary IBAN_SPECS view using direct dictionary conversion"""
-    # Extract and transform the data in one operation
-    specs_data = [
-        {
-            "country_code": country,
-            "iban_length": spec["iban_length"],
-            "bban_regex": _convert_bban_spec_to_regex(spec["bban_spec"])
-        }
-        for country, spec in IBAN_SPECIFICATIONS.items()
-    ]
-
-    # Schema definition (explicit typing ensures data quality)
-    specs_schema = StructType([
-        StructField("country_code", StringType()),
-        StructField("iban_length", IntegerType()),
-        StructField("bban_regex", StringType())
-    ])
-    
-    # Create DataFrame directly from the list of dictionaries
-    specs_df = session.create_dataframe(specs_data, specs_schema)
-    
-    # Create temporary view
-    specs_df.create_or_replace_temp_view("IBAN_SPECS")
-
-
-def _create_sql_udfs(session: Session):
-    """Creates optimized SQL UDFs for IBAN validation"""
-
-    # Validate IBAN Checksum
-    session.sql("""
-    CREATE OR REPLACE TEMPORARY FUNCTION VALIDATE_IBAN_CHECKSUM(IBAN STRING)
-    RETURNS BOOLEAN
-    AS $$
-    SELECT 
-        CASE 
-            WHEN IBAN IS NULL OR LENGTH(IBAN) < 4 THEN FALSE
-            ELSE (
-                MOD(
-                    TO_NUMBER(
-                        REGEXP_REPLACE(
-                            UPPER(SUBSTR(IBAN, 5) || SUBSTR(IBAN, 1, 4)),
-                            '[A-Z]', 
-                            TO_CHAR(ASCII(REGEXP_SUBSTR(UPPER(SUBSTR(IBAN, 5) || SUBSTR(IBAN, 1, 4)), '[A-Z]')) - 55)
-                        )
-                    ), 
-                    97
-                ) = 1
-            )
-        END
-    $$
-    """).collect()
-
-    # Main IBAN Validation
-    session.sql("""
-    CREATE OR REPLACE TEMPORARY FUNCTION VALIDATE_IBAN(IBAN STRING)
-    RETURNS BOOLEAN
-    AS $$
-    WITH cleaned_iban AS (
-        SELECT UPPER(REGEXP_REPLACE(IBAN, '[^A-Z0-9]', '')) AS cleaned
-    ),
-    country_check AS (
-        SELECT 
-            cleaned,
-            SUBSTR(cleaned, 1, 2) AS country_code,
-            LENGTH(cleaned) AS iban_length
-        FROM cleaned_iban
-    )
-    SELECT
-        cc.cleaned IS NOT NULL AND
-        s.iban_length IS NOT NULL AND
-        cc.iban_length = s.iban_length AND
-        REGEXP_LIKE(SUBSTR(cc.cleaned, 5), s.bban_regex) AND
-        VALIDATE_IBAN_CHECKSUM(cc.cleaned) 
-    FROM country_check cc
-    LEFT JOIN IBAN_SPECS s 
-        ON cc.country_code = s.country_code
-    $$
-    """).collect()
-
-
-def ensure_udfs_exist(session: Session):
-    """Ensures all required database objects exist"""
-
-    # Check if IBAN_SPECS view exists
-    view_exists = session.sql("""
-        SELECT EXISTS (
-            SELECT 1 
-            FROM information_schema.views 
-            WHERE table_name = 'IBAN_SPECS' 
-            AND table_type = 'LOCAL TEMPORARY'
-        ) AS exists
-    """).collect()[0]["EXISTS"]
-    
-    if not view_exists:
-        _create_iban_specs_table(session)
-        _create_sql_udfs(session)
-    else:
-        # Check if UDFs exist
-        funcs_exist = session.sql("""
-            SELECT COUNT(*) = 2 AS all_exist
-            FROM information_schema.functions
-            WHERE function_name IN ('VALIDATE_IBAN', 'VALIDATE_IBAN_CHECKSUM')
-        """).collect()[0]["ALL_EXIST"]
-        
-        if not funcs_exist:
-            _create_sql_udfs(session)
-
-
 def check_iban(col_name: str) -> Column:
     """
-    Public interface for IBAN validation
-    Usage: df.withColumn("is_valid_iban", check_iban("iban_column"))
+    Validates IBAN using 4 criteria:
+    1. Country code exists in IBAN_SPECIFICATIONS
+    2. Length matches country specification
+    3. BBAN format using country-specific regex
+    4. IBAN checksum
+
+    Args:
+    col_name: Column name containing IBAN
+
+    Returns:
+    Column containing boolean values for each row
     """
-    return call_udf("VALIDATE_IBAN", col(col_name))
+    cleaned_iban = F.upper(F.regexp_replace(F.col(col_name), r'[^A-Z0-9]', ''))
+    country_code = F.substr(cleaned_iban, 1, 2)
+    cleaned_len = F.length(cleaned_iban)
+    
+    # 1. Validate country code exists in specifications
+    valid_country = country_code.isin(IBAN_SPECIFICATIONS.keys())
+    
+    # 2. Validate length matches country specification
+    length_cond = F.when(~valid_country, False)
+    for country, spec in IBAN_SPECIFICATIONS.items():
+        length_cond = length_cond.when(
+            country_code == country, 
+            cleaned_len == spec["iban_length"]
+        )
+    length_cond = length_cond.otherwise(False)
+    
+    # 3. Validate BBAN format using country-specific regex
+    bban_part = F.substr(cleaned_iban, 5)
+    regex_cond = F.when(~valid_country, False)
+    for country, pattern in IBAN_REGEX_PATTERNS.items():
+        regex_cond = regex_cond.when(
+            country_code == country,
+            F.regexp_like(bban_part, pattern)
+        )
+    regex_cond = regex_cond.otherwise(False)
+
+    # 4. Validate IBAN checksum
+    rearranged = F.concat(F.substr(cleaned_iban, 5), F.substr(cleaned_iban, 1, 4))
+    translated = F.regexp_replace(
+        rearranged, 
+        '[A-Z]', 
+        (F.ascii(F.regexp_substr(rearranged, '[A-Z]')) - 55).cast("STRING")
+    )
+    
+    # Split the 'IBAN' into 5 parts of 15 digits each : This code is a workaround for IBANS exceeding BIGINT limit
+    parts = [
+        F.substr(translated, 1, 15).cast("NUMERIC(38,0)"),
+        F.substr(translated, 16, 15).cast("NUMERIC(38,0)"),
+        F.substr(translated, 31, 15).cast("NUMERIC(38,0)"),
+        F.substr(translated, 46, 15).cast("NUMERIC(38,0)"),
+        F.substr(translated, 61, 15).cast("NUMERIC(38,0)")
+    ]
+
+    # Calculate modulo properly by chaining the operations
+    chunk1 = F.coalesce(parts[0], F.lit(0))
+    mod1 = chunk1 % 97
+    mod2 = ((mod1 * F.pow(10, F.least(F.length(parts[1]), 15))) + F.coalesce(parts[1], F.lit(0))) % 97
+    mod3 = ((mod2 * F.pow(10, F.least(F.length(parts[2]), 15))) + F.coalesce(parts[2], F.lit(0))) % 97
+    mod4 = ((mod3 * F.pow(10, F.least(F.length(parts[3]), 15))) + F.coalesce(parts[3], F.lit(0))) % 97
+    final_mod = ((mod4 * F.pow(10, F.least(F.length(parts[4]), 15))) + F.coalesce(parts[4], F.lit(0))) % 97
+    checksum_cond = final_mod == 1
+
+    return valid_country & length_cond & regex_cond & checksum_cond
