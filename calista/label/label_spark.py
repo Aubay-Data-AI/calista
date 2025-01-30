@@ -1,15 +1,10 @@
 import json
 import re
+import os
 
-from pyspark.sql.functions import explode, col, upper, expr, from_json, length, upper, when
-from pyspark.sql.types import StructType, StructField, StringType, BooleanType, IntegerType, MapType, ArrayType
+from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
-import pyspark.sql.types as T
-from pyspark.sql import Column, DataFrame, SparkSession
-from pyspark.sql.group import GroupedData
-from pyspark.sql.window import Window
-from pyspark.sql import DataFrame
-from pyspark.sql.types import BooleanType
+from pyspark.sql.types import StructType, StructField, StringType, BooleanType, IntegerType
 
 
 def convert_bban_spec_to_regex(spec: str) -> str:
@@ -40,6 +35,16 @@ def flatten_iban_data(iban_specifications):
     return flattened_data
 
 
+def save_data(df, iban_length_map, bban_spec_map):
+    if not os.path.exists('/content/iban_data'):
+        os.makedirs('/content/iban_data')
+    df.write.mode("overwrite").parquet("/content/iban_data/iban_data.parquet")
+    with open("/content/iban_data/iban_length_map.json", "w") as f:
+        json.dump(iban_length_map, f)
+    with open("/content/iban_data/bban_spec_map.json", "w") as f:
+        json.dump(bban_spec_map, f)
+
+
 def create_df():
     spark = SparkSession.builder.appName("IBANValidation").getOrCreate()
     json_path = "/content/list_iban.json"
@@ -57,20 +62,32 @@ def create_df():
     ])
     flattened_data = flatten_iban_data(iban_specifications)
     df = spark.createDataFrame(flattened_data, schema)
-    return df
+    iban_length_map = {row["country"]: row["iban_length"] for row in df.collect()}
+    bban_spec_map = {row["country"]: row["bban_regex"] for row in df.collect()}
+
+    save_data(df, iban_length_map, bban_spec_map)
+    return df, iban_length_map, bban_spec_map
 
 
-def is_iban(condition: cond.IsIban) -> Column:
-    iban_specifications = create_df()
+def load_saved_data():
+    spark = SparkSession.builder.appName("IBANValidation").getOrCreate()
+    df = spark.read.parquet("/content/iban_data/iban_data.parquet")
+    with open("/content/iban_data/iban_length_map.json", "r") as f:
+        iban_length_map = json.load(f)
+    with open("/content/iban_data/bban_spec_map.json", "r") as f:
+        bban_spec_map = json.load(f)
+    return df, iban_length_map, bban_spec_map
+
+
+def is_iban(self, condition: cond.IsIban) -> Column:
+    iban_specifications, iban_length_map, bban_spec_map = load_saved_data()
     cleaned_str_col = F.upper(F.regexp_replace(F.col(condition.col_name), "[^A-Z0-9]", ""))
 
     country_code_col = F.substring(F.col(condition.col_name), 1, 2)
-    iban_length_map = {row["country"]: row["iban_length"] for row in iban_specifications.collect()}
     iban_length_col = F.create_map([F.lit(x) for pair in iban_length_map.items() for x in pair]).getItem(
         country_code_col)
     valid_length = (F.length(cleaned_str_col) == iban_length_col)
 
-    bban_spec_map = {row["country"]: row["bban_regex"] for row in iban_specifications.collect()}
     bban_regex_col = F.create_map([F.lit(x) for pair in bban_spec_map.items() for x in pair]).getItem(country_code_col)
     string_length_col = F.length(cleaned_str_col)
     bban_col = cleaned_str_col.substr(F.lit(5), string_length_col - F.lit(4))
@@ -82,12 +99,25 @@ def is_iban(condition: cond.IsIban) -> Column:
     alphabet_conversion = {chr(i + 65): str(i + 10) for i in range(26)}
     for letter, value in alphabet_conversion.items():
         cleaned_col = F.regexp_replace(cleaned_col, letter, value)
-    is_iban_col = (
-            F.concat(
-                (F.substring(cleaned_col, 1, 15) % 97).cast("bigint").cast("string"),
-                F.substring(cleaned_col, 16, 34),
-            ).cast("bigint")
-            % 97
-    )
-    valid_checksum = (is_iban_col == 1)
-    return valid_length & valid_checksum & valid_bban
+
+    current_value = cleaned_col
+    chunk1 = F.substring(current_value, 1, 15).cast("bigint") % 97
+    chunk2 = F.substring(current_value, 16, 55)
+    current_value = F.concat(chunk1.cast("string"), chunk2)
+
+    chunk1 = F.substring(current_value, 1, 15).cast("bigint") % 97
+    chunk2 = F.substring(current_value, 16, 55)
+    current_value = F.concat(chunk1.cast("string"), chunk2)
+
+    chunk1 = F.substring(current_value, 1, 15).cast("bigint") % 97
+    chunk2 = F.substring(current_value, 16, 55)
+    current_value = F.concat(chunk1.cast("string"), chunk2)
+
+    chunk1 = F.substring(current_value, 1, 15).cast("bigint") % 97
+    chunk2 = F.substring(current_value, 16, 55)
+    current_value = F.concat(chunk1.cast("string"), chunk2)
+
+    final_mod = current_value.cast("bigint") % 97
+    valid_checksum = (final_mod == 1)
+
+    return valid_length & valid_bban & valid_checksum
