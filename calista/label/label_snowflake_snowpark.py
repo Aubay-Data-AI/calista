@@ -2025,7 +2025,7 @@ IBAN_REGEX_PATTERNS = {
 }
 
 
-def check_iban(col_name: str) -> Column:
+def check_ibans(col_name: str) -> Column:
     """
     Validates IBAN using 4 criteria:
     1. Country code exists in IBAN_SPECIFICATIONS
