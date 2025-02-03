@@ -4,7 +4,6 @@ from snowflake.snowpark.session import Session
 from snowflake.snowpark.column import Column
 from snowflake.snowpark.types import StructType, StructField, StringType, IntegerType
 from typing import Dict, Any
-
 from snowflake.snowpark import DataFrame, DataFrameReader, DataFrameWriter, Row
 
 IBAN_SPECIFICATIONS: Dict[str, Dict[str, Any]] = {
