@@ -2,6 +2,8 @@ import re
 import snowflake.snowpark.functions as F
 from snowflake.snowpark.column import Column
 from typing import Dict, Any
+from snowflake.snowpark.types import BooleanType
+from snowflake.snowpark.functions import udf
 
 IBAN_SPECIFICATIONS: Dict[str, Dict[str, Any]] = {
   "AD": {
@@ -2027,7 +2029,7 @@ IBAN_REGEX_PATTERNS = {
 
 def check_ibans(col_name: str) -> Column:
     """
-    Validates IBAN using 4 criteria:
+    Validates IBAN using 4 criteria in a short-circuit manner:
     1. Country code exists in IBAN_SPECIFICATIONS
     2. Length matches country specification
     3. BBAN format using country-specific regex
@@ -2039,57 +2041,57 @@ def check_ibans(col_name: str) -> Column:
     Returns:
     Column containing boolean values for each row
     """
-
     cleaned_iban = F.upper(F.regexp_replace(F.col(col_name), r'[^A-Z0-9]', ''))
     country_code = F.substr(cleaned_iban, 1, 2)
     cleaned_len = F.length(cleaned_iban)
 
-    # 1. Validate country code exists in specifications
-    valid_country = country_code.isin(list(IBAN_SPECIFICATIONS.keys()))
-    
-    # 2. Validate length matches country specification
-    length_cond = F.when(~valid_country, False)
+    # Checksum calculation function
+    def calculate_checksum(iban_col: Column) -> Column:
+        rearranged = F.concat(F.substr(iban_col, 5), F.substr(iban_col, 1, 4))
+        alphabet_conversion = {chr(i + 65): str(i + 10) for i in range(26)}
+        for letter, value in alphabet_conversion.items():
+            rearranged = F.regexp_replace(rearranged, letter, value)
+        
+        current_value = rearranged
+        for _ in range(4):
+            chunk1 = F.substring(current_value, 1, 15).cast("bigint") % 97
+            chunk2 = F.substring(current_value, 16, 55)
+            current_value = F.concat(chunk1.cast("string"), chunk2)
+        
+        return current_value.cast("bigint") % 97 == 1
+
+    # length validation condition
+    length_cond = F.lit(False)
     for country, spec in IBAN_SPECIFICATIONS.items():
-        length_cond = length_cond.when(
-            country_code == country, 
-            cleaned_len == spec["iban_length"]
-        )
-    length_cond = length_cond.otherwise(False)
-    
-    # 3. Validate BBAN format using country-specific regex
-    bban_part = F.substr(cleaned_iban, 5)
-    regex_cond = F.when(~valid_country, False)
-    for country, pattern in IBAN_REGEX_PATTERNS.items():
-        regex_cond = regex_cond.when(
+        length_cond = F.iff(
             country_code == country,
-            bban_part.rlike(pattern)
+            cleaned_len == spec["iban_length"],
+            length_cond
         )
-    regex_cond = regex_cond.otherwise(False)
 
-    # 4. Validate IBAN checksum
-    rearranged = F.concat(F.substr(cleaned_iban, 5), F.substr(cleaned_iban, 1, 4))
+    # BBAN format validation condition
+    regex_cond = F.lit(False)
+    for country, pattern in IBAN_REGEX_PATTERNS.items():
+        regex_cond = F.iff(
+            country_code == country,
+            F.substr(cleaned_iban, 5).rlike(pattern),
+            regex_cond
+        )
 
-    alphabet_conversion = {chr(i + 65): str(i + 10) for i in range(26)}
-    for letter, value in alphabet_conversion.items():
-        rearranged = F.regexp_replace(rearranged, letter, value)
+    # Validation chain : country -> length -> regex -> checksum. Return False if any condition fails at some point
+    result = F.when(
+        # Check if country code exists in IBAN_SPECIFICATIONS
+        country_code.isin(list(IBAN_SPECIFICATIONS.keys())),
+        F.when(
+            # Check if length matches country specification
+            length_cond,
+            F.when(
+                # Check if BBAN format is valid
+                regex_cond,
+                # Check if checksum is valid
+                calculate_checksum(cleaned_iban)
+            ).otherwise(False)
+        ).otherwise(False)
+    ).otherwise(False)
 
-    chunk1 = F.substring(rearranged, 1, 15).cast("bigint") % 97
-    chunk2 = F.substring(rearranged, 16, 55)
-    current_value = F.concat(chunk1.cast("string"), chunk2)
-
-    chunk1 = F.substring(current_value, 1, 15).cast("bigint") % 97
-    chunk2 = F.substring(current_value, 16, 55)
-    current_value = F.concat(chunk1.cast("string"), chunk2)
-
-    chunk1 = F.substring(current_value, 1, 15).cast("bigint") % 97
-    chunk2 = F.substring(current_value, 16, 55)
-    current_value = F.concat(chunk1.cast("string"), chunk2)
-
-    chunk1 = F.substring(current_value, 1, 15).cast("bigint") % 97
-    chunk2 = F.substring(current_value, 16, 55)
-    current_value = F.concat(chunk1.cast("string"), chunk2)
-
-    final_mod = current_value.cast("bigint") % 97
-    valid_checksum = (final_mod == 1)
-
-    return valid_country & length_cond & regex_cond & valid_checksum
+    return result
