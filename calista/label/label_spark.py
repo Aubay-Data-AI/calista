@@ -1,3 +1,4 @@
+from typing import Dict, List, Tuple
 import json
 import os
 import re
@@ -25,7 +26,6 @@ from pyspark.sql.types import (
     StructField,
     StructType,
 )
-from pyspark.sql.window import Window
 
 import calista.core._conditions as cond
 from calista.label.tools import get_file_path
@@ -40,7 +40,7 @@ def convert_bban_spec_to_regex(spec: str) -> str:
     return rf"^{re.sub(spec_re, convert, spec)}$"
 
 
-def flatten_iban_data(iban_specifications):
+def flatten_iban_data(iban_specifications: Dict[str, Dict]) -> List[Dict[str, str | bool | int]]:
     flattened_data = []
     for country_code, specs in iban_specifications.items():
         positions_str = json.dumps(specs['positions'])
@@ -59,7 +59,7 @@ def flatten_iban_data(iban_specifications):
     return flattened_data
 
 
-def save_data(df, iban_length_map, bban_spec_map):
+def save_data(df: DataFrame, iban_length_map: Dict[str, int], bban_spec_map: Dict[str, str]) -> None:
     if not os.path.exists('/calista/data'):
         os.makedirs('/calsita/data')
     df.write.mode("overwrite").parquet("/calista/data/iban_data.parquet")
@@ -69,7 +69,7 @@ def save_data(df, iban_length_map, bban_spec_map):
         json.dump(bban_spec_map, f)
 
 
-def create_df():
+def create_df() -> Tuple[DataFrame, Dict[str, int], Dict[str, str]]:
     spark = SparkSession.builder.appName("IBANValidation").getOrCreate()
     json_path = "/calista/data/list_iban.json"
     with open(json_path, "r") as file:
@@ -93,7 +93,7 @@ def create_df():
     return df, iban_length_map, bban_spec_map
 
 
-def load_saved_data():
+def load_saved_data() -> Tuple[DataFrame, Dict[str, int], Dict[str, str]]:
     spark = SparkSession.builder.appName("IBANValidation").getOrCreate()
     json_path_iban_data = get_file_path("iban_data.parquet")
     df = spark.read.parquet(json_path_iban_data)
