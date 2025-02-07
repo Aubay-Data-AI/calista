@@ -1,10 +1,34 @@
 import json
-import re
 import os
+import re
 
-from pyspark.sql import SparkSession
+from pyspark.sql import Column, DataFrame, SparkSession
 from pyspark.sql import functions as F
-from pyspark.sql.types import StructType, StructField, StringType, BooleanType, IntegerType
+from pyspark.sql.functions import (
+    broadcast,
+    col,
+    explode,
+    expr,
+    from_json,
+    length,
+    regexp_like,
+    upper,
+    when,
+)
+from pyspark.sql.group import GroupedData
+from pyspark.sql.types import (
+    ArrayType,
+    BooleanType,
+    IntegerType,
+    MapType,
+    StringType,
+    StructField,
+    StructType,
+)
+from pyspark.sql.window import Window
+
+import calista.core._conditions as cond
+from calista.label.tools import get_file_path
 
 
 def convert_bban_spec_to_regex(spec: str) -> str:
@@ -36,18 +60,18 @@ def flatten_iban_data(iban_specifications):
 
 
 def save_data(df, iban_length_map, bban_spec_map):
-    if not os.path.exists('/content/iban_data'):
-        os.makedirs('/content/iban_data')
-    df.write.mode("overwrite").parquet("/content/iban_data/iban_data.parquet")
-    with open("/content/iban_data/iban_length_map.json", "w") as f:
+    if not os.path.exists('/calista/data'):
+        os.makedirs('/calsita/data')
+    df.write.mode("overwrite").parquet("/calista/data/iban_data.parquet")
+    with open("/calista/data/iban_length_map.json", "w") as f:
         json.dump(iban_length_map, f)
-    with open("/content/iban_data/bban_spec_map.json", "w") as f:
+    with open("/calista/data/bban_spec_map.json", "w") as f:
         json.dump(bban_spec_map, f)
 
 
 def create_df():
     spark = SparkSession.builder.appName("IBANValidation").getOrCreate()
-    json_path = "/content/list_iban.json"
+    json_path = "/calista/data/list_iban.json"
     with open(json_path, "r") as file:
         iban_specifications = json.load(file)
     schema = StructType([
@@ -71,18 +95,20 @@ def create_df():
 
 def load_saved_data():
     spark = SparkSession.builder.appName("IBANValidation").getOrCreate()
-    df = spark.read.parquet("/content/iban_data/iban_data.parquet")
-    with open("/content/iban_data/iban_length_map.json", "r") as f:
+    json_path_iban_data = get_file_path("iban_data.parquet")
+    df = spark.read.parquet(json_path_iban_data)
+    json_path_iban_length_map = get_file_path("iban_length_map.json")
+    with open(json_path_iban_length_map, "r") as f:
         iban_length_map = json.load(f)
-    with open("/content/iban_data/bban_spec_map.json", "r") as f:
+    json_path_bban_spec_map = get_file_path("bban_spec_map.json")
+    with open(json_path_bban_spec_map, "r") as f:
         bban_spec_map = json.load(f)
     return df, iban_length_map, bban_spec_map
 
 
-def is_iban(self, condition: cond.IsIban) -> Column:
+def is_iban(condition: cond.IsIban) -> Column:
     iban_specifications, iban_length_map, bban_spec_map = load_saved_data()
     cleaned_str_col = F.upper(F.regexp_replace(F.col(condition.col_name), "[^A-Z0-9]", ""))
-
     country_code_col = F.substring(F.col(condition.col_name), 1, 2)
     iban_length_col = F.create_map([F.lit(x) for pair in iban_length_map.items() for x in pair]).getItem(
         country_code_col)
@@ -99,24 +125,19 @@ def is_iban(self, condition: cond.IsIban) -> Column:
     alphabet_conversion = {chr(i + 65): str(i + 10) for i in range(26)}
     for letter, value in alphabet_conversion.items():
         cleaned_col = F.regexp_replace(cleaned_col, letter, value)
-
     current_value = cleaned_col
     chunk1 = F.substring(current_value, 1, 15).cast("bigint") % 97
     chunk2 = F.substring(current_value, 16, 55)
     current_value = F.concat(chunk1.cast("string"), chunk2)
-
     chunk1 = F.substring(current_value, 1, 15).cast("bigint") % 97
     chunk2 = F.substring(current_value, 16, 55)
     current_value = F.concat(chunk1.cast("string"), chunk2)
-
     chunk1 = F.substring(current_value, 1, 15).cast("bigint") % 97
     chunk2 = F.substring(current_value, 16, 55)
     current_value = F.concat(chunk1.cast("string"), chunk2)
-
     chunk1 = F.substring(current_value, 1, 15).cast("bigint") % 97
     chunk2 = F.substring(current_value, 16, 55)
     current_value = F.concat(chunk1.cast("string"), chunk2)
-
     final_mod = current_value.cast("bigint") % 97
     valid_checksum = (final_mod == 1)
 
