@@ -31,7 +31,8 @@ from calista.core.catalogue import PythonTypes
 from calista.core.database import Database
 from calista.core.metrics import Metrics
 from calista.core.types_alias import ColumnName, PythonType
-from calista.label.label_snowflake_snowpark import check_ibans
+#from calista.label.label_snowflake_snowpark import check_ibans
+from calista.label.label_snowflake_udfs import init_udf, check_ibans
 
 
 def _is_not_null(e: C.ColumnOrName) -> Column:
@@ -58,7 +59,8 @@ class SnowflakeEngine(Database):
             print(f"Error establishing connection: {e}")
         self.dataset = None
         self._config = config
-        #ensure_udfs_exist(self.snowflake)
+        init_udf(self.snowflake)
+        print(self.snowflake.sql("SHOW USER FUNCTIONS").collect())
 
     def _load_from_database(self, table: str, schema: str, database: str) -> None:
         self.snowflake.sql(f"USE {database}").collect()
