@@ -60,7 +60,6 @@ class SnowflakeEngine(Database):
         self.dataset = None
         self._config = config
         init_udf(self.snowflake)
-        print(self.snowflake.sql("SHOW USER FUNCTIONS").collect())
 
     def _load_from_database(self, table: str, schema: str, database: str) -> None:
         self.snowflake.sql(f"USE {database}").collect()
