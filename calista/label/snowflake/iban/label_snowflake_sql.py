@@ -420,6 +420,7 @@ IBAN_VALIDATION_RULES: Dict[str, Dict[str, Union[int, str]]] = {
     }
 }
 
+
 def init_validation_rules(session: Session):
     """
     Initialize a temporary table or view to store IBAN validation rules.
@@ -433,7 +434,7 @@ def init_validation_rules(session: Session):
         ("AL", 28, r"^\d{8}[A-Za-z0-9]{16}$"),
         ("AT", 20, r"^\d{5}\d{11}$"),
         ("AZ", 28, r"^[A-Z]{4}[A-Za-z0-9]{20}$")
-        # Add more rules here as needed
+        #... test , ajouter les autres pays après
     ]
 
     session.create_dataframe(rules_data, schema=["country_code", "length", "regex"]) \
@@ -533,7 +534,7 @@ def init_udf(session: Session):
         $$;
     """)
 
-    #check if the UDFs are created
+    #check UDFs
     session.sql("SHOW FUNCTIONS LIKE 'calculate_checksum'").show()
     session.sql("SHOW FUNCTIONS LIKE 'validate_iban'").show()
 
