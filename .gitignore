@@ -169,3 +169,9 @@ tests/table/parameters.py
 tests/table/*.json
 
 .DS_Store
+
+#benchmarking
+benchmarking.py
+benchmarking.ipynb
+list_iban.json
+iban_data.csv
