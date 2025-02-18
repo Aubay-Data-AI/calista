@@ -32,7 +32,7 @@ from calista.core.database import Database
 from calista.core.metrics import Metrics
 from calista.core.types_alias import ColumnName, PythonType
 #from calista.label.label_snowflake_snowpark import check_ibans
-from calista.label.label_snowflake_sql import init_udf, check_ibans
+from calista.label.snowflake.iban.label_snowflake_udfs import init_udf, check_ibans
 
 
 def _is_not_null(e: C.ColumnOrName) -> Column:
