@@ -25,7 +25,7 @@ from pandas.core.groupby import DataFrameGroupBy
 
 import calista.core._conditions as cond
 import calista.core.rules as R
-import calista.label.pandas.iban.label_pandas as label
+import calista.label.pandas.iban.iban as label
 from calista.core._aggregate_conditions import Count, Max, Mean, Median, Min, Sum
 from calista.core.aggregates import AggregateDataset
 from calista.core.catalogue import PythonTypes

@@ -14,7 +14,7 @@
 
 import re
 import json
-from calista.label.tools import get_file_path
+from calista.label.resources.tools import get_file_path
 
 def iban_isvalid(iban: str) -> bool:
     iban = re.sub(r'[^a-zA-Z0-9]', '', iban)
