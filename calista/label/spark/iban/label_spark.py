@@ -5,29 +5,14 @@ import re
 
 from pyspark.sql import Column, DataFrame, SparkSession
 from pyspark.sql import functions as F
-from pyspark.sql.functions import (
-    broadcast,
-    col,
-    explode,
-    expr,
-    from_json,
-    length,
-    regexp_like,
-    upper,
-    when,
-)
-from pyspark.sql.group import GroupedData
 from pyspark.sql.types import (
-    ArrayType,
     BooleanType,
     IntegerType,
-    MapType,
     StringType,
     StructField,
     StructType,
 )
 
-import calista.core._conditions as cond
 from calista.label.tools import get_file_path
 
 
@@ -106,10 +91,10 @@ def load_saved_data() -> Tuple[DataFrame, Dict[str, int], Dict[str, str]]:
     return df, iban_length_map, bban_spec_map
 
 
-def is_iban(condition: cond.IsIban) -> Column:
+def is_iban(col_name : str) -> Column:
     iban_specifications, iban_length_map, bban_spec_map = load_saved_data()
-    cleaned_str_col = F.upper(F.regexp_replace(F.col(condition.col_name), "[^A-Z0-9]", ""))
-    country_code_col = F.substring(F.col(condition.col_name), 1, 2)
+    cleaned_str_col = F.upper(F.regexp_replace(F.col(col_name), "[^A-Z0-9]", ""))
+    country_code_col = F.substring(F.col(col_name), 1, 2)
     iban_length_col = F.create_map([F.lit(x) for pair in iban_length_map.items() for x in pair]).getItem(
         country_code_col)
     valid_length = (F.length(cleaned_str_col) == iban_length_col)
