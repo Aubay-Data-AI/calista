@@ -4,7 +4,6 @@ import snowflake.snowpark.functions as F
 from snowflake.snowpark.types import StringType, BooleanType
 from snowflake.snowpark.column import Column
 from snowflake.snowpark import Session
-from snowflake.snowpark.functions import udf
 
 ALPHABET_CONVERSION = str.maketrans({chr(i + 65): str(i + 10) for i in range(26)})
 

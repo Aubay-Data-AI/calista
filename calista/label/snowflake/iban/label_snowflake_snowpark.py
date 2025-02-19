@@ -1,9 +1,6 @@
-import re
 import snowflake.snowpark.functions as F
 from snowflake.snowpark.column import Column
-from typing import Dict, Any, Union
-from snowflake.snowpark.types import BooleanType
-from snowflake.snowpark.functions import udf
+from typing import Dict, Union
 
 
 IBAN_VALIDATION_RULES: Dict[str, Dict[str, Union[int, str]]] = {
