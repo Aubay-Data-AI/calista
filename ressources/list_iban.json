@@ -105,6 +105,7 @@
     "iban_spec": "BA2!n3!n3!n8!n2!n",
     "iban_length": 20,
     "positions": {
+      
       "account_code": [
         6,
         16

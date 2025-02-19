@@ -31,6 +31,8 @@ from calista.core.catalogue import PythonTypes
 from calista.core.database import Database
 from calista.core.metrics import Metrics
 from calista.core.types_alias import ColumnName, PythonType
+#from calista.label.label_snowflake_snowpark import check_ibans
+from calista.label.snowflake.iban.label_snowflake_udfs import init_udf, check_ibans
 
 
 def _is_not_null(e: C.ColumnOrName) -> Column:
@@ -57,6 +59,7 @@ class SnowflakeEngine(Database):
             print(f"Error establishing connection: {e}")
         self.dataset = None
         self._config = config
+        init_udf(self.snowflake)
 
     def _load_from_database(self, table: str, schema: str, database: str) -> None:
         self.snowflake.sql(f"USE {database}").collect()
@@ -170,33 +173,7 @@ class SnowflakeEngine(Database):
         )
 
     def is_iban(self, condition: cond.IsIban) -> Column:
-        alphabet_conversion = {chr(i + 65): str(i + 10) for i in range(26)}
-
-        check_valid_length = F.when(
-            (F.length(F.col(condition.col_name)) >= 14)
-            & (F.length(F.col(condition.col_name)) <= 34),
-            F.col(condition.col_name),
-        ).otherwise("0")
-
-        cleaned_str_col = F.regexp_replace(check_valid_length, "[^a-zA-Z0-9]", "")
-        cleaned_col = F.concat(
-            F.substring(cleaned_str_col, 5, 34), F.substring(cleaned_str_col, 1, 4)
-        )
-
-        cleaned_col = F.upper(cleaned_col)
-
-        for letter, value in alphabet_conversion.items():
-            cleaned_col = F.regexp_replace(cleaned_col, letter, value)
-
-        is_iban_col = (
-            F.concat(
-                (F.substring(cleaned_col, 1, 15) % 97).cast("long").cast("string"),
-                F.substring(cleaned_col, 16, 34),
-            ).cast("long")
-            % 97
-        )
-
-        return is_iban_col == 1
+        return check_ibans(condition.col_name)
 
     def is_ip_address(self, condition: cond.IsIpAddress) -> Column:
         ipv6_regex = (
@@ -245,10 +222,10 @@ class SnowflakeEngine(Database):
     def is_date(self, condition: cond.IsDate) -> Column:
 
         date_regex_patterns = (
-            r"\b(\d{4}-\d{2}-\d{2}|"  # yyyy-mm-dd or yyyy-dd-mm
-            r"\d{2}-\d{2}-\d{4}|"  # dd-mm-yyyy or mm-dd-yyyy
-            r"\d{2}/\d{2}/\d{4}|"  # dd/mm/yyyy or mm/dd/yyyy
-            r"\d{4}/\d{2}/\d{2})\b"  # yyyy/mm/dd or yyyy/dd/mm
+            r"\b(\d{4}-\d{2}-\d{2}|"
+            r"\d{2}-\d{2}-\d{4}|"
+            r"\d{2}/\d{2}/\d{4}|" 
+            r"\d{4}/\d{2}/\d{2})\b" 
         )
         return F.col(condition.col_name).rlike(date_regex_patterns)
 
