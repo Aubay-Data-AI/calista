@@ -173,5 +173,4 @@ tests/table/*.json
 #benchmarking
 benchmarking.py
 benchmarking.ipynb
-list_iban.json
 iban_data.csv

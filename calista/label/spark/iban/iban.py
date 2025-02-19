@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple
+from typing import Dict, Tuple
 import json
 from pyspark.sql import Column
 from pyspark.sql import functions as F
