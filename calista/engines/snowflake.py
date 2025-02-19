@@ -31,7 +31,6 @@ from calista.core.catalogue import PythonTypes
 from calista.core.database import Database
 from calista.core.metrics import Metrics
 from calista.core.types_alias import ColumnName, PythonType
-#from calista.label.label_snowflake_snowpark import check_ibans
 from calista.label.snowflake.iban.iban import init_udf, check_ibans
 
 
