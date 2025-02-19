@@ -14,7 +14,6 @@
 
 import re
 import json
-
 from calista.label.tools import get_file_path
 
 def iban_isvalid(iban: str) -> bool:
