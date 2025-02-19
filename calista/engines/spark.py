@@ -24,6 +24,7 @@ from pyspark.sql.window import Window
 
 import calista.core._conditions as cond
 import calista.core.rules as R
+import calista.label.spark.iban.label_spark as label
 from calista.core._aggregate_conditions import Count, Max, Mean, Median, Min, Sum
 from calista.core.aggregates import AggregateDataset
 from calista.core.catalogue import PythonTypes
@@ -174,33 +175,7 @@ class SparkEngine(LazyEngine):
         )
 
     def is_iban(self, condition: cond.IsIban) -> Column:
-
-        alphabet_conversion = {chr(i + 65): str(i + 10) for i in range(26)}
-
-        check_valid_length = F.when(
-            (F.length(F.col(condition.col_name)) >= 14)
-            & (F.length(F.col(condition.col_name)) <= 34),
-            F.col(condition.col_name),
-        ).otherwise(0)
-
-        cleaned_str_col = F.regexp_replace(check_valid_length, "[^a-zA-Z0-9]", "")
-
-        cleaned_col = F.concat(
-            F.substring(cleaned_str_col, 5, 34), F.substring(cleaned_str_col, 1, 4)
-        )
-
-        for letter, value in alphabet_conversion.items():
-            cleaned_col = F.regexp_replace(cleaned_col, letter, value)
-
-        is_iban_col = (
-            F.concat(
-                (F.substring(cleaned_col, 1, 15) % 97).cast("bigint").cast("string"),
-                F.substring(cleaned_col, 16, 34),
-            ).cast("bigint")
-            % 97
-        )
-
-        return is_iban_col == 1
+        return label.is_iban(condition)
 
     def is_ip_address(self, condition: cond.IsIpAddress) -> Column:
         """Merci Thomas"""
