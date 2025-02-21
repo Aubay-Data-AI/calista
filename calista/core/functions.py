@@ -411,33 +411,6 @@ def is_iban(col_name: str) -> ConditionExpression:
     return cond.IsIban(col_name=col_name)
 
 
-def is_iban(col_name: str) -> ConditionExpression:
-    """
-    Create a condition to check if a column value is an IBAN.
-
-    Args:
-        col_name (str): The name of the column.
-
-    Returns:
-        ConditionExpression: The condition to check if the column value is an IBAN.
-
-    Example
-    --------
-    >>> from calista import CalistaEngine
-    >>> from calista.core.functions import is_iban
-    >>>
-    >>> calista_table = CalistaEngine(engine = "spark").load_from_dict({"IBAN": ["FR7612548029989876543210917", "FR7630003035409876543210925", "None", None]})
-    >>> my_rule = is_iban(col_name="IBAN")
-    >>> print(calista_table.analyze(rule_name="My Rule Name", condition=my_rule))
-    rule_name : My Rule Name
-    total_row_count : 4
-    valid_row_count : 2
-    valid_row_count_pct : 50.0
-    timestamp : 2024-01-01 00:00:00.000000
-    """
-    return cond.IsIban(col_name=col_name)
-
-
 def is_unique(col_name: str) -> ConditionExpression:
     """
     Create a condition to check if all values in a column are unique.

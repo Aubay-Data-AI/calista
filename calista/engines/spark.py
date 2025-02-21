@@ -32,6 +32,8 @@ from calista.core.engine import LazyEngine
 from calista.core.metrics import Metrics
 from calista.core.types_alias import ColumnName, PythonType
 
+from calista.label.spark.iban_udf import is_valid_iban_udf
+
 
 class SparkEngine(LazyEngine):
 
@@ -175,7 +177,7 @@ class SparkEngine(LazyEngine):
         )
 
     def is_iban(self, condition: cond.IsIban) -> Column:
-        return label.is_iban(condition)
+        return is_valid_iban_udf(condition.col_name)
 
     def is_ip_address(self, condition: cond.IsIpAddress) -> Column:
         """Merci Thomas"""
