@@ -4,7 +4,7 @@ from pyspark.sql.types import BooleanType
 from pyspark.sql.functions import udf
 
 
-spark = SparkSession.builder.appName("IBANValidation").getOrCreate()
+#spark = SparkSession.builder.appName("IBANValidation").getOrCreate()
 
 
 def verifier_email_regex(email:str) -> bool:

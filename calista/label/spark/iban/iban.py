@@ -15,7 +15,7 @@ def load_saved_data() -> Tuple[Dict[str, int], Dict[str, str]]:
     return iban_length_map, bban_spec_map
 
 
-def is_valid_iban_udf(col_name : str) -> Column:
+def is_valid_iban(col_name : str) -> Column:
     iban_length_map, bban_spec_map = load_saved_data()
     cleaned_str_col = F.upper(F.regexp_replace(F.col(col_name), "[^A-Z0-9]", ""))
     country_code_col = F.substring(F.col(col_name), 1, 2)

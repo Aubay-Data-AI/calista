@@ -411,6 +411,7 @@ def is_iban(col_name: str) -> ConditionExpression:
     return cond.IsIban(col_name=col_name)
 
 
+
 def is_unique(col_name: str) -> ConditionExpression:
     """
     Create a condition to check if all values in a column are unique.

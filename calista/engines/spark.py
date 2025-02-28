@@ -32,7 +32,11 @@ from calista.core.engine import LazyEngine
 from calista.core.metrics import Metrics
 from calista.core.types_alias import ColumnName, PythonType
 
-from calista.label.spark.iban_udf import is_valid_iban_udf
+from calista.label.spark.iban.iban_udf import is_valid_iban_udf # tester en utilisant la methode udf
+from calista.label.spark.iban.iban import is_valid_iban  #tester Iban normal
+from calista.label.spark.iban.iban_schwifty import is_valid_iban_schwifty  #tester Iban normal
+
+from calista.label.spark.email_package.__email import is_valid_email
 
 
 class SparkEngine(LazyEngine):
@@ -175,9 +179,9 @@ class SparkEngine(LazyEngine):
         return F.year(condition.col_name).__getattribute__(operator)(
             F.lit(condition.value)
         )
-
+    
     def is_iban(self, condition: cond.IsIban) -> Column:
-        return is_valid_iban_udf(condition.col_name)
+        return is_valid_iban(condition.col_name)
 
     def is_ip_address(self, condition: cond.IsIpAddress) -> Column:
         """Merci Thomas"""
@@ -268,10 +272,16 @@ class SparkEngine(LazyEngine):
         boolean_type = map_boolean_type.get(data_type, [])
         return F.col(condition.col_name).isin(boolean_type)
 
-    def is_email(self, condition: cond.IsEmail) -> Column:
+    '''def is_email(self, condition: cond.IsEmail) -> Column:
         return F.col(condition.col_name).rlike(
             r"^[a-zA-Z0-9](?!.*\.\.)[\w\.-]*[a-zA-Z0-9]@[a-zA-Z]{4,}(\.[A-Za-z]{2,})+$"
-        )
+        )'''
+    
+    def is_email(self, condition: cond.IsEmail) -> Column:
+        return is_valid_email(condition.col_name)
+        
+    
+    
 
     def is_integer(self, condition: cond.IsInteger) -> Column:
         return F.col(condition.col_name) % 1 == 0
