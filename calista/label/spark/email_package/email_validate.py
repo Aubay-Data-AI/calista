@@ -1,9 +1,10 @@
+
 from email_validator import validate_email, EmailNotValidError
 from pyspark.sql import SparkSession
 from pyspark.sql.types import BooleanType
-from pyspark.sql.functions import udf,col
+from pyspark.sql.functions import udf
 
---spark = SparkSession.builder.appName("IBANValidation").getOrCreate()
+#spark = SparkSession.builder.appName("IBANValidation").getOrCreate()
 
 
 def verifier_email(email:str)->bool:
