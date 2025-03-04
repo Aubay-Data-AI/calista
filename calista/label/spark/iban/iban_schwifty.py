@@ -3,10 +3,6 @@ from pyspark.sql.functions import udf, col
 from pyspark.sql.types import BooleanType
 import schwifty
 
-from pyspark.sql import SparkSession
-from pyspark.sql.functions import udf, col
-from pyspark.sql.types import BooleanType
-import schwifty
 
 # Initialiser Spark
 #spark = SparkSession.builder.appName("IBANValidation").getOrCreate()
