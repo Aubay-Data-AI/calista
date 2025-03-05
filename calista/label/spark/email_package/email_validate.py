@@ -17,10 +17,3 @@ def verifier_email(email:str)->bool:
 
 
 is_valid_email = udf(verifier_email, BooleanType())
-
-'''data = [("test@example.com",), ("mic@example.com",), ("peter@example.com",),("mauvais-email@",),("@com",)]
-df = spark.createDataFrame(data, ["email"])
-df=df.withColumn("email_Valid",is_valid_email("email"))
-
-df.show()
-'''

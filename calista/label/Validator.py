@@ -1,5 +1,4 @@
-from pyspark.sql import SparkSession
-from pyspark.sql.functions import udf, col
+from pyspark.sql.functions import udf
 from pyspark.sql.types import BooleanType
 from abc import ABC, abstractmethod
 import schwifty
@@ -24,20 +23,22 @@ class EmailValidator(validator):
         
     @staticmethod
     def udf_validate():
-        """Retourne une UDF pour PySpark."""
+
         return udf(lambda email: EmailValidator().validate(email), BooleanType())
 
 
 
 class IbanValidator(validator):
-    '''Valide les IBANs.'''
+    '''Valide les ibans'''
+
 
     def validate(self, iban: str) -> bool:
+
         return bool(schwifty.IBAN(iban, allow_invalid=True).is_valid)
 
     @staticmethod
     def udf_validate():
-        """Retourne une UDF pour PySpark."""
+
         return udf(lambda iban: IbanValidator().validate(iban), BooleanType())
 
 
