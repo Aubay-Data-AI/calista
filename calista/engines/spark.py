@@ -179,6 +179,9 @@ class SparkEngine(LazyEngine):
         return label.is_valid_iban(condition.col_name)
 
     def is_ip_address(self, condition: cond.IsIpAddress) -> Column:
+        return label.is_valid_ip_adress(condition.col_name)
+
+    '''def is_ip_address(self, condition: cond.IsIpAddress) -> Column:
         """Merci Thomas"""
         ipv6_regex = (
             r"^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,"
@@ -191,7 +194,7 @@ class SparkEngine(LazyEngine):
         )
         ipv4_regex = r"^(?!.*-)(25[0-5]|2[0-4][0-9]|1?[0-9]{1,2})(.(25[0-5]|2[0-4][0-9]|1?[0-9]{1,2})){3}$"
         trimmed_ip_col = F.trim(F.col(condition.col_name))
-        return trimmed_ip_col.rlike(ipv6_regex) | trimmed_ip_col.rlike(ipv4_regex)
+        return trimmed_ip_col.rlike(ipv6_regex) | trimmed_ip_col.rlike(ipv4_regex)'''
 
     def count_occurences(self, rule: R.CountOccurences) -> dict[Any, int]:
         val_count = self.dataset.groupBy(rule.col_name).count().collect()

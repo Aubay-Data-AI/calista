@@ -3,6 +3,8 @@ from pyspark.sql.types import BooleanType
 
 from email_validator import validate_email, EmailNotValidError
 import schwifty
+import validators
+
 
 
 @udf(returnType=BooleanType(), useArrow=True)
@@ -19,3 +21,7 @@ def is_valid_email(email: str) -> bool:
         return True
     except EmailNotValidError:
         return False
+    
+@udf(returnType=BooleanType(),useArrow=True)
+def is_valid_ip_adress(adress_ip:str)->bool:
+    return bool(validators.ipv4(adress_ip) or validators.ipv6(adress_ip))
