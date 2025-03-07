@@ -30,6 +30,7 @@ from calista.core.catalogue import PythonTypes
 from calista.core.engine import LazyEngine
 from calista.core.metrics import Metrics
 from calista.core.types_alias import ColumnName, PythonType
+from calista.label import polars_ as label
 
 
 class Polars_Engine(LazyEngine):
@@ -171,7 +172,11 @@ class Polars_Engine(LazyEngine):
             .dt.year()
             .__getattribute__(operator)(pl.lit(condition.value))
         )
+    
+    def is_iban(self, condition: cond.IsIban) -> Expr:
+        return  pl.col(condition.col_name).map_elements(label.is_valid_iban,return_dtype=pl.Boolean)
 
+    '''
     def is_iban(self, condition: cond.IsIban) -> Expr:
         alphabet_conversion = {chr(i + 65): str(i + 10) for i in range(26)}
         cast_col = pl.col(condition.col_name).cast(pl.String)
@@ -194,7 +199,10 @@ class Polars_Engine(LazyEngine):
         is_iban_col = update_cleaned_col.cast(pl.Int64) % 97
 
         return is_iban_col == 1
-
+    ''' 
+    def is_ip_address(self, condition: cond.IsIpAddress) -> Expr:
+        return pl.col(condition.col_name).map_elements(label.is_valid_ip_adress,return_dtype=pl.Boolean)
+    ''' 
     def is_ip_address(self, condition: cond.IsIpAddress) -> Expr:
         ipv6_regex = r"^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$"
         ipv4_regex = r"^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$"
@@ -202,7 +210,7 @@ class Polars_Engine(LazyEngine):
         return trimmed_ip_col.str.contains(ipv6_regex) | trimmed_ip_col.str.contains(
             ipv4_regex
         )
-
+    '''
     def count_occurences(self, rule: R.CountOccurences) -> dict[Any, int]:
         val_count = self.dataset.group_by(rule.col_name).len().collect()
         keys = val_count.to_dict(as_series=False)[rule.col_name]
@@ -286,7 +294,13 @@ class Polars_Engine(LazyEngine):
 
     def is_integer(self, condition: cond.IsInteger) -> Expr:
         return pl.col(condition.col_name).str.contains(r"^[-+]?[0-9]+(?:\.0)?$")
+    
+    def is_email(self, condition: cond.IsEmail) -> Expr:
+        return (
+            pl.col(condition.col_name).map_elements(label.is_valid_email,return_dtype=pl.Boolean)
+        )
 
+    '''
     def is_email(self, condition: cond.IsEmail) -> Expr:
         return (
             pl.col(condition.col_name)
@@ -295,6 +309,7 @@ class Polars_Engine(LazyEngine):
                 r"^[a-zA-Z0-9][\w.-]*[a-zA-Z0-9]@[a-zA-Z]{4,}(\.[A-Za-z]{2,})+$"
             )
         )
+    '''    
 
     def is_unique(self, condition: cond.IsUnique) -> Expr:
         return pl.col(condition.col_name).count().over(condition.col_name) == 1
