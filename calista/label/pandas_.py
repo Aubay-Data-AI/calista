@@ -48,8 +48,3 @@ def is_valid_ip_adress(adress_ip: str) -> bool:
 
     """
     return bool(validators.ipv4(adress_ip) or validators.ipv6(adress_ip))
-
-
-df = pd.read_csv('emails.csv')
-df['is_valid_email'] = df['email'].apply(is_valid_email)
-print(df.head(10))
