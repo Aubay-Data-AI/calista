@@ -41,7 +41,7 @@ def is_valid_ip_adress(adress_ip: str) -> bool:
         is valid ip_adress It will be used to check an ip_adress
 
         Args:
-            the function takes a string email as a argument
+            the function takes a string adress_ip as a argument
 
         Returns:
         bool: the function returns a boolean.
