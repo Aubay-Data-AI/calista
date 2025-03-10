@@ -4,6 +4,7 @@ from pyspark.sql.types import BooleanType
 from email_validator import validate_email, EmailNotValidError
 import schwifty
 import validators
+import phonenumbers
 
 
 
@@ -54,3 +55,22 @@ def is_valid_ip_adress(adress_ip: str) -> bool:
 
     """
     return bool(validators.ipv4(adress_ip) or validators.ipv6(adress_ip))
+
+
+@udf(returnType= BooleanType(), useArrow=True)
+def is_valid_phone_number(phone_number: str) -> bool:
+    """
+        is valid ip_adress It will be used to check an ip_adress
+
+        Args:
+            the function takes a string adress_ip as a argument
+
+        Returns:
+        bool: the function returns a boolean.
+
+    """
+    if phonenumbers.is_possible_number_string(phone_number, None):  
+        parsed_number = phonenumbers.parse(phone_number, None)  
+        return phonenumbers.is_valid_number(parsed_number)
+    else :
+        return False

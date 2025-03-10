@@ -178,11 +178,11 @@ class SparkEngine(LazyEngine):
     def is_iban(self, condition: cond.IsIban) -> Column:
         return label.is_valid_iban(condition.col_name)
 
-    '''
+    
     def is_ip_address(self, condition: cond.IsIpAddress) -> Column:
         return label.is_valid_ip_adress(condition.col_name)
-    '''
-     
+    
+    ''' 
     def is_ip_address(self, condition: cond.IsIpAddress) -> Column:
         """Merci Thomas"""
         ipv6_regex = (
@@ -197,7 +197,7 @@ class SparkEngine(LazyEngine):
         ipv4_regex = r"^(?!.*-)(25[0-5]|2[0-4][0-9]|1?[0-9]{1,2})(.(25[0-5]|2[0-4][0-9]|1?[0-9]{1,2})){3}$"
         trimmed_ip_col = F.trim(F.col(condition.col_name))
         return trimmed_ip_col.rlike(ipv6_regex) | trimmed_ip_col.rlike(ipv4_regex)
-
+    '''
 
     def count_occurences(self, rule: R.CountOccurences) -> dict[Any, int]:
         val_count = self.dataset.groupBy(rule.col_name).count().collect()
@@ -240,6 +240,10 @@ class SparkEngine(LazyEngine):
         return F.col(condition.col_name).rlike(date_regex_patterns)
 
     def is_phone_number(self, condition: cond.IsPhoneNumber) -> Column:
+        return label.is_valid_phone_number(condition.col_name)
+    
+    ''' 
+    def is_phone_number(self, condition: cond.IsPhoneNumber) -> Column:
         country_regex = {
             "fr": r"^(\+?33\s?|0)(\(0\)\s?)?(\d\s?){9}$",
             "be": r"^\+32[1-9][0-9]{7,8}$",
@@ -260,6 +264,7 @@ class SparkEngine(LazyEngine):
         return F.regexp_replace(
             F.regexp_replace(F.col(condition.col_name), r"(?<![-.])[-.]", ""), r"\s", ""
         ).rlike(regex)
+    '''
 
     def is_boolean(self, condition: cond.IsBoolean) -> Column:
         data_type = self.dataset.schema[condition.col_name].dataType
