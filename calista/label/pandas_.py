@@ -53,7 +53,7 @@ def is_valid_ip_adress(adress_ip: str) -> bool:
 
 def is_valid_phone_number(phone_number: str) -> bool:
     """
-        is valid ip_adress It will be used to check an ip_adress
+        is valid phone_number It will be used to check an phone_number
 
         Args:
             the function takes a string phone_number as a argument
