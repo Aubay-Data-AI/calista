@@ -269,6 +269,10 @@ class Pandas_Engine(LazyEngine):
         return col.str.contains(date_pattern, regex=True)
 
     def is_phone_number(self, condition: cond.IsPhoneNumber) -> Series:
+        return self.dataset[condition.col_name].apply(label.is_valid_phone_number)
+
+    '''
+    def is_phone_number(self, condition: cond.IsPhoneNumber) -> Series:
         col = self.dataset[condition.col_name].astype(str)
         country_regex = {
             "fr": r"^(\+?33\s?|0)(\(0\)\s?)?(\d\s?){9}$",
@@ -292,7 +296,8 @@ class Pandas_Engine(LazyEngine):
             .replace(r"\s", "", regex=True)
             .str.match(regex)
         )
-
+    '''
+        
     def is_boolean(self, condition: cond.IsBoolean) -> Series:
         data_type = str(self.dataset[condition.col_name].dtype)
         map_boolean_type = {
