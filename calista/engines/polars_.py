@@ -262,6 +262,9 @@ class Polars_Engine(LazyEngine):
         )
         return pl.col(condition.col_name).str.contains(date_regex_patterns)
 
+    def is_phone_number(self, condition: cond.IsPhoneNumber) -> Expr :
+         return pl.col(condition.col_name).map_elements(label.is_valid_phone_number,return_dtype=pl.Boolean)
+    ''' 
     def is_phone_number(self, condition: cond.IsPhoneNumber) -> Expr:
         country_regex = {
             "fr": "^(\+?33\s?|0)(\(0\)\s?)?(\d\s?){9}$",
@@ -286,7 +289,7 @@ class Polars_Engine(LazyEngine):
             .str.replace_all("[-.\s]", "")
             .str.contains(regex)
         )
-
+    '''
     def is_boolean(self, condition: cond.IsBoolean) -> Expr:
         col_as_string = pl.col(condition.col_name).cast(pl.String)
         boolean_string = ["0", "1", "0.0", "1.0", "true", "false", "True", "False"]
