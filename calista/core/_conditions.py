@@ -288,6 +288,17 @@ class IsIban(Condition):
     col_name: str
 
 
+class IsEmail(Condition):
+    """
+    Condition to check if a column value is an IBAN.
+
+    Args:
+        col_name (str): The name of the column.
+    """
+
+    col_name: str
+
+
 class IsIpAddress(Condition):
     """
     Condition to check if a column value is an IP address.
@@ -512,6 +523,7 @@ ConditionExpression: TypeAlias = Union[
     IsEmail,
     IsFloat,
     IsIban,
+    IsEmail,
     IsIn,
     IsInteger,
     IsIpAddress,

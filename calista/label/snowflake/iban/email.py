@@ -17,10 +17,7 @@ class EmailSyntaxError(ValueError):
 
 
 def split_email(email: str):
-    """
-    Sépare l'email en display name, local_part et domain_part. 
-    Gère les formats avancés (ex: "John Doe <email@example.com>").
-    """
+    
     email = email.strip()
 
     match = DISPLAY_NAME_REGEX.match(email)
@@ -43,8 +40,7 @@ def split_email(email: str):
 
 def validate_email_snowflake(email: str) -> bool:
     """
-    Fonction UDF pour valider un email dans Snowflake.
-    Retourne True si l'email est valide, sinon False.
+    Fonction UDF 
     """
 
     if not email:
@@ -58,23 +54,23 @@ def validate_email_snowflake(email: str) -> bool:
     except EmailSyntaxError:
         return False
 
-    # Vérification regex stricte
+   
     if not EMAIL_REGEX.match(f"{local_part}@{domain_part}"):
         return False
 
-    # Vérification du local_part
+   
     if not local_part or len(local_part) > 64:
         return False
 
-    # Vérification des quoted local parts
+   
     if is_quoted_local_part and '"' in local_part[1:-1]:
         return False
 
-    # Vérification du domain_part
+   
     if not domain_part or len(domain_part) > 255:
         return False
 
-    # Vérification si le domaine est une adresse IP (user@[192.168.1.1])
+    
     if domain_part.startswith("[") and domain_part.endswith("]"):
         ip_address = domain_part[1:-1]
         if not re.fullmatch(r"(\d{1,3}\.){3}\d{1,3}", ip_address):
@@ -88,21 +84,42 @@ def validate_email_snowflake(email: str) -> bool:
 
 
 def init_udf(session: Session):
-    """
-    Enregistre la fonction validate_email_snowflake comme UDF dans Snowflake.
-    """
-
     try:
+        # ✅ Explicitly set the schema and database
+        result = session.sql("SELECT CURRENT_DATABASE(), CURRENT_SCHEMA()").collect()
+        current_db = result[0][0]
+        current_schema = result[0][1]
+
+        print(f"✅ Registering UDF in: {current_db}.{current_schema}")
+
+        
+        session.sql(f"USE SCHEMA {current_schema}").collect()
+
+        # ✅ Register the UDF
         session.udf.register(
             validate_email_snowflake,
             name="validate_email",
             input_types=[StringType()],
             return_type=BooleanType(),
-            replace=True
+            replace=True,
+            is_permanent=True,  # ✅ Ensures UDF is stored permanently
+            stage_location="@MY_STAGE"  # ✅ Required for permanent UDFs
         )
+
         print("✅ UDF 'validate_email' enregistrée avec succès !")
+
+        # ✅ Verify that the UDF is correctly saved
+        result = session.sql("SHOW USER FUNCTIONS").collect()
+        udf_names = [row['name'].upper() for row in result]
+
+        if "VALIDATE_EMAIL" in udf_names:
+            print("✅ L'UDF 'validate_email' est bien enregistrée dans Snowflake !")
+        else:
+            print("❌ L'UDF 'validate_email' n'est pas enregistrée.")
+
     except Exception as e:
         print(f"❌ Erreur lors de l'enregistrement de l'UDF : {e}")
+
 
 
 def check_emails(col_name: str):

@@ -58,21 +58,22 @@ class TestSnowflakeTable:
      
 
     def test_is_email(self, snowflake_table):
+        
         email_rule_name = "check_email_quality"
         email_rule = F.is_email("EMAIL")
 
         valid_rows = snowflake_table.get_valid_rows(email_rule)
         invalid_rows = snowflake_table.get_invalid_rows(email_rule)
 
-        # Transformer en DataFrame si nécessaire
+       
         valid_df = valid_rows.to_pandas() if hasattr(valid_rows, "to_pandas") else valid_rows
         invalid_df = invalid_rows.to_pandas() if hasattr(invalid_rows, "to_pandas") else invalid_rows
 
-        print("Numéros valides :")
-        print(valid_df["TELEPHONE"].tolist())  # Affiche sous forme de liste
+        print("Email Ok")
+        print(valid_df["EMAIL"].tolist())  # Affiche sous forme de liste
 
-        print("\nNuméros invalides :")
-        print(invalid_df["TELEPHONE"].tolist())  # Affiche sous forme de liste
+        print("Email non valides:")
+        print(invalid_df["EMAIL"].tolist())  # Affiche sous forme de liste
 
         expected_valid_row_count = 92
 

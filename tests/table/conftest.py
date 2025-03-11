@@ -5,6 +5,10 @@ import pytest
 import calista
 from calista import CalistaEngine
 from tests.table.parameters import BIGQUERY_CONN_PARAMS, SNOWFLAKE_CONN_PARAMS
+from calista.label.snowflake.iban.email import init_udf as init_udf_email
+
+from calista.label.snowflake.iban.iban import init_udf
+
 
 
 def get_file_path(file_name: str) -> str:
@@ -70,7 +74,14 @@ def bigquery_session():
 
 @pytest.fixture(scope="module")
 def snowflake_session():
-    return CalistaEngine(
+    session = CalistaEngine(  
         "snowflake",
         SNOWFLAKE_CONN_PARAMS,
     )
+    
+    session._engine.snowflake.sql("USE DATABASE RESSOURCES").collect()
+    session._engine.snowflake.sql("USE SCHEMA TESTS_UNITAIRES").collect()
+    
+    init_udf_email(session._engine.snowflake)  
+
+    return session  # ✅ Return the session after initialization

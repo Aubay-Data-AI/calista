@@ -1,0 +1,449 @@
+.
+├── LICENSE
+├── NOTICE
+├── README.md
+├── calista
+│   ├── __init__.py
+│   ├── __pycache__
+│   │   ├── __init__.cpython-312.pyc
+│   │   ├── _print_versions.cpython-312.pyc
+│   │   ├── group.cpython-312.pyc
+│   │   ├── table.cpython-312.pyc
+│   │   └── user_defined_condition.cpython-312.pyc
+│   ├── _print_versions.py
+│   ├── core
+│   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   │   ├── __init__.cpython-312.pyc
+│   │   │   ├── _aggregate_conditions.cpython-312.pyc
+│   │   │   ├── _conditions.cpython-312.pyc
+│   │   │   ├── aggregates.cpython-312.pyc
+│   │   │   ├── catalogue.cpython-312.pyc
+│   │   │   ├── database.cpython-312.pyc
+│   │   │   ├── engine.cpython-312.pyc
+│   │   │   ├── functions.cpython-312.pyc
+│   │   │   ├── metrics.cpython-312.pyc
+│   │   │   ├── rules.cpython-312.pyc
+│   │   │   ├── types_alias.cpython-312.pyc
+│   │   │   └── utils.cpython-312.pyc
+│   │   ├── _aggregate_conditions.py
+│   │   ├── _conditions.py
+│   │   ├── aggregates.py
+│   │   ├── catalogue.py
+│   │   ├── database.py
+│   │   ├── engine.py
+│   │   ├── functions.py
+│   │   ├── metrics.py
+│   │   ├── rules.py
+│   │   ├── types_alias.py
+│   │   └── utils.py
+│   ├── engines
+│   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   │   ├── __init__.cpython-312.pyc
+│   │   │   ├── bigquery.cpython-312.pyc
+│   │   │   ├── pandas_.cpython-312.pyc
+│   │   │   ├── polars_.cpython-312.pyc
+│   │   │   ├── snowflake.cpython-312.pyc
+│   │   │   ├── spark.cpython-312.pyc
+│   │   │   └── sql.cpython-312.pyc
+│   │   ├── bigquery.py
+│   │   ├── pandas_.py
+│   │   ├── polars_.py
+│   │   ├── snowflake.py
+│   │   ├── spark.py
+│   │   └── sql.py
+│   ├── group.py
+│   ├── label
+│   │   ├── pandas
+│   │   │   └── iban
+│   │   │       ├── __pycache__
+│   │   │       └── iban.py
+│   │   ├── requirements.txt
+│   │   ├── resources
+│   │   │   ├── __pycache__
+│   │   │   │   └── tools.cpython-312.pyc
+│   │   │   ├── bban_spec_map.json
+│   │   │   ├── iban_length_map.json
+│   │   │   ├── list_iban.json
+│   │   │   └── tools.py
+│   │   ├── snowflake
+│   │   │   └── iban
+│   │   │       ├── __pycache__
+│   │   │       ├── email.py
+│   │   │       ├── iban.py
+│   │   │       ├── iban_snowpark.py
+│   │   │       └── iban_sql.py
+│   │   └── spark
+│   │       └── iban
+│   │           ├── __pycache__
+│   │           ├── iban.py
+│   │           └── iban_schwifty.py
+│   ├── table.py
+│   └── user_defined_condition.py
+├── docs
+│   ├── Makefile
+│   ├── api
+│   │   ├── calista.core.functions.column_equal_to_column.rst
+│   │   ├── calista.core.functions.column_equal_to_value.rst
+│   │   ├── calista.core.functions.column_ge_column.rst
+│   │   ├── calista.core.functions.column_ge_value.rst
+│   │   ├── calista.core.functions.column_gt_column.rst
+│   │   ├── calista.core.functions.column_gt_value.rst
+│   │   ├── calista.core.functions.column_le_column.rst
+│   │   ├── calista.core.functions.column_le_value.rst
+│   │   ├── calista.core.functions.column_lt_column.rst
+│   │   ├── calista.core.functions.column_lt_value.rst
+│   │   ├── calista.core.functions.compare_column_to_column.rst
+│   │   ├── calista.core.functions.compare_column_to_value.rst
+│   │   ├── calista.core.functions.compare_length.rst
+│   │   ├── calista.core.functions.compare_year_to_value.rst
+│   │   ├── calista.core.functions.count_decimal_digit.rst
+│   │   ├── calista.core.functions.count_eq_value.rst
+│   │   ├── calista.core.functions.count_ge_value.rst
+│   │   ├── calista.core.functions.count_gt_value.rst
+│   │   ├── calista.core.functions.count_integer_digit.rst
+│   │   ├── calista.core.functions.count_le_value.rst
+│   │   ├── calista.core.functions.count_lt_value.rst
+│   │   ├── calista.core.functions.decimal_digit_eq.rst
+│   │   ├── calista.core.functions.decimal_digit_ge.rst
+│   │   ├── calista.core.functions.decimal_digit_gt.rst
+│   │   ├── calista.core.functions.decimal_digit_le.rst
+│   │   ├── calista.core.functions.decimal_digit_lt.rst
+│   │   ├── calista.core.functions.integer_digit_equal.rst
+│   │   ├── calista.core.functions.integer_digit_ge.rst
+│   │   ├── calista.core.functions.integer_digit_gt.rst
+│   │   ├── calista.core.functions.integer_digit_le.rst
+│   │   ├── calista.core.functions.integer_lt_digit.rst
+│   │   ├── calista.core.functions.is_alphabetic.rst
+│   │   ├── calista.core.functions.is_between.rst
+│   │   ├── calista.core.functions.is_boolean.rst
+│   │   ├── calista.core.functions.is_date.rst
+│   │   ├── calista.core.functions.is_email.rst
+│   │   ├── calista.core.functions.is_float.rst
+│   │   ├── calista.core.functions.is_iban.rst
+│   │   ├── calista.core.functions.is_in.rst
+│   │   ├── calista.core.functions.is_integer.rst
+│   │   ├── calista.core.functions.is_ip_address.rst
+│   │   ├── calista.core.functions.is_negative.rst
+│   │   ├── calista.core.functions.is_not_null.rst
+│   │   ├── calista.core.functions.is_null.rst
+│   │   ├── calista.core.functions.is_phone_number.rst
+│   │   ├── calista.core.functions.is_positive.rst
+│   │   ├── calista.core.functions.is_unique.rst
+│   │   ├── calista.core.functions.length_eq.rst
+│   │   ├── calista.core.functions.length_ge.rst
+│   │   ├── calista.core.functions.length_gt.rst
+│   │   ├── calista.core.functions.length_le.rst
+│   │   ├── calista.core.functions.length_lt.rst
+│   │   ├── calista.core.functions.max_eq_value.rst
+│   │   ├── calista.core.functions.max_ge_value.rst
+│   │   ├── calista.core.functions.max_gt_value.rst
+│   │   ├── calista.core.functions.max_le_value.rst
+│   │   ├── calista.core.functions.max_lt_value.rst
+│   │   ├── calista.core.functions.mean_eq_value.rst
+│   │   ├── calista.core.functions.mean_ge_value.rst
+│   │   ├── calista.core.functions.mean_gt_value.rst
+│   │   ├── calista.core.functions.mean_le_value.rst
+│   │   ├── calista.core.functions.mean_lt_value.rst
+│   │   ├── calista.core.functions.median_eq_value.rst
+│   │   ├── calista.core.functions.median_ge_value.rst
+│   │   ├── calista.core.functions.median_gt_value.rst
+│   │   ├── calista.core.functions.median_le_value.rst
+│   │   ├── calista.core.functions.median_lt_value.rst
+│   │   ├── calista.core.functions.min_eq_value.rst
+│   │   ├── calista.core.functions.min_ge_value.rst
+│   │   ├── calista.core.functions.min_gt_value.rst
+│   │   ├── calista.core.functions.min_le_value.rst
+│   │   ├── calista.core.functions.min_lt_value.rst
+│   │   ├── calista.core.functions.rlike.rst
+│   │   ├── calista.core.functions.sum_eq_value.rst
+│   │   ├── calista.core.functions.sum_ge_value.rst
+│   │   ├── calista.core.functions.sum_gt_value.rst
+│   │   ├── calista.core.functions.sum_le_value.rst
+│   │   ├── calista.core.functions.sum_lt_value.rst
+│   │   ├── calista.core.functions.year_equal_to_value.rst
+│   │   ├── calista.core.functions.year_ge_value.rst
+│   │   ├── calista.core.functions.year_gt_value.rst
+│   │   ├── calista.core.functions.year_le_value.rst
+│   │   └── calista.core.functions.year_lt_value.rst
+│   ├── api.rst
+│   ├── calistaengine.rst
+│   ├── calistatable.rst
+│   ├── conf.py
+│   ├── contributing.rst
+│   ├── functions.rst
+│   ├── getting_started.rst
+│   ├── grouped_table.rst
+│   ├── index.rst
+│   ├── intro.rst
+│   ├── make.bat
+│   └── udc.rst
+├── git-flow.md
+├── how_to_run_tests.md
+├── pre-commit.md
+├── project_tree.txt
+├── pyproject.toml
+├── requirements-dev.txt
+├── requirements.txt
+├── ressources
+│   ├── TEST_DATASET_100.csv
+│   ├── TEST_DATASET_100.json
+│   ├── TEST_DATASET_100.parquet
+│   ├── TEST_DATASET_100_2.parquet
+│   ├── bban_spec_map.json
+│   ├── calista_logo.png
+│   ├── iban_data.parquet
+│   │   ├── _SUCCESS
+│   │   ├── part-00000-3357c217-2d5d-4575-9c14-752a15db6c5e-c000.snappy.parquet
+│   │   └── part-00001-3357c217-2d5d-4575-9c14-752a15db6c5e-c000.snappy.parquet
+│   ├── iban_length_map.json
+│   └── list_iban.json
+├── tests
+│   ├── __init__.py
+│   ├── __pycache__
+│   │   └── __init__.cpython-312.pyc
+│   ├── ignore
+│   │   ├── __pycache__
+│   │   │   ├── test_bigquery_table.cpython-312-pytest-8.3.4.pyc
+│   │   │   ├── test_pandas_table.cpython-312-pytest-8.3.4.pyc
+│   │   │   ├── test_polars_table.cpython-312-pytest-8.3.4.pyc
+│   │   │   └── test_spark_table.cpython-312-pytest-8.3.4.pyc
+│   │   ├── test_bigquery_table.py
+│   │   ├── test_pandas_table.py
+│   │   ├── test_polars_table.py
+│   │   └── test_spark_table.py
+│   └── table
+│       ├── __init__.py
+│       ├── __pycache__
+│       │   ├── __init__.cpython-312.pyc
+│       │   ├── conftest.cpython-312-pytest-7.4.4.pyc
+│       │   ├── conftest.cpython-312-pytest-8.3.4.pyc
+│       │   ├── parameters.cpython-312.pyc
+│       │   ├── test_bigquery_table.cpython-312-pytest-8.3.4.pyc
+│       │   ├── test_pandas_table.cpython-312-pytest-8.3.4.pyc
+│       │   ├── test_polars_table.cpython-312-pytest-8.3.4.pyc
+│       │   ├── test_snowflake_table.cpython-312-pytest-8.3.4.pyc
+│       │   └── test_spark_table.cpython-312-pytest-8.3.4.pyc
+│       ├── bigquery_private_key.json
+│       ├── conftest.py
+│       ├── parameters.py
+│       ├── test_snowflake_table.py
+│       └── testudfmail.py
+└── venv
+    ├── bin
+    │   ├── Activate.ps1
+    │   ├── __pycache__
+    │   │   └── find_spark_home.cpython-312.pyc
+    │   ├── activate
+    │   ├── activate.csh
+    │   ├── activate.fish
+    │   ├── beeline
+    │   ├── beeline.cmd
+    │   ├── coverage
+    │   ├── coverage-3.12
+    │   ├── coverage3
+    │   ├── docker-image-tool.sh
+    │   ├── f2py
+    │   ├── find-spark-home
+    │   ├── find-spark-home.cmd
+    │   ├── find_spark_home.py
+    │   ├── load-spark-env.cmd
+    │   ├── load-spark-env.sh
+    │   ├── normalizer
+    │   ├── numpy-config
+    │   ├── pip
+    │   ├── pip3
+    │   ├── pip3.12
+    │   ├── py.test
+    │   ├── pyrsa-decrypt
+    │   ├── pyrsa-encrypt
+    │   ├── pyrsa-keygen
+    │   ├── pyrsa-priv2pub
+    │   ├── pyrsa-sign
+    │   ├── pyrsa-verify
+    │   ├── pyspark
+    │   ├── pyspark.cmd
+    │   ├── pyspark2.cmd
+    │   ├── pytest
+    │   ├── python -> python3
+    │   ├── python3 -> /usr/bin/python3
+    │   ├── python3.12 -> python3
+    │   ├── run-example
+    │   ├── run-example.cmd
+    │   ├── snowflake-dump-certs
+    │   ├── snowflake-dump-ocsp-response
+    │   ├── snowflake-dump-ocsp-response-cache
+    │   ├── spark-class
+    │   ├── spark-class.cmd
+    │   ├── spark-class2.cmd
+    │   ├── spark-connect-shell
+    │   ├── spark-shell
+    │   ├── spark-shell.cmd
+    │   ├── spark-shell2.cmd
+    │   ├── spark-sql
+    │   ├── spark-sql.cmd
+    │   ├── spark-sql2.cmd
+    │   ├── spark-submit
+    │   ├── spark-submit.cmd
+    │   ├── spark-submit2.cmd
+    │   ├── sparkR
+    │   ├── sparkR.cmd
+    │   ├── sparkR2.cmd
+    │   └── wheel
+    ├── include
+    │   ├── python3.12
+    │   └── site
+    │       └── python3.12
+    │           └── greenlet
+    ├── lib
+    │   └── python3.12
+    │       └── site-packages
+    │           ├── OpenSSL
+    │           ├── PyJWT-2.10.1.dist-info
+    │           ├── PyYAML-6.0.2.dist-info
+    │           ├── SQLAlchemy-2.0.29.dist-info
+    │           ├── __pycache__
+    │           ├── _cffi_backend.cpython-312-x86_64-linux-gnu.so
+    │           ├── _distutils_hack
+    │           ├── _pytest
+    │           ├── _yaml
+    │           ├── annotated_types
+    │           ├── annotated_types-0.7.0.dist-info
+    │           ├── asn1crypto
+    │           ├── asn1crypto-1.5.1.dist-info
+    │           ├── cachetools
+    │           ├── cachetools-5.5.2.dist-info
+    │           ├── certifi
+    │           ├── certifi-2025.1.31.dist-info
+    │           ├── cffi
+    │           ├── cffi-1.17.1.dist-info
+    │           ├── charset_normalizer
+    │           ├── charset_normalizer-3.4.1.dist-info
+    │           ├── chispa
+    │           ├── chispa-0.10.1.dist-info
+    │           ├── cloudpickle
+    │           ├── cloudpickle-2.2.1.dist-info
+    │           ├── coverage
+    │           ├── coverage-7.6.12.dist-info
+    │           ├── cryptography
+    │           ├── cryptography-44.0.1.dist-info
+    │           ├── dateutil
+    │           ├── delta
+    │           ├── delta_spark-3.3.0.dist-info
+    │           ├── distutils-precedence.pth
+    │           ├── filelock
+    │           ├── filelock-3.17.0.dist-info
+    │           ├── google
+    │           ├── google_api_core-2.24.1.dist-info
+    │           ├── google_auth-2.38.0.dist-info
+    │           ├── google_cloud_bigquery-3.30.0.dist-info
+    │           ├── google_cloud_core-2.4.2.dist-info
+    │           ├── google_crc32c
+    │           ├── google_crc32c-1.6.0.dist-info
+    │           ├── google_crc32c.libs
+    │           ├── google_resumable_media-2.7.2.dist-info
+    │           ├── googleapis_common_protos-1.68.0.dist-info
+    │           ├── greenlet
+    │           ├── greenlet-3.1.1.dist-info
+    │           ├── grpc
+    │           ├── grpc_status
+    │           ├── grpcio-1.70.0.dist-info
+    │           ├── grpcio_status-1.70.0.dist-info
+    │           ├── idna
+    │           ├── idna-3.10.dist-info
+    │           ├── importlib_metadata
+    │           ├── importlib_metadata-8.6.1.dist-info
+    │           ├── iniconfig
+    │           ├── iniconfig-2.0.0.dist-info
+    │           ├── jwt
+    │           ├── numpy
+    │           ├── numpy-2.2.3.dist-info
+    │           ├── numpy.libs
+    │           ├── packaging
+    │           ├── packaging-24.2.dist-info
+    │           ├── pandas
+    │           ├── pandas-2.2.3.dist-info
+    │           ├── pip
+    │           ├── pip-24.0.dist-info
+    │           ├── pkg_resources
+    │           ├── platformdirs
+    │           ├── platformdirs-4.3.6.dist-info
+    │           ├── pluggy
+    │           ├── pluggy-1.5.0.dist-info
+    │           ├── polars
+    │           ├── polars-1.6.0.dist-info
+    │           ├── prettytable
+    │           ├── prettytable-3.15.1.dist-info
+    │           ├── proto
+    │           ├── proto_plus-1.26.0.dist-info
+    │           ├── protobuf-5.29.3.dist-info
+    │           ├── py.py
+    │           ├── py4j
+    │           ├── py4j-0.10.9.7.dist-info
+    │           ├── pyOpenSSL-24.3.0.dist-info
+    │           ├── pyarrow
+    │           ├── pyarrow-19.0.1.dist-info
+    │           ├── pyasn1
+    │           ├── pyasn1-0.6.1.dist-info
+    │           ├── pyasn1_modules
+    │           ├── pyasn1_modules-0.4.1.dist-info
+    │           ├── pycparser
+    │           ├── pycparser-2.22.dist-info
+    │           ├── pydantic
+    │           ├── pydantic-2.10.6.dist-info
+    │           ├── pydantic_core
+    │           ├── pydantic_core-2.27.2.dist-info
+    │           ├── pyspark
+    │           ├── pyspark-3.5.5.dist-info
+    │           ├── pytest
+    │           ├── pytest-8.3.4.dist-info
+    │           ├── pytest-cov.pth
+    │           ├── pytest_cov
+    │           ├── pytest_cov-6.0.0.dist-info
+    │           ├── python_dateutil-2.9.0.post0.dist-info
+    │           ├── pytz
+    │           ├── pytz-2025.1.dist-info
+    │           ├── requests
+    │           ├── requests-2.32.3.dist-info
+    │           ├── rsa
+    │           ├── rsa-4.9.dist-info
+    │           ├── rust
+    │           ├── setuptools
+    │           ├── setuptools-75.8.2.dist-info
+    │           ├── six-1.17.0.dist-info
+    │           ├── six.py
+    │           ├── snowflake
+    │           ├── snowflake_connector_python-3.13.2.dist-info
+    │           ├── snowflake_snowpark_python-1.28.0-py3.11-nspkg.pth
+    │           ├── snowflake_snowpark_python-1.28.0.dist-info
+    │           ├── sortedcontainers
+    │           ├── sortedcontainers-2.4.0.dist-info
+    │           ├── sqlalchemy
+    │           ├── sqlalchemy_bigquery
+    │           ├── sqlalchemy_bigquery-1.12.1.dist-info
+    │           ├── sqlalchemy_bigquery_vendored
+    │           ├── tomlkit
+    │           ├── tomlkit-0.13.2.dist-info
+    │           ├── typing_extensions-4.12.2.dist-info
+    │           ├── typing_extensions.py
+    │           ├── tzdata
+    │           ├── tzdata-2025.1.dist-info
+    │           ├── tzlocal
+    │           ├── tzlocal-5.3.dist-info
+    │           ├── urllib3
+    │           ├── urllib3-2.3.0.dist-info
+    │           ├── wcwidth
+    │           ├── wcwidth-0.2.13.dist-info
+    │           ├── wheel
+    │           ├── wheel-0.45.1.dist-info
+    │           ├── yaml
+    │           ├── zipp
+    │           └── zipp-3.21.0.dist-info
+    ├── lib64 -> lib
+    ├── pyvenv.cfg
+    └── share
+        └── py4j
+            └── py4j0.10.9.7.jar
+
+177 directories, 270 files

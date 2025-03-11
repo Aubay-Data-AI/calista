@@ -31,7 +31,8 @@ from calista.core.catalogue import PythonTypes
 from calista.core.database import Database
 from calista.core.metrics import Metrics
 from calista.core.types_alias import ColumnName, PythonType
-from calista.label.snowflake.iban.iban import init_udf, check_ibans
+from calista.label.snowflake.iban.iban import init_udf as init_udf_iban, check_ibans
+from calista.label.snowflake.iban.email import init_udf, check_emails
 
 
 def _is_not_null(e: C.ColumnOrName) -> Column:
@@ -58,7 +59,7 @@ class SnowflakeEngine(Database):
             print(f"Error establishing connection: {e}")
         self.dataset = None
         self._config = config
-        #init_udf(self.snowflake)
+        init_udf_iban(self.snowflake)
 
     def _load_from_database(self, table: str, schema: str, database: str) -> None:
         self.snowflake.sql(f"USE {database}").collect()
@@ -173,6 +174,9 @@ class SnowflakeEngine(Database):
 
     def is_iban(self, condition: cond.IsIban) -> Column:
         return check_ibans(condition.col_name)
+    
+    def is_email(self, condition: cond.IsEmail) -> Column:
+        return check_emails(condition.col_name)
 
     def is_ip_address(self, condition: cond.IsIpAddress) -> Column:
         ipv6_regex = (
@@ -265,10 +269,10 @@ class SnowflakeEngine(Database):
         boolean_type = map_boolean_type.get(data_type, [])
         return F.col(condition.col_name).isin(boolean_type)
 
-    def is_email(self, condition: cond.IsEmail) -> Column:
-        return F.regexp_replace(condition.col_name, "[-.]{2,}", "£").rlike(
-            r"^[a-zA-Z0-9][\w.-]*[a-zA-Z0-9]@[a-zA-Z]{4,}(\.[A-Za-z]{2,})+$"
-        )
+    #def is_email(self, condition: cond.IsEmail) -> Column:
+     #   return F.regexp_replace(condition.col_name, "[-.]{2,}", "£").rlike(
+      #      r"^[a-zA-Z0-9][\w.-]*[a-zA-Z0-9]@[a-zA-Z]{4,}(\.[A-Za-z]{2,})+$"
+       # )
 
     def is_integer(self, condition: cond.IsInteger) -> Column:
         data_type = self.dataset.schema[condition.col_name].datatype

@@ -533,4 +533,4 @@ def check_ibans(col_name: str) -> Column:
     Returns:
     Column containing boolean values for each row
     """
-    return F.call_udf('TESTS_UNITAIRES.validate_iban', F.col(col_name))
+    return F.call_udf('validate_iban', F.col(col_name))
