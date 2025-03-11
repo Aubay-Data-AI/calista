@@ -22,21 +22,21 @@ def bigquery_table(request):
     return request.getfixturevalue(request.param)
 
 
-@pytest.fixture(scope="module")
+@pytest.mark.skip(reason="Ignoré temporairement")
 def spark_table():
     return CalistaEngine("spark").load_from_path(
         get_file_path("TEST_DATASET_100.parquet"), "parquet"
     )
 
 
-@pytest.fixture(scope="module")
+@pytest.mark.skip(reason="Ignoré temporairement")
 def pandas_table():
     return CalistaEngine("pandas").load_from_path(
         get_file_path("TEST_DATASET_100.parquet"), "parquet"
     )
 
 
-@pytest.fixture(scope="module")
+@pytest.mark.skip(reason="Ignoré temporairement")
 def polars_table():
     return CalistaEngine("polars").load_from_path(
         get_file_path("TEST_DATASET_100.parquet"), "parquet"

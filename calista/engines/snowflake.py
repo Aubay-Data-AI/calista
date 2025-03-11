@@ -58,7 +58,7 @@ class SnowflakeEngine(Database):
             print(f"Error establishing connection: {e}")
         self.dataset = None
         self._config = config
-        init_udf(self.snowflake)
+        #init_udf(self.snowflake)
 
     def _load_from_database(self, table: str, schema: str, database: str) -> None:
         self.snowflake.sql(f"USE {database}").collect()

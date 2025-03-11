@@ -1,21 +1,21 @@
 from datetime import datetime
 from functools import reduce
 
+import pandas as pd
 import pytest
-from chispa.dataframe_comparer import assert_df_equality
-from snowflake.snowpark import functions as F_snowpark
-from snowflake.snowpark.types import BooleanType, StringType, StructField, StructType
+from sqlalchemy import func
+from sqlalchemy.sql.selectable import Select
 
 import calista.core.rules as R
 from calista import functions as F
-from calista import register_snowflake_condition
+from calista import register_bigquery_condition
 from calista.core.metrics import Metrics
 
 
-class TestSnowflakeTable:
+class TestBigqueryTable:
     expected_dataset_row_count = 103
 
-    def test_is_date(self, snowflake_table):
+    def test_is_date(self, bigquery_table):
         dates_rule_name = "check_dates"
         date_columns = [
             "DATE_ENTREE",
@@ -32,131 +32,101 @@ class TestSnowflakeTable:
         expected_valid_row_count = 57
 
         self.analyze_and_assert_rule(
-            snowflake_table, dates_rule_name, dates_rule, expected_valid_row_count
+            bigquery_table, dates_rule_name, dates_rule, expected_valid_row_count
         )
 
-    def test_is_iban(self, snowflake_table):
+    def test_is_iban(self, bigquery_table):
         iban_rule_name = "check_iban_quality"
         iban_rule = F.is_iban("IBAN")
 
         expected_valid_row_count = 90
 
         self.analyze_and_assert_rule(
-            snowflake_table, iban_rule_name, iban_rule, expected_valid_row_count
+            bigquery_table, iban_rule_name, iban_rule, expected_valid_row_count
         )
 
-    def test_is_integer(self, snowflake_table):
+    def test_is_integer(self, bigquery_table):
         integer_rule_name = "check_CDI_ID_are_integer"
         integer_rule = F.is_integer("CDI") & F.is_integer("ID")
 
         expected_valid_row_count = 98
 
         self.analyze_and_assert_rule(
-            snowflake_table, integer_rule_name, integer_rule, expected_valid_row_count
+            bigquery_table, integer_rule_name, integer_rule, expected_valid_row_count
         )
 
-     
-
-    def test_is_email(self, snowflake_table):
+    def test_is_email(self, bigquery_table):
         email_rule_name = "check_email_quality"
         email_rule = F.is_email("EMAIL")
-
-        valid_rows = snowflake_table.get_valid_rows(email_rule)
-        invalid_rows = snowflake_table.get_invalid_rows(email_rule)
-
-        # Transformer en DataFrame si nécessaire
-        valid_df = valid_rows.to_pandas() if hasattr(valid_rows, "to_pandas") else valid_rows
-        invalid_df = invalid_rows.to_pandas() if hasattr(invalid_rows, "to_pandas") else invalid_rows
-
-        print("Numéros valides :")
-        print(valid_df["TELEPHONE"].tolist())  # Affiche sous forme de liste
-
-        print("\nNuméros invalides :")
-        print(invalid_df["TELEPHONE"].tolist())  # Affiche sous forme de liste
 
         expected_valid_row_count = 92
 
         self.analyze_and_assert_rule(
-            snowflake_table, email_rule_name, email_rule, expected_valid_row_count
+            bigquery_table, email_rule_name, email_rule, expected_valid_row_count
         )
 
-    def test_is_boolean(self, snowflake_table):
+    def test_is_boolean(self, bigquery_table):
         boolean_rule_name = "check_CDD_CDI_are_boolean"
         boolean_rule = F.is_boolean("CDD") & F.is_boolean("CDI")
 
         expected_valid_row_count = 88
 
         self.analyze_and_assert_rule(
-            snowflake_table, boolean_rule_name, boolean_rule, expected_valid_row_count
+            bigquery_table, boolean_rule_name, boolean_rule, expected_valid_row_count
         )
 
-    def test_is_unique(self, snowflake_table):
+    def test_is_unique(self, bigquery_table):
         id_rule_name = "check_ID_is_unique"
         id_rule = F.is_unique("ID")
 
         expected_valid_row_count = 103
 
         self.analyze_and_assert_rule(
-            snowflake_table, id_rule_name, id_rule, expected_valid_row_count
+            bigquery_table, id_rule_name, id_rule, expected_valid_row_count
         )
 
-    def test_is_phone_number(self, snowflake_table):
+    def test_is_phone_number(self, bigquery_table):
         phone_number_rule_name = "check_is_phone_number"
         phone_number_rule = F.is_phone_number("TELEPHONE")
 
         expected_valid_row_count = 81
 
-        valid_rows = snowflake_table.get_valid_rows(phone_number_rule)
-        invalid_rows = snowflake_table.get_invalid_rows(phone_number_rule)
-
-        # Transformer en DataFrame si nécessaire
-        valid_df = valid_rows.to_pandas() if hasattr(valid_rows, "to_pandas") else valid_rows
-        invalid_df = invalid_rows.to_pandas() if hasattr(invalid_rows, "to_pandas") else invalid_rows
-
-        print("Numéros valides :")
-        print(valid_df["TELEPHONE"].tolist())  # Affiche sous forme de liste
-
-        print("\nNuméros invalides :")
-        print(invalid_df["TELEPHONE"].tolist())  # Affiche sous forme de liste
-
         self.analyze_and_assert_rule(
-            snowflake_table,
+            bigquery_table,
             phone_number_rule_name,
             phone_number_rule,
             expected_valid_row_count,
         )
 
-
-
-    def test_is_float(self, snowflake_table):
+    def test_is_float(self, bigquery_table):
         salary_rule_name = "check_salary_is_float"
         salary_rule = F.is_float("SALAIRE")
 
         expected_valid_row_count = 84
 
         self.analyze_and_assert_rule(
-            snowflake_table, salary_rule_name, salary_rule, expected_valid_row_count
+            bigquery_table, salary_rule_name, salary_rule, expected_valid_row_count
         )
 
-    def test_outliers_continuous_var(self, snowflake_table):
+    def test_outliers_continuous_var(self, bigquery_table):
         outlier_rule = R.GetOutliersForContinuousVar(col_name="SALAIRE")
         expected_outlier_values = []
 
-        outlier_values = snowflake_table._engine.get_outliers_for_continuous_var(
+        outlier_values = bigquery_table._engine.get_outliers_for_continuous_var(
             outlier_rule
         )
         assert outlier_values == expected_outlier_values
 
-    def test_outliers_discrete_var(self, snowflake_table):
+    def test_outliers_discrete_var(self, bigquery_table):
         count_occurences_rule = R.CountOccurences(col_name="DATE_ENTREE")
         expected_outlier_values = []
 
-        outlier_values = snowflake_table._engine.get_outliers_for_discrete_var(
+        outlier_values = bigquery_table._engine.get_outliers_for_discrete_var(
             count_occurences_rule
         )
         assert outlier_values == expected_outlier_values
 
-    def test_is_ip_address(self, snowflake_table):
+    def test_is_ip_address(self, bigquery_table):
         ip_address_rule_name = "check_ip_address_quality"
         ip_address_rule = F.is_ip_address("ADRESSE_IP_V4") & F.is_ip_address(
             "ADRESSE_IP_V6"
@@ -165,13 +135,13 @@ class TestSnowflakeTable:
         expected_valid_row_count = 98
 
         self.analyze_and_assert_rule(
-            snowflake_table,
+            bigquery_table,
             ip_address_rule_name,
             ip_address_rule,
             expected_valid_row_count,
         )
 
-    def test_compare_column_to_value(self, snowflake_table):
+    def test_compare_column_to_value(self, bigquery_table):
         salary_rule_name = "check_secteur_activite_banque_finance"
         salary_rule = F.compare_column_to_value(
             "SECTEUR_ACTIVITE", operator="=", value="Banque/Finance"
@@ -180,10 +150,10 @@ class TestSnowflakeTable:
         expected_valid_row_count = 17
 
         self.analyze_and_assert_rule(
-            snowflake_table, salary_rule_name, salary_rule, expected_valid_row_count
+            bigquery_table, salary_rule_name, salary_rule, expected_valid_row_count
         )
 
-    def test_compare_column_to_column(self, snowflake_table):
+    def test_compare_column_to_column(self, bigquery_table):
         salary_rule_name = "check_salaire_id"
         salary_rule = F.compare_column_to_column(
             col_left="SALAIRE", operator="=", col_right="ID"
@@ -192,40 +162,40 @@ class TestSnowflakeTable:
         expected_valid_row_count = 0
 
         self.analyze_and_assert_rule(
-            snowflake_table, salary_rule_name, salary_rule, expected_valid_row_count
+            bigquery_table, salary_rule_name, salary_rule, expected_valid_row_count
         )
 
-    def test_integer_digit(self, snowflake_table):
+    def test_integer_digit(self, bigquery_table):
         salary_rule_name = "check_salare_integer_3_digit"
         salary_rule = F.count_integer_digit("SALAIRE", operator="=", digit=3)
 
         expected_valid_row_count = 0
 
         self.analyze_and_assert_rule(
-            snowflake_table, salary_rule_name, salary_rule, expected_valid_row_count
+            bigquery_table, salary_rule_name, salary_rule, expected_valid_row_count
         )
 
-    def test_decimal_digit(self, snowflake_table):
+    def test_decimal_digit(self, bigquery_table):
         salary_rule_name = "check_salare_decimal_3_digit"
         salary_rule = F.count_decimal_digit("SALAIRE", operator=">=", digit=3)
 
         expected_valid_row_count = 8
 
         self.analyze_and_assert_rule(
-            snowflake_table, salary_rule_name, salary_rule, expected_valid_row_count
+            bigquery_table, salary_rule_name, salary_rule, expected_valid_row_count
         )
 
-    def test_is_between(self, snowflake_table):
+    def test_is_between(self, bigquery_table):
         salary_rule_name = "check_salare_between_60000_80000"
         salary_rule = F.is_between("SALAIRE", min_value=60000, max_value=80000)
 
         expected_valid_row_count = 23
 
         self.analyze_and_assert_rule(
-            snowflake_table, salary_rule_name, salary_rule, expected_valid_row_count
+            bigquery_table, salary_rule_name, salary_rule, expected_valid_row_count
         )
 
-    def test_compare_length(self, snowflake_table):
+    def test_compare_length(self, bigquery_table):
         salary_rule_name = "check_compare_secteur_activite"
         salary_rule = F.compare_length(
             col_name="SECTEUR_ACTIVITE", operator=">", length=8
@@ -234,72 +204,69 @@ class TestSnowflakeTable:
         expected_valid_row_count = 80
 
         self.analyze_and_assert_rule(
-            snowflake_table, salary_rule_name, salary_rule, expected_valid_row_count
+            bigquery_table, salary_rule_name, salary_rule, expected_valid_row_count
         )
 
-    def test_is_alphabetic(self, snowflake_table):
+    def test_is_alphabetic(self, bigquery_table):
         salary_rule_name = "check_nom_is_alphabetic"
         salary_rule = F.is_alphabetic(col_name="NOM")
 
         expected_valid_row_count = 96
 
         self.analyze_and_assert_rule(
-            snowflake_table, salary_rule_name, salary_rule, expected_valid_row_count
+            bigquery_table, salary_rule_name, salary_rule, expected_valid_row_count
         )
 
-    def test_is_negative(self, snowflake_table):
+    def test_is_negative(self, bigquery_table):
         salary_rule_name = "check_salaire_is_not_negative"
         salary_rule = F.is_negative(col_name="SALAIRE")
 
         expected_valid_row_count = 0
 
         self.analyze_and_assert_rule(
-            snowflake_table, salary_rule_name, salary_rule, expected_valid_row_count
+            bigquery_table, salary_rule_name, salary_rule, expected_valid_row_count
         )
 
-    def test_is_positive(self, snowflake_table):
+    def test_is_positive(self, bigquery_table):
         salary_rule_name = "check_salaire_is_positive"
         salary_rule = F.is_positive(col_name="SALAIRE")
 
         expected_valid_row_count = 87
 
         self.analyze_and_assert_rule(
-            snowflake_table, salary_rule_name, salary_rule, expected_valid_row_count
+            bigquery_table, salary_rule_name, salary_rule, expected_valid_row_count
         )
 
-    def test_rlike(self, snowflake_table):
-        salary_rule_name = "check_salaire_regex"
-        salary_rule = F.rlike(col_name="SALAIRE", pattern=r"^[+-]?[0-9]+\.[0-9]+$")
+    def test_rlike(self, bigquery_table):
+        with pytest.raises(Exception) as rlike_exception:
+            bigquery_table.analyze(
+                "salaire_regex",
+                F.rlike(col_name="SALAIRE", pattern=r"^[+-]?[0-9]+\.[0-9]+$"),
+            )
 
-        expected_valid_row_count = 84
+        assert "rlike() function is not available" == str(rlike_exception.value)
 
-        self.analyze_and_assert_rule(
-            snowflake_table, salary_rule_name, salary_rule, expected_valid_row_count
-        )
-
-    def test_not_condition(self, snowflake_table):
+    def test_not_condition(self, bigquery_table):
         salary_rule_name = "check_Prenom_not_not_null"
         salary_rule = ~F.is_not_null(col_name="PRENOM")
-
-         
 
         expected_valid_row_count = 15
 
         self.analyze_and_assert_rule(
-            snowflake_table, salary_rule_name, salary_rule, expected_valid_row_count
+            bigquery_table, salary_rule_name, salary_rule, expected_valid_row_count
         )
 
     def analyze_and_assert_rule(
-        self, snowflake_table, rule_name, rule, expected_valid_row_count
+        self, bigquery_table, rule_name, rule, expected_valid_row_count
     ):
-        computed_metrics = snowflake_table.analyze(rule_name, rule)
+        computed_metrics = bigquery_table.analyze(rule_name, rule)
         expected_metrics = Metrics(
             rule=rule_name,
             total_row_count=self.expected_dataset_row_count,
             valid_row_count=expected_valid_row_count,
-            valid_row_count_pct=round(
-                expected_valid_row_count * 100 / self.expected_dataset_row_count, 2
-            ),
+            valid_row_count_pct=expected_valid_row_count
+            * 100
+            / self.expected_dataset_row_count,
             timestamp=computed_metrics.timestamp,
         )
 
@@ -307,7 +274,7 @@ class TestSnowflakeTable:
 
     @pytest.mark.parametrize(
         "calista_session",
-        ["snowflake_session"],
+        ["bigquery_session"],
         indirect=True,
     )
     def test_table_from_dict_for_dbs(self, calista_session):
@@ -324,7 +291,7 @@ class TestSnowflakeTable:
         with pytest.raises(Exception):
             calista_session().create(data_dict)
 
-    def test_analyze_rules(self, snowflake_table):
+    def test_analyze_rules(self, bigquery_table):
         rules_with_expected_valid_count = {
             "check_iban_quality": (F.is_iban("IBAN"), 90),
             "check_CDI_ID_are_integer": (F.is_integer("CDI") & F.is_integer("ID"), 98),
@@ -336,7 +303,7 @@ class TestSnowflakeTable:
             for rule_name, rule_with_valid_count in rules_with_expected_valid_count.items()
         }
 
-        computed_metrics = snowflake_table.analyze_rules(rules)
+        computed_metrics = bigquery_table.analyze_rules(rules)
 
         metrics_timestamp = computed_metrics[0].timestamp
         expected_metrics = [
@@ -344,9 +311,9 @@ class TestSnowflakeTable:
                 rule=rule_name,
                 total_row_count=self.expected_dataset_row_count,
                 valid_row_count=rule_with_valid_count[1],
-                valid_row_count_pct=round(
-                    rule_with_valid_count[1] * 100 / self.expected_dataset_row_count, 2
-                ),
+                valid_row_count_pct=rule_with_valid_count[1]
+                * 100
+                / self.expected_dataset_row_count,
                 timestamp=metrics_timestamp,
             )
             for rule_name, rule_with_valid_count in rules_with_expected_valid_count.items()
@@ -356,43 +323,43 @@ class TestSnowflakeTable:
 
     def groupby_and_assert_rule(
         self,
-        snowflake_table,
+        bigquery_table,
         keys,
         rule_name,
         rule,
         expected_valid_row_count,
         expected_dataset_row_count,
     ):
-        computed_metrics = snowflake_table.group_by(keys).analyze(rule_name, rule)
+        computed_metrics = bigquery_table.group_by(keys).analyze(rule_name, rule)
         expected_metrics = Metrics(
             rule=rule_name,
             total_row_count=expected_dataset_row_count,
             valid_row_count=expected_valid_row_count,
-            valid_row_count_pct=round(
-                expected_valid_row_count * 100 / expected_dataset_row_count, 2
-            ),
+            valid_row_count_pct=expected_valid_row_count
+            * 100
+            / expected_dataset_row_count,
             timestamp=computed_metrics.timestamp,
         )
 
         assert computed_metrics == expected_metrics
 
-    def test_compare_sum_to_value(self, snowflake_table):
-        sum_by_rule_name = "check_sum_salary_by_sex_gt"
-        sum_by_rule = F.sum_gt_value(col_name="SALAIRE", value=20000)
+    def test_compare_sum_to_value(self, bigquery_table):
+        sum_by_gt_rule_name = "check_sum_salary_by_sex_gt"
+        sum_by_gt_rule = F.sum_gt_value(col_name="SALAIRE", value=20000)
 
         expected_dataset_row_count = 3
         expected_valid_row_count = 3
 
         self.groupby_and_assert_rule(
-            snowflake_table,
+            bigquery_table,
             "SEXE",
-            sum_by_rule_name,
-            sum_by_rule,
+            sum_by_gt_rule_name,
+            sum_by_gt_rule,
             expected_valid_row_count,
             expected_dataset_row_count,
         )
 
-    def test_compare_count_to_value(self, snowflake_table):
+    def test_compare_count_to_value(self, bigquery_table):
         count_by_rule_name = "check_count_salary_by_sex_le"
         count_by_rule = F.count_le_value(col_name="SALAIRE", value=40)
 
@@ -400,7 +367,7 @@ class TestSnowflakeTable:
         expected_valid_row_count = 2
 
         self.groupby_and_assert_rule(
-            snowflake_table,
+            bigquery_table,
             "SEXE",
             count_by_rule_name,
             count_by_rule,
@@ -408,7 +375,7 @@ class TestSnowflakeTable:
             expected_dataset_row_count,
         )
 
-    def test_compare_mean_to_value(self, snowflake_table):
+    def test_compare_mean_to_value(self, bigquery_table):
         mean_by_rule_name = "check_mean_salary_by_sex_ge"
         mean_by_rule = F.mean_ge_value(col_name="SALAIRE", value=50000)
 
@@ -416,7 +383,7 @@ class TestSnowflakeTable:
         expected_valid_row_count = 3
 
         self.groupby_and_assert_rule(
-            snowflake_table,
+            bigquery_table,
             "SEXE",
             mean_by_rule_name,
             mean_by_rule,
@@ -424,15 +391,13 @@ class TestSnowflakeTable:
             expected_dataset_row_count,
         )
 
-    def test_compare_median_to_value(self, snowflake_table):
+    def test_compare_median_to_value(self, bigquery_table):
         median_by_rule_name = "check_median_by_salary_by_sex_gt"
         median_by_rule = F.median_gt_value(col_name="SALAIRE", value=60000)
-
         expected_dataset_row_count = 3
         expected_valid_row_count = 1
-
         self.groupby_and_assert_rule(
-            snowflake_table,
+            bigquery_table,
             "SEXE",
             median_by_rule_name,
             median_by_rule,
@@ -440,31 +405,15 @@ class TestSnowflakeTable:
             expected_dataset_row_count,
         )
 
-    def test_compare_min_to_value(self, snowflake_table):
-        min_by_rule_name = "check_min_salary_by_sex_le"
-        min_by_rule = F.min_le_value(col_name="SALAIRE", value=50000)
-
-        expected_dataset_row_count = 3
-        expected_valid_row_count = 2
-
-        self.groupby_and_assert_rule(
-            snowflake_table,
-            "SEXE",
-            min_by_rule_name,
-            min_by_rule,
-            expected_valid_row_count,
-            expected_dataset_row_count,
-        )
-
-    def test_compare_max_to_value(self, snowflake_table):
+    def test_compare_max_to_value(self, bigquery_table):
         max_by_rule_name = "check_max_salary_by_sex_ge"
-        max_by_rule = F.max_ge_value(col_name="SALAIRE", value=100000)
+        max_by_rule = F.max_ge_value(col_name="SALAIRE", value=50000)
 
         expected_dataset_row_count = 3
-        expected_valid_row_count = 2
+        expected_valid_row_count = 3
 
         self.groupby_and_assert_rule(
-            snowflake_table,
+            bigquery_table,
             "SEXE",
             max_by_rule_name,
             max_by_rule,
@@ -472,7 +421,23 @@ class TestSnowflakeTable:
             expected_dataset_row_count,
         )
 
-    def test_multiple_agg(self, snowflake_table):
+    def test_compare_min_to_value(self, bigquery_table):
+        min_by_rule_name = "check_min_salary_by_sex_lt"
+        min_by_rule = F.min_lt_value(col_name="SALAIRE", value=50000)
+
+        expected_dataset_row_count = 3
+        expected_valid_row_count = 2
+
+        self.groupby_and_assert_rule(
+            bigquery_table,
+            "SEXE",
+            min_by_rule_name,
+            min_by_rule,
+            expected_valid_row_count,
+            expected_dataset_row_count,
+        )
+
+    def test_multiple_agg(self, bigquery_table):
         rule_name = "check_sum_count_mean_salary_by_gender"
         rule = (
             F.sum_lt_value(col_name="SALAIRE", value=20000000)
@@ -484,7 +449,7 @@ class TestSnowflakeTable:
         expected_valid_row_count = 2
 
         self.groupby_and_assert_rule(
-            snowflake_table,
+            bigquery_table,
             "SEXE",
             rule_name,
             rule,
@@ -500,18 +465,18 @@ class TestSnowflakeTable:
             combination_exception.value
         )
 
-    def test_colname_not_in_table(self, snowflake_table):
+    def test_colname_not_in_table(self, bigquery_table):
         with pytest.raises(Exception) as combination_exception:
-            snowflake_table.analyze("rule", F.is_iban("DATE"))
+            bigquery_table.analyze("rule", F.is_iban("DATE"))
 
         assert (
             "Column 'DATE' not found in ['NOM', 'PRENOM', 'SEXE', 'DATE_ENTREE', 'CDI', 'IBAN', 'SECTEUR_ACTIVITE', 'ADRESSE', 'SITUATION_FAMILIALE', 'ADRESSE_IP_V4', 'ADRESSE_IP_V6', 'DATE_NAISSANCE', 'DATE_SORTIE', 'DATE_DERNIER_EA', 'DATE_DERNIERE_AUGMENTATION', 'CDD', 'EMAIL', 'TELEPHONE', 'SALAIRE', 'DEVISE', 'ID']"
             == str(combination_exception.value)
         )
 
-    def test_col_left_not_in_table_compare_col_to_col(self, snowflake_table):
+    def test_col_left_not_in_table_compare_col_to_col(self, bigquery_table):
         with pytest.raises(Exception) as combination_exception:
-            snowflake_table.analyze(
+            bigquery_table.analyze(
                 "rule",
                 F.compare_column_to_column(
                     col_left="DATE", operator="=", col_right="DATE_ENTREE"
@@ -523,9 +488,9 @@ class TestSnowflakeTable:
             == str(combination_exception.value)
         )
 
-    def test_col_right_not_in_table_compare_col_to_col(self, snowflake_table):
+    def test_col_right_not_in_table_compare_col_to_col(self, bigquery_table):
         with pytest.raises(Exception) as combination_exception:
-            snowflake_table.analyze(
+            bigquery_table.analyze(
                 "rule",
                 F.compare_column_to_column(
                     col_left="DATE_ENTREE", operator="=", col_right="DATE"
@@ -537,22 +502,22 @@ class TestSnowflakeTable:
             == str(combination_exception.value)
         )
 
-    def test_col_not_in_table_groupby(self, snowflake_table):
+    def test_col_not_in_table_groupby(self, bigquery_table):
         with pytest.raises(Exception) as combination_exception:
-            snowflake_table.group_by("DATE")
+            bigquery_table.group_by("DATE")
 
         assert (
             "Column 'DATE' not found in ['NOM', 'PRENOM', 'SEXE', 'DATE_ENTREE', 'CDI', 'IBAN', 'SECTEUR_ACTIVITE', 'ADRESSE', 'SITUATION_FAMILIALE', 'ADRESSE_IP_V4', 'ADRESSE_IP_V6', 'DATE_NAISSANCE', 'DATE_SORTIE', 'DATE_DERNIER_EA', 'DATE_DERNIERE_AUGMENTATION', 'CDD', 'EMAIL', 'TELEPHONE', 'SALAIRE', 'DEVISE', 'ID']"
             == str(combination_exception.value)
         )
 
-    def test_calistatable_filter(self, snowflake_table):
+    def test_calistatable_filter(self, bigquery_table):
         rule_name = "check_iban_not_null"
         rule = F.is_not_null(col_name="IBAN")
 
         expected_valid_row_count = 90
 
-        computed_metrics = snowflake_table.filter(F.is_iban("IBAN")).analyze(
+        computed_metrics = bigquery_table.filter(F.is_iban("IBAN")).analyze(
             rule_name, rule
         )
         expected_metrics = Metrics(
@@ -565,88 +530,87 @@ class TestSnowflakeTable:
 
         assert computed_metrics == expected_metrics
 
-    def test_apply(self, snowflake_table):
+    def test_apply_rule(self, bigquery_table):
         condition = F.is_iban(col_name="IBAN")
-        df_result = snowflake_table.apply_rule(rule_name="IsIban", rule=condition)
-        df_result = df_result.select("IBAN", "IsIban").limit(5)
+        res = bigquery_table.apply_rule(rule_name="IsIban", rule=condition)
 
-        schema = StructType(
-            [
-                StructField("IBAN", StringType(), nullable=True),
-                StructField("IsIban", BooleanType(), nullable=True),
-            ]
-        )
-        expected_data = [
-            ("FR4756356801990924110246661", True),
-            ("FR9152927592715361970259533", True),
-            ("FR6098743347361131022029548", True),
-            ("FR2371478023732554095214206", True),
-            ("FR0330875910858658779613722", True),
-        ]
-        expected_df = snowflake_table._engine.snowflake.createDataFrame(
-            expected_data, schema
+        df_result = res.to_pandas()
+        df_result = df_result[["IBAN", "IsIban"]].head(5)
+
+        expected_df = pd.DataFrame(
+            {
+                "IBAN": [
+                    None,
+                    None,
+                    None,
+                    "FR1981073760101001813753760",
+                    "FR6906093250967318491811332",
+                ],
+                "IsIban": [False, False, False, True, True],
+            }
         )
 
-        assert_df_equality(
-            df_result, expected_df, ignore_column_order=True, ignore_row_order=True
-        )
+        pd.testing.assert_frame_equal(left=df_result, right=expected_df)
 
-    def test_apply_rules(self, snowflake_table):
+    def test_apply_rules(self, bigquery_table):
         rule_1 = F.is_iban(col_name="IBAN")
         rule_2 = F.is_not_null(col_name="IBAN")
-        df_result = snowflake_table.apply_rules(
+        res = bigquery_table.apply_rules(
             {"IBAN_is_iban": rule_1, "IBAN_is_not_null": rule_2}
         )
-        df_result = df_result.select("IBAN", "IBAN_is_iban", "IBAN_is_not_null").limit(
-            5
+
+        df_result = res.to_pandas()
+        df_result = df_result[["IBAN", "IBAN_is_iban", "IBAN_is_not_null"]].head(5)
+
+        expected_df = pd.DataFrame(
+            {
+                "IBAN": [
+                    None,
+                    None,
+                    None,
+                    "FR1981073760101001813753760",
+                    "FR6906093250967318491811332",
+                ],
+                "IBAN_is_iban": [False, False, False, True, True],
+                "IBAN_is_not_null": [False, False, False, True, True],
+            }
         )
 
-        schema = StructType(
-            [
-                StructField("IBAN", StringType(), nullable=True),
-                StructField("IBAN_is_iban", BooleanType(), nullable=True),
-                StructField("IBAN_is_not_null", BooleanType(), nullable=True),
-            ]
-        )
-        expected_data = [
-            ("FR4756356801990924110246661", True, True),
-            ("FR9152927592715361970259533", True, True),
-            ("FR6098743347361131022029548", True, True),
-            ("FR2371478023732554095214206", True, True),
-            ("FR0330875910858658779613722", True, True),
-        ]
-        expected_df = snowflake_table._engine.snowflake.createDataFrame(
-            expected_data, schema
-        )
+        pd.testing.assert_frame_equal(left=df_result, right=expected_df)
 
-        assert_df_equality(
-            df_result, expected_df, ignore_column_order=True, ignore_row_order=True
-        )
+    def test_aggregate_invalid_rows(self, bigquery_table):
+        rule = F.mean_le_value(col_name="SALAIRE", value=63500)
+        res = bigquery_table.group_by("SEXE").get_valid_rows(rule)
+        df_result = res.to_pandas()
+        expected_df = pd.DataFrame({"MEAN_SALAIRE": [63404.656421], "SEXE": ["M"]})
+        pd.testing.assert_frame_equal(left=df_result, right=expected_df)
 
-    def test_get_invalid_rows_granular_level(self, snowflake_table):
+    def test_get_invalid_rows_granular_level(self, bigquery_table):
         cond = F.mean_le_value(col_name="SALAIRE", value=63500)
-        df = snowflake_table.group_by("SEXE").get_invalid_rows(cond, granular=True)
-        assert (df.count(), len(df.columns)) == (44, 22)
+        df = bigquery_table.group_by("SEXE").get_invalid_rows(cond, granular=True)
+        df = df.to_pandas()
+        assert df.shape == (44, 22)
 
-    def test_udc(self, snowflake_table):
+    def test_udc(self, bigquery_table):
         rule_name = "udc_floor"
 
-        @register_snowflake_condition
-        def snowflake_floor_lt_value(col_name: str, value: int):
-            return F_snowpark.col(col_name) < value
+        @register_bigquery_condition
+        def bigquery_floor_lt_value(dataset: Select, col_name: str, value: int):
+            return func.floor(dataset.c[col_name]) < value
 
-        udc = snowflake_floor_lt_value(col_name="SALAIRE", value=54000)
+        udc = bigquery_floor_lt_value(col_name="SALAIRE", value=54000)
 
+        expected_dataset_row_count = 103
         expected_valid_row_count = 30
 
-        computed_metrics = snowflake_table.analyze(rule_name, udc)
+        computed_metrics = bigquery_table.analyze(rule_name, udc)
         expected_metrics = Metrics(
             rule=rule_name,
-            total_row_count=self.expected_dataset_row_count,
+            total_row_count=expected_dataset_row_count,
             valid_row_count=expected_valid_row_count,
-            valid_row_count_pct=round(
-                expected_valid_row_count * 100 / self.expected_dataset_row_count, 2
-            ),
+            valid_row_count_pct=expected_valid_row_count
+            * 100
+            / expected_dataset_row_count,
             timestamp=computed_metrics.timestamp,
         )
 
@@ -656,9 +620,9 @@ class TestSnowflakeTable:
 
         with pytest.raises(AttributeError) as udc_exception:
 
-            @register_snowflake_condition
-            def is_null(col_name: str, value: int):
-                return F_snowpark.col(col_name) < value
+            @register_bigquery_condition
+            def is_null(dataset: Select, col_name: str, value: int):
+                return func.floor(dataset.c[col_name]) < value
 
         assert (
             "is_null condition already exists in Calista. Choose a different name for your function"
