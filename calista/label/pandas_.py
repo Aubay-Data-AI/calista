@@ -37,7 +37,7 @@ def is_valid_email(email: str) -> bool:
         return False
 
 
-def is_valid_ip_adress(adress_ip: str) -> bool:
+def is_valid_ip_address(address_ip: str) -> bool:
     """
         is valid ip_adress It will be used to check an ip_adress
 
@@ -48,7 +48,7 @@ def is_valid_ip_adress(adress_ip: str) -> bool:
         bool: the function returns a boolean.
 
     """
-    return bool(validators.ipv4(adress_ip) or validators.ipv6(adress_ip))
+    return bool(validators.ipv4(address_ip) or validators.ipv6(address_ip))
 
 
 def is_valid_phone_number(phone_number: str) -> bool:
@@ -65,7 +65,7 @@ def is_valid_phone_number(phone_number: str) -> bool:
     if phonenumbers.is_possible_number_string(phone_number, None):  
         parsed_number = phonenumbers.parse(phone_number, None)  
         return phonenumbers.is_valid_number(parsed_number)
-    else :
+    else:
         return False
 
 
