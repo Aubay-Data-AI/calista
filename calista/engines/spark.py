@@ -237,7 +237,7 @@ class SparkEngine(LazyEngine):
         return F.col(condition.col_name).isin(boolean_type)
 
     def is_email(self, condition: cond.IsEmail) -> Column:
-        return label.is_valid_email(condition.col_name)
+        return label.email_validator(condition.col_name)
 
     def is_integer(self, condition: cond.IsInteger) -> Column:
         return F.col(condition.col_name) % 1 == 0

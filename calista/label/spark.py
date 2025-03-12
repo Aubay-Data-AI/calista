@@ -46,6 +46,21 @@ def is_valid_email(email: str) -> bool:
     
 
 @udf(returnType= BooleanType(), useArrow=True)
+def email_validator(email: str) -> bool:
+    """
+        email_validator It will be used to check an ip_adress
+
+        Args:
+            the function takes a string email as a argument
+
+        Returns:
+        bool: the function returns a boolean.
+
+    """
+    return bool(validators.email(email))
+
+
+@udf(returnType= BooleanType(), useArrow=True)
 def is_valid_ip_address(address_ip: str) -> bool:
     """
         is valid ip_address It will be used to check an ip_address
