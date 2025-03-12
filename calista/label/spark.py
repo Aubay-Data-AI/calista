@@ -7,7 +7,6 @@ import validators
 import phonenumbers
 
 
-
 @udf(returnType= BooleanType(), useArrow=True)
 def is_valid_iban(iban: str) -> bool:
     """
@@ -20,6 +19,8 @@ def is_valid_iban(iban: str) -> bool:
         bool: the function returns a boolean.
 
     """
+    if not iban:
+        return False
     return bool(schwifty.IBAN(iban, allow_invalid=True).is_valid)
 
 
@@ -35,6 +36,8 @@ def is_valid_email(email: str) -> bool:
         bool: the function returns a boolean.
 
     """
+    if not email: 
+        return False
     try:
         validate_email(email, check_deliverability=False)
         return True
@@ -43,18 +46,18 @@ def is_valid_email(email: str) -> bool:
     
 
 @udf(returnType= BooleanType(), useArrow=True)
-def is_valid_ip_adress(adress_ip: str) -> bool:
+def is_valid_ip_address(address_ip: str) -> bool:
     """
-        is valid ip_adress It will be used to check an ip_adress
+        is valid ip_address It will be used to check an ip_address
 
         Args:
-            the function takes a string adress_ip as a argument
+            the function takes a string address_ip as a argument
 
         Returns:
         bool: the function returns a boolean.
 
     """
-    return bool(validators.ipv4(adress_ip) or validators.ipv6(adress_ip))
+    return bool(validators.ipv4(address_ip) or validators.ipv6(address_ip))
 
 
 @udf(returnType= BooleanType(), useArrow=True)
@@ -69,8 +72,10 @@ def is_valid_phone_number(phone_number: str) -> bool:
         bool: the function returns a boolean.
 
     """
-    if phonenumbers.is_possible_number_string(phone_number, None):  
-        parsed_number = phonenumbers.parse(phone_number, None)  
+    if not phone_number:
+        return False
+    try:
+        parsed_number = phonenumbers.parse(phone_number, None)
         return phonenumbers.is_valid_number(parsed_number)
-    else :
+    except phonenumbers.NumberParseException:
         return False
