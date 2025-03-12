@@ -16,6 +16,8 @@ def is_valid_iban(iban: str) -> bool:
         bool: the function returns a boolean.
 
     """
+    if not iban:
+        return False
     return bool(schwifty.IBAN(iban, allow_invalid=True).is_valid)
 
 
@@ -30,6 +32,8 @@ def is_valid_email(email: str) -> bool:
         bool: the function returns a boolean.
 
     """
+    if not email or not email.strip():
+        return False
     try:
         validate_email(email, check_deliverability=False)
         return True
@@ -48,6 +52,8 @@ def is_valid_ip_address(address_ip: str) -> bool:
         bool: the function returns a boolean.
 
     """
+    if not address_ip : 
+        return False
     return bool(validators.ipv4(address_ip) or validators.ipv6(address_ip))
 
 
@@ -62,10 +68,10 @@ def is_valid_phone_number(phone_number: str) -> bool:
         bool: the function returns a boolean.
 
     """
-    if phonenumbers.is_possible_number_string(phone_number, None):  
-        parsed_number = phonenumbers.parse(phone_number, None)  
-        return phonenumbers.is_valid_number(parsed_number)
-    else:
+    if not phone_number :
         return False
-
-
+    try:
+        parsed_number = phonenumbers.parse(phone_number, None)
+        return phonenumbers.is_valid_number(parsed_number)
+    except phonenumbers.NumberParseException:
+        return False
