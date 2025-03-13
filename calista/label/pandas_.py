@@ -39,6 +39,19 @@ def is_valid_email(email: str) -> bool:
         return True
     except EmailNotValidError:
         return False
+    
+def email_validator(email: str) -> bool:
+    """
+        is valid email It will be used to check an email
+
+        Args:
+            the function takes a string email as a argument
+
+        Returns:
+        bool: the function returns a boolean.
+
+    """
+    return bool(validators.email(email))
 
 
 def is_valid_ip_address(address_ip: str) -> bool:
@@ -52,8 +65,6 @@ def is_valid_ip_address(address_ip: str) -> bool:
         bool: the function returns a boolean.
 
     """
-    if not address_ip : 
-        return False
     return bool(validators.ipv4(address_ip) or validators.ipv6(address_ip))
 
 
