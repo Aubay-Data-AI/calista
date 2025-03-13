@@ -4,6 +4,7 @@ import schwifty
 import validators
 import phonenumbers
 
+
 def is_valid_iban(iban: str) -> bool:
     """
      
@@ -41,6 +42,20 @@ def is_valid_email(email: str) -> bool:
         return False
 
 
+def email_validator(email: str) -> bool:
+    """
+        email_validator It will be used to check an email
+
+        Args:
+            the function takes a string email as a argument
+
+        Returns:
+        bool: the function returns a boolean.
+
+    """
+    return bool(validators.email(email))
+
+
 def is_valid_ip_address(address_ip: str) -> bool:
     """
         is valid ip_address It will be used to check an ip_address
@@ -52,8 +67,6 @@ def is_valid_ip_address(address_ip: str) -> bool:
         bool: the function returns a boolean.
 
     """
-    if not address_ip:
-        return False
     return bool(validators.ipv4(address_ip) or validators.ipv6(address_ip))
 
 
