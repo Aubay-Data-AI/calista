@@ -91,6 +91,17 @@ def is_valid_phone_number(phone_number: str) -> bool:
         return False
     try:
         parsed_number = phonenumbers.parse(phone_number, None)
-        return phonenumbers.is_valid_number(parsed_number)
     except phonenumbers.NumberParseException:
+        possible_countries = ["FR", "BE", "CH", "DE"]
+        for country in possible_countries: 
+            try:
+                parsed_number = phonenumbers.parse(phone_number, country)
+                if phonenumbers.is_valid_number(parsed_number):
+                    return True
+            except phonenumbers.NumberParseException:
+                continue
+              
+                 
         return False
+    
+    return phonenumbers.is_valid_number(parsed_number)
