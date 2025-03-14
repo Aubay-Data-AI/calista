@@ -25,13 +25,15 @@ from pandas.core.groupby import DataFrameGroupBy
 
 import calista.core._conditions as cond
 import calista.core.rules as R
-import calista.label.pandas.iban.iban as label
+#import calista.label.pandas.iban.iban as label
 from calista.core._aggregate_conditions import Count, Max, Mean, Median, Min, Sum
 from calista.core.aggregates import AggregateDataset
 from calista.core.catalogue import PythonTypes
 from calista.core.engine import LazyEngine
 from calista.core.metrics import Metrics
 from calista.core.types_alias import ColumnName, PythonType
+
+from calista.label import pandas_ as label
 
 
 class Pandas_Engine(LazyEngine):
@@ -203,22 +205,11 @@ class Pandas_Engine(LazyEngine):
             condition.value
         )
 
-    def is_iban(self, condition: cond.IsIban) -> Series:
-        cleaned_col_str = self.dataset[condition.col_name].astype(str)
-        cleaned_col_str = cleaned_col_str.fillna("").str.strip()
-        is_valid_series = cleaned_col_str.apply(
-            lambda iban: label.iban_isvalid(iban) if len(iban) >= 4 else False
-        )
-        return is_valid_series
-
+    def is_iban(self, condition: cond.IsIban) -> pd.Series:
+        return self.dataset[condition.col_name].apply(label.is_valid_iban)
+         
     def is_ip_address(self, condition: cond.IsIpAddress) -> Series:
-        col = self.dataset[condition.col_name].astype(str)
-        ipv6_regex = r"^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$"
-        ipv4_regex = r"^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$"
-        trimmed_ip_col = col.str.strip()
-        return trimmed_ip_col.str.contains(
-            ipv6_regex, regex=True
-        ) | trimmed_ip_col.str.contains(ipv4_regex, regex=True)
+        return self.dataset[condition.col_name].apply(label.is_valid_ip_address)
 
     def count_occurences(self, rule: R.CountOccurences) -> dict[Any, int]:
         val_count_pd = self.dataset.groupby(rule.col_name).size()
@@ -259,30 +250,8 @@ class Pandas_Engine(LazyEngine):
         return col.str.contains(date_pattern, regex=True)
 
     def is_phone_number(self, condition: cond.IsPhoneNumber) -> Series:
-        col = self.dataset[condition.col_name].astype(str)
-        country_regex = {
-            "fr": r"^(\+?33\s?|0)(\(0\)\s?)?(\d\s?){9}$",
-            "be": r"^\+32[1-9][0-9]{7,8}$",
-            "es": r"^\+34[6-9][0-9]{8}$",
-            "pt": r"^\+351[1-9][0-9]{8}$",
-            "gb": r"^\+44[1-9][0-9]{9,10}$",
-            "it": r"^\+39[0-9]{6,12}$",
-            "lu": r"^\+352[0-9]{3,11}$",
-        }
-        regex = (
-            "|".join(f"({regex})" for regex in country_regex.values())
-            if condition.filter_per_country is None
-            else "|".join(
-                f"({country_regex[country]})"
-                for country in condition.filter_per_country
-            )
-        )
-        return (
-            col.str.replace(r"(?<![-.])[-.]", "", regex=True)
-            .replace(r"\s", "", regex=True)
-            .str.match(regex)
-        )
-
+        return self.dataset[condition.col_name].apply(label.is_valid_phone_number)
+        
     def is_boolean(self, condition: cond.IsBoolean) -> Series:
         data_type = str(self.dataset[condition.col_name].dtype)
         map_boolean_type = {
@@ -297,12 +266,9 @@ class Pandas_Engine(LazyEngine):
             return col.str.lower().isin(boolean_type)
         else:
             return self.dataset[condition.col_name].isin(boolean_type)
-
+        
     def is_email(self, condition: cond.IsEmail) -> Series:
-        col = self.dataset[condition.col_name].astype(str)
-        return col.str.match(
-            r"^[a-zA-Z0-9](?!.*\.\.)[\w\.-]*[a-zA-Z0-9]@[a-zA-Z]{4,}(\.[A-Za-z]{2,})+$"
-        )
+        return self.dataset[condition.col_name].apply(label.email_validator)
 
     def is_integer(self, condition: cond.IsInteger) -> Series:
         col = self.dataset[condition.col_name].astype(str)
