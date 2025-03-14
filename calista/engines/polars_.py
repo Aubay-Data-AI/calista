@@ -30,6 +30,7 @@ from calista.core.catalogue import PythonTypes
 from calista.core.engine import LazyEngine
 from calista.core.metrics import Metrics
 from calista.core.types_alias import ColumnName, PythonType
+from calista.label import polars_ as label
 
 
 class Polars_Engine(LazyEngine):
@@ -171,38 +172,13 @@ class Polars_Engine(LazyEngine):
             .dt.year()
             .__getattribute__(operator)(pl.lit(condition.value))
         )
-
+    
     def is_iban(self, condition: cond.IsIban) -> Expr:
-        alphabet_conversion = {chr(i + 65): str(i + 10) for i in range(26)}
-        cast_col = pl.col(condition.col_name).cast(pl.String)
-        valid_length_col = (
-            pl.when((cast_col.str.len_chars() >= 14) & (cast_col.str.len_chars() <= 34))
-            .then(cast_col)
-            .otherwise(pl.lit("0"))
-        )
-        cleaned_col = valid_length_col.str.slice(4, 34) + valid_length_col.str.slice(
-            0, 4
-        )
-        for letter, value in alphabet_conversion.items():
-            cleaned_col = cleaned_col.str.replace_all(letter, value)
-
-        first_16_digit_mod_97 = (
-            cleaned_col.str.slice(0, 16).cast(pl.Int64).mod(97).cast(pl.String)
-        )
-        other_digit = cleaned_col.str.slice(16, 16)
-        update_cleaned_col = first_16_digit_mod_97 + other_digit
-        is_iban_col = update_cleaned_col.cast(pl.Int64) % 97
-
-        return is_iban_col == 1
-
+        return  pl.col(condition.col_name).map_elements(label.is_valid_iban,return_dtype=pl.Boolean)
+ 
     def is_ip_address(self, condition: cond.IsIpAddress) -> Expr:
-        ipv6_regex = r"^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$"
-        ipv4_regex = r"^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$"
-        trimmed_ip_col = pl.col(condition.col_name).str.strip_chars()
-        return trimmed_ip_col.str.contains(ipv6_regex) | trimmed_ip_col.str.contains(
-            ipv4_regex
-        )
-
+        return pl.col(condition.col_name).map_elements(label.is_valid_ip_address,return_dtype=pl.Boolean)
+    
     def count_occurences(self, rule: R.CountOccurences) -> dict[Any, int]:
         val_count = self.dataset.group_by(rule.col_name).len().collect()
         keys = val_count.to_dict(as_series=False)[rule.col_name]
@@ -254,31 +230,9 @@ class Polars_Engine(LazyEngine):
         )
         return pl.col(condition.col_name).str.contains(date_regex_patterns)
 
-    def is_phone_number(self, condition: cond.IsPhoneNumber) -> Expr:
-        country_regex = {
-            "fr": "^(\+?33\s?|0)(\(0\)\s?)?(\d\s?){9}$",
-            "be": "^\+32[1-9][0-9]{7,8}$",
-            "es": "^\+34[6-9][0-9]{8}$",
-            "pt": "^\+351[1-9][0-9]{8}$",
-            "gb": "^\+44[1-9][0-9]{9,10}$",
-            "it": "^\+39[0-9]{6,12}$",
-            "lu": "^\+352[0-9]{3,11}$",
-        }
-        regex = (
-            "|".join(f"({regex})" for regex in country_regex.values())
-            if condition.filter_per_country is None
-            else "|".join(
-                f"({country_regex[country]})"
-                for country in condition.filter_per_country
-            )
-        )
-        return (
-            pl.col(condition.col_name)
-            .str.replace_all("[-.]{2,}", "succ")
-            .str.replace_all("[-.\s]", "")
-            .str.contains(regex)
-        )
-
+    def is_phone_number(self, condition: cond.IsPhoneNumber) -> Expr :
+         return pl.col(condition.col_name).map_elements(label.is_valid_phone_number,return_dtype=pl.Boolean)
+    
     def is_boolean(self, condition: cond.IsBoolean) -> Expr:
         col_as_string = pl.col(condition.col_name).cast(pl.String)
         boolean_string = ["0", "1", "0.0", "1.0", "true", "false", "True", "False"]
@@ -286,14 +240,10 @@ class Polars_Engine(LazyEngine):
 
     def is_integer(self, condition: cond.IsInteger) -> Expr:
         return pl.col(condition.col_name).str.contains(r"^[-+]?[0-9]+(?:\.0)?$")
-
+    
     def is_email(self, condition: cond.IsEmail) -> Expr:
         return (
-            pl.col(condition.col_name)
-            .str.replace_all("[-.]{2,}", "£")
-            .str.contains(
-                r"^[a-zA-Z0-9][\w.-]*[a-zA-Z0-9]@[a-zA-Z]{4,}(\.[A-Za-z]{2,})+$"
-            )
+            pl.col(condition.col_name).map_elements(label.email_validator,return_dtype=pl.Boolean)
         )
 
     def is_unique(self, condition: cond.IsUnique) -> Expr:
