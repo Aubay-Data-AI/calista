@@ -268,7 +268,7 @@ class Pandas_Engine(LazyEngine):
             return self.dataset[condition.col_name].isin(boolean_type)
         
     def is_email(self, condition: cond.IsEmail) -> Series:
-        return self.dataset[condition.col_name].apply(label.is_valid_email)
+        return self.dataset[condition.col_name].apply(label.email_validator)
 
     def is_integer(self, condition: cond.IsInteger) -> Series:
         col = self.dataset[condition.col_name].astype(str)
