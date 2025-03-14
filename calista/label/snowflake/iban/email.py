@@ -101,9 +101,7 @@ def init_udf(session: Session):
             name="validate_email",
             input_types=[StringType()],
             return_type=BooleanType(),
-            replace=True,
-            is_permanent=True,  # ✅ Ensures UDF is stored permanently
-            stage_location="@MY_STAGE"  # ✅ Required for permanent UDFs
+            replace=True
         )
 
         print("✅ UDF 'validate_email' enregistrée avec succès !")

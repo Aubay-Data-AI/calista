@@ -33,8 +33,7 @@ from calista.core.metrics import Metrics
 from calista.core.types_alias import ColumnName, PythonType
 from calista.label.snowflake.iban.iban import init_udf as init_udf_iban, check_ibans
 from calista.label.snowflake.iban.email import init_udf, check_emails
-
-
+from calista.label.snowflake.iban.validate_email_norm import EMAIL_REGEX
 def _is_not_null(e: C.ColumnOrName) -> Column:
     c = C._to_col_if_str(e, "is_not_null")
     return c.is_not_null()
@@ -176,7 +175,17 @@ class SnowflakeEngine(Database):
         return check_ibans(condition.col_name)
     
     def is_email(self, condition: cond.IsEmail) -> Column:
-        return check_emails(condition.col_name)
+        cleaned_column = F.regexp_replace(F.col(condition.col_name), r"\s+", "")
+        cleaned_column = F.regexp_replace(cleaned_column, r"[<>]", "")
+
+        email_regex_str = r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+
+        return (F.col(condition.col_name).isNotNull()) & cleaned_column.rlike(email_regex_str)
+
+        
+
+
+        
 
     def is_ip_address(self, condition: cond.IsIpAddress) -> Column:
         ipv6_regex = (

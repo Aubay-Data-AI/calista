@@ -476,7 +476,7 @@ def init_udf(session: Session):
         
         Returns:
             bool: Whether IBAN is valid
-        """
+        
         if not iban:
             return False
         
@@ -511,7 +511,7 @@ def init_udf(session: Session):
         )
     except Exception as e:
         print(f"Error registering UDF calculate_checksum: {e}")
-
+"""
     try:
         session.udf.register(
             validate_iban, 
@@ -533,4 +533,4 @@ def check_ibans(col_name: str) -> Column:
     Returns:
     Column containing boolean values for each row
     """
-    return F.call_udf('validate_iban', F.col(col_name))
+    return F.call_udf('TESTS_UNITAIRES.validate_iban', F.col(col_name))

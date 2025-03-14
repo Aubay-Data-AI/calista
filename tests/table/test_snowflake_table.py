@@ -58,7 +58,6 @@ class TestSnowflakeTable:
      
 
     def test_is_email(self, snowflake_table):
-        
         email_rule_name = "check_email_quality"
         email_rule = F.is_email("EMAIL")
 
@@ -80,6 +79,7 @@ class TestSnowflakeTable:
         self.analyze_and_assert_rule(
             snowflake_table, email_rule_name, email_rule, expected_valid_row_count
         )
+
 
     def test_is_boolean(self, snowflake_table):
         boolean_rule_name = "check_CDD_CDI_are_boolean"
