@@ -243,7 +243,7 @@ class Polars_Engine(LazyEngine):
     
     def is_email(self, condition: cond.IsEmail) -> Expr:
         return (
-            pl.col(condition.col_name).map_elements(label.is_valid_email,return_dtype=pl.Boolean)
+            pl.col(condition.col_name).map_elements(label.email_validator,return_dtype=pl.Boolean)
         )
 
     def is_unique(self, condition: cond.IsUnique) -> Expr:
