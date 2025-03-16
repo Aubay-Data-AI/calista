@@ -18,8 +18,7 @@ class ValidatedEmail:
         self.display_name = display_name
 
 EMAIL_REGEX = re.compile(
-    r"^(?P<local>[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+)@(?P<domain>[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})$"
-)
+    r"^(?!.*\.\.)[a-zA-Z0-9][a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]*[a-zA-Z0-9]@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
 
 def split_email(email: str) -> Tuple[Optional[str], str, str, bool]:
     def split_string_at_unquoted_special(text: str, specials: Tuple[str, ...]) -> Tuple[str, str]:

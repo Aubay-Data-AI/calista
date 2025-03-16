@@ -2,6 +2,9 @@ import re
 import snowflake.snowpark.functions as F
 from snowflake.snowpark.types import StringType, BooleanType
 from snowflake.snowpark import Session
+from snowflake.snowpark.functions import udf
+
+from email_validator import validate_email, EmailNotValidError
 
 
 # Regex stricte pour la validation email (RFC 5322 compatible)
@@ -37,6 +40,24 @@ def split_email(email: str):
 
     return display_name, local_part, domain_part, is_quoted_local_part
 
+
+
+
+def init_udf(session: Session):
+
+    
+
+    @udf(name="validate_email")
+    def validate_email_snowflake(email: str) -> bool:
+        if email is None:
+            return False
+        try:
+            validate_email(email, check_deliverability=False)
+            return True
+        except EmailNotValidError:
+            return False
+
+    session.udf.register(validate_email_snowflake)
 
 def validate_email_snowflake(email: str) -> bool:
     """
@@ -83,17 +104,19 @@ def validate_email_snowflake(email: str) -> bool:
     return True
 
 
-def init_udf(session: Session):
+def init_udf_email(session: Session):
     try:
         # ✅ Explicitly set the schema and database
-        result = session.sql("SELECT CURRENT_DATABASE(), CURRENT_SCHEMA()").collect()
-        current_db = result[0][0]
-        current_schema = result[0][1]
+        session.sql("USE DATABASE RESSOURCES").collect()
+        session.sql("USE SCHEMA TESTS_UNITAIRES").collect()
 
-        print(f"✅ Registering UDF in: {current_db}.{current_schema}")
+        result = session.sql("SELECT CURRENT_DATABASE(), CURRENT_SCHEMA()").collect()
+        current_db, current_schema = result[0]
+
+        print(f"✅ First time Registering UDF in: {current_db}.{current_schema}")
 
         
-        session.sql(f"USE SCHEMA {current_schema}").collect()
+       
 
         # ✅ Register the UDF
         session.udf.register(
@@ -103,7 +126,9 @@ def init_udf(session: Session):
             return_type=BooleanType(),
             replace=True
         )
-
+        result = session.sql("SELECT CURRENT_SESSION() AS session_id").collect()
+        session_id = result[0]['SESSION_ID']
+        print(f"✅ Current Session ID: {session_id}")
         print("✅ UDF 'validate_email' enregistrée avec succès !")
 
         # ✅ Verify that the UDF is correctly saved
@@ -120,7 +145,7 @@ def init_udf(session: Session):
 
 
 
-def check_emails(col_name: str):
+def check_emails(col_name: str,Session : Session):
     """
     Valide les emails dans une colonne avec l'UDF validate_email.
     
@@ -130,4 +155,7 @@ def check_emails(col_name: str):
     Returns:
         Column: Colonne contenant True/False pour chaque email.
     """
+    
+    
+    init_udf(Session)  
     return F.call_udf("validate_email", F.col(col_name))

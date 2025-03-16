@@ -33,7 +33,10 @@ from calista.core.metrics import Metrics
 from calista.core.types_alias import ColumnName, PythonType
 from calista.label.snowflake.iban.iban import init_udf as init_udf_iban, check_ibans
 from calista.label.snowflake.iban.email import init_udf, check_emails
-from calista.label.snowflake.iban.validate_email_norm import EMAIL_REGEX
+from calista.label.snowflake.iban.email import init_udf_email
+from calista.label.snowflake.email.validate_email_norm import EMAIL_REGEX
+from email_validator import validate_email, EmailNotValidError
+import pyisemail
 def _is_not_null(e: C.ColumnOrName) -> Column:
     c = C._to_col_if_str(e, "is_not_null")
     return c.is_not_null()
@@ -58,7 +61,7 @@ class SnowflakeEngine(Database):
             print(f"Error establishing connection: {e}")
         self.dataset = None
         self._config = config
-        init_udf_iban(self.snowflake)
+        #init_udf_iban(self.snowflake)
 
     def _load_from_database(self, table: str, schema: str, database: str) -> None:
         self.snowflake.sql(f"USE {database}").collect()
@@ -174,18 +177,33 @@ class SnowflakeEngine(Database):
     def is_iban(self, condition: cond.IsIban) -> Column:
         return check_ibans(condition.col_name)
     
+
+
     def is_email(self, condition: cond.IsEmail) -> Column:
-        cleaned_column = F.regexp_replace(F.col(condition.col_name), r"\s+", "")
+        """cleaned_column = F.regexp_replace(F.col(condition.col_name), r"\s+", "")
         cleaned_column = F.regexp_replace(cleaned_column, r"[<>]", "")
 
-        email_regex_str = r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+        def validate_email_python(email: str) -> bool:
+            if not email:  # Handle None or empty values
+                return False
+            try:
+                validate_email(email, check_deliverability=False)  # Validate format only
+                return True
+            except EmailNotValidError:
+                return False
 
-        return (F.col(condition.col_name).isNotNull()) & cleaned_column.rlike(email_regex_str)
-
-        
-
-
-        
+        valid_emails = [
+            email for email in self.dataset.select(condition.col_name).to_pandas()[condition.col_name]
+            if validate_email_python(email)
+        ]
+      
+         
+        return F.col(condition.col_name).isin(valid_emails)
+        return  check_emails(condition.col_name,self.snowflake)"""
+        cleaned_column = F.regexp_replace(F.col(condition.col_name), r"\s+", "")
+        cleaned_column = F.regexp_replace(cleaned_column, r"[<>]", "")
+        print("ana f is email dial snowflake")
+        return F.call_udf("TESTS_UNITAIRES.validate_email", cleaned_column)
 
     def is_ip_address(self, condition: cond.IsIpAddress) -> Column:
         ipv6_regex = (

@@ -5,9 +5,13 @@ import pytest
 import calista
 from calista import CalistaEngine
 from tests.table.parameters import BIGQUERY_CONN_PARAMS, SNOWFLAKE_CONN_PARAMS
-from calista.label.snowflake.iban.iban  import init_udf as init_udf_email
 
-from calista.label.snowflake.iban.iban import init_udf
+from snowflake.snowpark.types import StringType, BooleanType
+import shutil
+import os
+from email_validator import validate_email, EmailNotValidError
+
+from snowflake.snowpark import Session
 
 
 
@@ -78,10 +82,53 @@ def snowflake_session():
         "snowflake",
         SNOWFLAKE_CONN_PARAMS,
     )
+ 
+    """snowflake_engine = session._engine
+
+    print("Available attributes on SnowflakeEngine:", dir(snowflake_engine))
+    print("SnowflakeEngine internal attributes and values:", snowflake_engine.__dict__)
+
+    # Temporarily raise to quickly inspect output
+    raise Exception("Debug stop: Check printed output above")
+
+    yield session"""
+
+    # Tester la connexion
+    session._engine.snowflake.sql("SELECT CURRENT_VERSION()").show()
+    session._engine.snowflake.sql("USE DATABASE RESSOURCES").collect()
+    session._engine.snowflake.sql("USE SCHEMA TESTS_UNITAIRES").collect()
+    session._engine.snowflake.add_packages("email_validator")
     
-    #session._engine.snowflake.sql("USE DATABASE RESSOURCES").collect()
-    #session._engine.snowflake.sql("USE SCHEMA TESTS_UNITAIRES").collect()
+    def validate_email_snowflake(email: str) -> bool:
+        if email is None:
+            return False
+        try:
+            validate_email(email, check_deliverability=False)
+            return True
+        except EmailNotValidError:
+            return False
+    session._engine.snowflake.udf.register(
+        validate_email_snowflake,
+        name="validate_email",
+        input_types=[StringType()],
+        return_type=BooleanType(),
+        replace=True,
+        packages=["email_validator"],  # critical dependency
+    )
+        # Fermer la session
+      
     
-    #init_udf_email(session._engine.snowflake)  
+    session_id = session._engine.snowflake.sql("SELECT CURRENT_SESSION()").collect()[0][0]
+    print(f"✅ UDF registered in session {session_id}")   
+    result = session._engine.snowflake.sql("SHOW USER FUNCTIONS").collect()
+    udf_names = [row['name'].upper() for row in result]
+
+    if "VALIDATE_EMAIL" in udf_names:
+        print("✅ L'UDF 'validate_email' est bien enregistrée dans Snowflake !")
+    else:
+        print("❌ L'UDF 'validate_email' n'est pas enregistrée.")
+
+    yield session
+    
 
     return session  # ✅ Return the session after initialization
