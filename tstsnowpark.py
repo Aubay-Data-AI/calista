@@ -26,7 +26,7 @@ def validate_email_snowflake(email: str) -> bool:
 def main():
     CONNECTION_PARAMETERS =  {
         'user':'RAMOSLENAMOS',
-        'password':'Absolut4p6laa-',
+        'password':'',
         'account':'XYUWMIA-DL07627',
         'warehouse':'COMPUTE_WH',
         'database':'RESSOURCES',
