@@ -89,19 +89,21 @@ def is_valid_phone_number(phone_number: str) -> bool:
     """
     if not phone_number:
         return False
-    try:
+
+    possible_countries = ["FR", "BE", "CH", "DE", "ES", "PT", "GB", "IT", "LU"]
+    parsed_number = None 
+
+    if phone_number.startswith("+"):
         parsed_number = phonenumbers.parse(phone_number, None)
-    except phonenumbers.NumberParseException:
-        possible_countries = ["FR", "BE", "CH", "DE"]
-        for country in possible_countries: 
-            try:
-                parsed_number = phonenumbers.parse(phone_number, country)
-                if phonenumbers.is_valid_number(parsed_number):
-                    return True
-            except phonenumbers.NumberParseException:
-                continue
-              
-                 
-        return False
-    
-    return phonenumbers.is_valid_number(parsed_number)
+        if phonenumbers.is_valid_number(parsed_number):
+            return True
+
+    # Essayer avec les pays si pas de préfixe international
+    for country in possible_countries:
+        if not phone_number.startswith("+"):
+            parsed_number = phonenumbers.parse(phone_number, country)
+
+        if parsed_number and phonenumbers.is_valid_number(parsed_number):
+            return True
+
+    return False
