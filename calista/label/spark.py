@@ -7,7 +7,7 @@ import validators
 import phonenumbers
 
 
-@udf(returnType= BooleanType(), useArrow=True)
+@udf(returnType=BooleanType(), useArrow=True)
 def is_valid_iban(iban: str) -> bool:
     """
         is valid iban It will be used to check an ip_adress
@@ -24,7 +24,7 @@ def is_valid_iban(iban: str) -> bool:
     return bool(schwifty.IBAN(iban, allow_invalid=True).is_valid)
 
 
-@udf(returnType= BooleanType(), useArrow=True)
+@udf(returnType=BooleanType(), useArrow=True)
 def is_valid_email(email: str) -> bool:
     """
         is valid email It will be used to check an ip_adress
@@ -45,7 +45,7 @@ def is_valid_email(email: str) -> bool:
         return False
     
 
-@udf(returnType= BooleanType(), useArrow=True)
+@udf(returnType=BooleanType(), useArrow=True)
 def email_validator(email: str) -> bool:
     """
         email_validator It will be used to check an email
@@ -60,7 +60,7 @@ def email_validator(email: str) -> bool:
     return bool(validators.email(email))
 
 
-@udf(returnType= BooleanType(), useArrow=True)
+@udf(returnType=BooleanType(), useArrow=True)
 def is_valid_ip_address(address_ip: str) -> bool:
     """
         is valid ip_address It will be used to check an ip_address
@@ -75,7 +75,7 @@ def is_valid_ip_address(address_ip: str) -> bool:
     return bool(validators.ipv4(address_ip) or validators.ipv6(address_ip))
 
 
-@udf(returnType= BooleanType(), useArrow=True)
+@udf(returnType=BooleanType(), useArrow=True)
 def is_valid_phone_number(phone_number: str) -> bool:
     """
         is valid phone_number It will be used to check an phone_number

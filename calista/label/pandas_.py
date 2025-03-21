@@ -39,7 +39,8 @@ def is_valid_email(email: str) -> bool:
         return True
     except EmailNotValidError:
         return False
-    
+
+
 def email_validator(email: str) -> bool:
     """
         is valid email It will be used to check an email
