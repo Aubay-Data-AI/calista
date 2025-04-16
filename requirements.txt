@@ -10,3 +10,7 @@ pyspark>=3.5.0
 delta-spark>=3.1.0
 snowflake-snowpark-python>=1.12.1
 sqlalchemy-bigquery>=1.11.0
+pyisemail
+email-validator==1.2.1
+phonenumbers==8.13.49
+validators==0.18.2
