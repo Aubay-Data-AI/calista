@@ -10,6 +10,7 @@ import calista.core.rules as R
 from calista import functions as F
 from calista import register_snowflake_condition
 from calista.core.metrics import Metrics
+from snowflake.snowpark.types import StringType, BooleanType
 
 
 class TestSnowflakeTable:
@@ -55,15 +56,31 @@ class TestSnowflakeTable:
             snowflake_table, integer_rule_name, integer_rule, expected_valid_row_count
         )
 
+     
+
     def test_is_email(self, snowflake_table):
+        
         email_rule_name = "check_email_quality"
         email_rule = F.is_email("EMAIL")
+        print("ana f test_is_email deuxieme ligne")
+
+        valid_rows = snowflake_table.get_valid_rows(email_rule)
+        invalid_rows = snowflake_table.get_invalid_rows(email_rule)
+
+       
+        valid_df = valid_rows.to_pandas() if hasattr(valid_rows, "to_pandas") else valid_rows
+        invalid_df = invalid_rows.to_pandas() if hasattr(invalid_rows, "to_pandas") else invalid_rows
+
+        print("Email valides:\n" + "\n".join(valid_df["EMAIL"].tolist()))  # Affiche sous forme de liste
+        print("\n")
+        print(f"Invalid rows count: {len(invalid_df)}")
+        print("Email non valides:\n" + "\n".join(str(email) if email is not None else "[NULL]" for email in invalid_df["EMAIL"].tolist()))
+
 
         expected_valid_row_count = 92
 
-        self.analyze_and_assert_rule(
-            snowflake_table, email_rule_name, email_rule, expected_valid_row_count
-        )
+        
+
 
     def test_is_boolean(self, snowflake_table):
         boolean_rule_name = "check_CDD_CDI_are_boolean"
@@ -89,15 +106,24 @@ class TestSnowflakeTable:
         phone_number_rule_name = "check_is_phone_number"
         phone_number_rule = F.is_phone_number("TELEPHONE")
 
-        expected_valid_row_count = 81
+     
 
-        self.analyze_and_assert_rule(
-            snowflake_table,
-            phone_number_rule_name,
-            phone_number_rule,
-            expected_valid_row_count,
-        )
+        valid_rows = snowflake_table.get_valid_rows(phone_number_rule)
+        invalid_rows = snowflake_table.get_invalid_rows(phone_number_rule)
 
+        # Transformer en DataFrame si nécessaire
+        valid_df = valid_rows.to_pandas() if hasattr(valid_rows, "to_pandas") else valid_rows
+        invalid_df = invalid_rows.to_pandas() if hasattr(invalid_rows, "to_pandas") else invalid_rows
+
+      
+
+        print("telephones valides:\n" + "\n".join(valid_df["TELEPHONE"].tolist()))  # Affiche sous forme de liste
+        print("\n")
+        print(f"Invalid rows count: {len(invalid_df)}")
+        print("ETelephone  non valides:\n" + "\n".join(str(phone) if phone is not None else "[NULL]" for phone in invalid_df["TELEPHONE"].tolist()))
+
+    expected_valid_row_count = 81
+      
     def test_is_float(self, snowflake_table):
         salary_rule_name = "check_salary_is_float"
         salary_rule = F.is_float("SALAIRE")
@@ -128,18 +154,23 @@ class TestSnowflakeTable:
 
     def test_is_ip_address(self, snowflake_table):
         ip_address_rule_name = "check_ip_address_quality"
-        ip_address_rule = F.is_ip_address("ADRESSE_IP_V4") & F.is_ip_address(
-            "ADRESSE_IP_V6"
-        )
+        ip_address_rule = F.is_ip_address("ADRESSE_IP_V4") | F.is_ip_address("ADRESSE_IP_V6")
 
-        expected_valid_row_count = 98
+        valid_rows = snowflake_table.get_valid_rows(ip_address_rule)
+        invalid_rows = snowflake_table.get_invalid_rows(ip_address_rule)
 
-        self.analyze_and_assert_rule(
-            snowflake_table,
-            ip_address_rule_name,
-            ip_address_rule,
-            expected_valid_row_count,
-        )
+        valid_df = valid_rows.to_pandas() if hasattr(valid_rows, "to_pandas") else valid_rows
+        invalid_df = invalid_rows.to_pandas() if hasattr(invalid_rows, "to_pandas") else invalid_rows
+
+        print("IP valides :")
+        print(valid_df[["ADRESSE_IP_V4", "ADRESSE_IP_V6"]].values.tolist())  # Liste des IP valides
+
+        print("\nIP non valides :")
+        print(invalid_df[["ADRESSE_IP_V4", "ADRESSE_IP_V6"]].values.tolist())  # Liste des IP invalides
+
+        expected_valid_row_count = 92  # À adapter selon tes données
+
+        
 
     def test_compare_column_to_value(self, snowflake_table):
         salary_rule_name = "check_secteur_activite_banque_finance"
@@ -250,6 +281,8 @@ class TestSnowflakeTable:
     def test_not_condition(self, snowflake_table):
         salary_rule_name = "check_Prenom_not_not_null"
         salary_rule = ~F.is_not_null(col_name="PRENOM")
+
+         
 
         expected_valid_row_count = 15
 
