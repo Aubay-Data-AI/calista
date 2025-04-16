@@ -32,10 +32,13 @@ from calista.core.database import Database
 from calista.core.metrics import Metrics
 from calista.core.types_alias import ColumnName, PythonType
 from calista.label.snowflake.iban.iban import init_udf as init_udf_iban, check_ibans
-from calista.label.snowflake.iban.email import init_udf, check_emails
-from calista.label.snowflake.iban.email import init_udf_email
-from calista.label.snowflake.email.validate_email_norm import EMAIL_REGEX
-from email_validator import validate_email, EmailNotValidError
+
+
+from calista.label.snowflake.email.validate_email_norm import is_email as is_email_udf
+from calista.label.snowflake.phonenumbers.valide_phone_number import is_phone as is_phone_udf
+from calista.label.snowflake.ip_adress.validate_ip_adress import is_ip as is_ip_udf
+
+
 import pyisemail
 def _is_not_null(e: C.ColumnOrName) -> Column:
     c = C._to_col_if_str(e, "is_not_null")
@@ -61,7 +64,7 @@ class SnowflakeEngine(Database):
             print(f"Error establishing connection: {e}")
         self.dataset = None
         self._config = config
-        #init_udf_iban(self.snowflake)
+        #init_udf_email(self.snowflake)
 
     def _load_from_database(self, table: str, schema: str, database: str) -> None:
         self.snowflake.sql(f"USE {database}").collect()
@@ -180,44 +183,17 @@ class SnowflakeEngine(Database):
 
 
     def is_email(self, condition: cond.IsEmail) -> Column:
-        """cleaned_column = F.regexp_replace(F.col(condition.col_name), r"\s+", "")
-        cleaned_column = F.regexp_replace(cleaned_column, r"[<>]", "")
-
-        def validate_email_python(email: str) -> bool:
-            if not email:  # Handle None or empty values
-                return False
-            try:
-                validate_email(email, check_deliverability=False)  # Validate format only
-                return True
-            except EmailNotValidError:
-                return False
-
-        valid_emails = [
-            email for email in self.dataset.select(condition.col_name).to_pandas()[condition.col_name]
-            if validate_email_python(email)
-        ]
-      
-         
-        return F.col(condition.col_name).isin(valid_emails)
-        return  check_emails(condition.col_name,self.snowflake)"""
-        cleaned_column = F.regexp_replace(F.col(condition.col_name), r"\s+", "")
-        cleaned_column = F.regexp_replace(cleaned_column, r"[<>]", "")
-        print("ana f is email dial snowflake")
-        return F.call_udf("TESTS_UNITAIRES.validate_email", cleaned_column)
+        
+        #call udf sur la colonne email
+        return is_email_udf(condition.col_name)
+    
+    def is_phone_number(self, condition: cond.IsPhoneNumber) -> Column:
+           return is_phone_udf(condition.col_name)
 
     def is_ip_address(self, condition: cond.IsIpAddress) -> Column:
-        ipv6_regex = (
-            "^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,"
-            "6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,"
-            "4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,"
-            "2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,"
-            "7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,"
-            "1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,"
-            "4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$"
-        )
-        ipv4_regex = "^(25[0-5]|2[0-4][0-9]|1?[0-9]{1,2})(\.(25[0-5]|2[0-4][0-9]|1?[0-9]{1,2})){3}$"
-        trimmed_ip_col = F.trim(F.col(condition.col_name))
-        return trimmed_ip_col.rlike(ipv6_regex) | trimmed_ip_col.rlike(ipv4_regex)
+        
+        return is_ip_udf(condition.col_name)
+
 
     def count_occurences(self, rule: R.CountOccurences) -> dict[Any, int]:
         val_count = self.dataset.groupBy(rule.col_name).count().collect()
@@ -259,29 +235,7 @@ class SnowflakeEngine(Database):
         )
         return F.col(condition.col_name).rlike(date_regex_patterns)
 
-    def is_phone_number(self, condition: cond.IsPhoneNumber) -> Column:
-        country_regex = {
-            "fr": "^(\+?33\s?|0)(\(0\)\s?)?(\d\s?){9}$",
-            "be": "^\+32[1-9][0-9]{7,8}$",
-            "es": "^\+34[6-9][0-9]{8}$",
-            "pt": "^\+351[1-9][0-9]{8}$",
-            "gb": "^\+44[1-9][0-9]{9,10}$",
-            "it": "^\+39[0-9]{6,12}$",
-            "lu": "^\+352[0-9]{3,11}$",
-        }
-        regex = (
-            "|".join(f"({regex})" for regex in country_regex.values())
-            if condition.filter_per_country is None
-            else "|".join(
-                f"({country_regex[country]})"
-                for country in condition.filter_per_country
-            )
-        )
-        return F.regexp_replace(
-            F.regexp_replace(F.col(condition.col_name), "[-.]{2,}", "succ"),
-            r"[-.\s]",
-            "",
-        ).rlike(regex)
+   
 
     def is_boolean(self, condition: cond.IsBoolean) -> Column:
         data_type = self.dataset.schema[condition.col_name].datatype
