@@ -37,9 +37,11 @@ from calista.label.snowflake.iban.iban import init_udf as init_udf_iban, check_i
 from calista.label.snowflake.email.validate_email_norm import is_email as is_email_udf
 from calista.label.snowflake.phonenumbers.valide_phone_number import is_phone as is_phone_udf
 from calista.label.snowflake.ip_adress.validate_ip_adress import is_ip as is_ip_udf
+
 from calista.label.snowflake.email.validate_email_norm import init_udf as init_udf_email
 from calista.label.snowflake.phonenumbers.valide_phone_number import init_udf as init_udf_phone
 from calista.label.snowflake.ip_adress.validate_ip_adress import init_udf as init_udf_ip
+
 
 import pyisemail
 def _is_not_null(e: C.ColumnOrName) -> Column:
@@ -66,14 +68,23 @@ class SnowflakeEngine(Database):
             print(f"Error establishing connection: {e}")
         self.dataset = None
         self._config = config
-        init_udf_email(self.snowflake)
-        init_udf_phone(self.snowflake)
-        init_udf_ip(self._engine.snowflake)
+       
 
     def _load_from_database(self, table: str, schema: str, database: str) -> None:
-        self.snowflake.sql(f"USE {database}").collect()
-        self.dataset = self.snowflake.table(f"{schema}.{table}")
+        # Set context: database & schema
+        self.snowflake.sql(f"USE DATABASE {database}").collect()
+        self.snowflake.sql(f"USE SCHEMA {schema}").collect()
+        self.snowflake.add_packages("email_validator")
+        self.snowflake.add_packages("phonenumbers")
+        self.snowflake.add_packages("validators")
 
+        # Register UDFs in the correct context
+        init_udf_email(self.snowflake)
+        init_udf_phone(self.snowflake)
+        init_udf_ip(self.snowflake)
+
+        # Load the dataset after the context is set
+        self.dataset = self.snowflake.table(f"{schema}.{table}")
     def where(self, expression: Column) -> DataFrame:
         return self.dataset.filter(expression)
 

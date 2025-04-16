@@ -19,7 +19,7 @@ def init_udf(session: Session):
             return_type=BooleanType()
         )
     except Exception as e:
-        print(f"Error registering UDF validate_ip: {e}")
+        print(f"Error  registering UDF validate_ip: {e}")
 
 
 def is_ip(col_name: str) -> Column:
