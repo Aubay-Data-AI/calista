@@ -34,13 +34,13 @@ from calista.core.types_alias import ColumnName, PythonType
 from calista.label.snowflake.iban.iban import init_udf as init_udf_iban, check_ibans
 
 
-from calista.label.snowflake.email.validate_email_norm import is_email as is_email_udf
-from calista.label.snowflake.phonenumbers.valide_phone_number import is_phone as is_phone_udf
-from calista.label.snowflake.ip_adress.validate_ip_adress import is_ip as is_ip_udf
+from calista.label.snowflake.iban.email.validate_email_norm import is_email as is_email_udf
+from calista.label.snowflake.iban.phonenumbers.valide_phone_number import is_phone as is_phone_udf
+from calista.label.snowflake.iban.ip_adress.validate_ip_adress import is_ip as is_ip_udf
 
-from calista.label.snowflake.email.validate_email_norm import init_udf as init_udf_email
-from calista.label.snowflake.phonenumbers.valide_phone_number import init_udf as init_udf_phone
-from calista.label.snowflake.ip_adress.validate_ip_adress import init_udf as init_udf_ip
+from calista.label.snowflake.iban.email.validate_email_norm import init_udf as init_udf_email
+from calista.label.snowflake.iban.phonenumbers.valide_phone_number import init_udf as init_udf_phone
+from calista.label.snowflake.iban.ip_adress.validate_ip_adress import init_udf as init_udf_ip
 
 
 import pyisemail
