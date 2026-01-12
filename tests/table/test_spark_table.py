@@ -3,7 +3,7 @@ from functools import reduce
 
 import pandas as pd
 import pytest
-from chispa.dataframe_comparer import assert_df_equality
+from pyspark.testing import assertDataFrameEqual
 from pyspark.sql import functions as F_spark
 from pyspark.sql.types import BooleanType, StringType, StructField, StructType
 
@@ -557,7 +557,7 @@ class TestSparkTable:
         ]
         expected_df = spark_table._engine.spark.createDataFrame(expected_data, schema)
 
-        assert_df_equality(df_result, expected_df)
+        assertDataFrameEqual(df_result, expected_df)
 
     def test_apply_rules(self, spark_table):
         rule_1 = F.is_iban(col_name="IBAN")
@@ -586,7 +586,7 @@ class TestSparkTable:
         ]
         expected_df = spark_table._engine.spark.createDataFrame(expected_data, schema)
 
-        assert_df_equality(df_result, expected_df)
+        assertDataFrameEqual(df_result, expected_df)
 
     def test_get_invalid_rows_granular_level(self, spark_table):
         cond = F.mean_le_value(col_name="SALAIRE", value=63500)
