@@ -26,6 +26,8 @@ from calista.core._conditions import (
 )
 from calista.core.engine import DataFrameType, GenericColumnType, LazyEngine
 from calista.core.metrics import Metrics
+from calista.core.profile import ColumnProfile, QualityWeights, TableProfile
+from calista.core.rules import GetOutliersForContinuousVar
 from calista.core.types_alias import ColumnName, PythonType, RuleName
 from calista.core.utils import import_engine
 
@@ -505,9 +507,6 @@ class CalistaTable:
             TableProfile: Structured profile report with per-column profiles
                          and overall quality score.
         """
-        from calista.core.profile import ColumnProfile, QualityWeights, TableProfile
-        from calista.core.rules import GetOutliersForContinuousVar
-
         if weights is None:
             weights = QualityWeights()
 
