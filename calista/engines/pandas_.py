@@ -21,7 +21,7 @@ from typing import Any, Dict, List
 import numpy as np
 import pandas as pd
 from pandas import DataFrame, Series
-from pandas.core.groupby import DataFrameGroupBy
+
 
 import calista.core._conditions as cond
 import calista.core.rules as R
@@ -451,17 +451,17 @@ class Pandas_AggregateDataset(AggregateDataset):
         dataset: DataFrame,
         keys: list[str],
         agg_cols_expr: list[tuple[str, tuple[str, str]]],
-    ) -> DataFrameGroupBy:
+    ) -> DataFrame:
         """
         Aggregate a dataset. It will be used for aggregate conditions
 
         Args:
-            dataset (DataFrame): LazyFrame type object to aggregate.
+            dataset (DataFrame): DataFrame type object to aggregate.
             keys (list[str]): The aggregation keys.
             agg_cols_expr (list[tuple[str, tuple[str, str]]]): The aggregation expressions list.
 
         Returns:
-            DataFrameGroupBy: The aggregated dataset.
+            DataFrame: The aggregated dataset.
         """
         new_agg_cols_expr = {}
         for expr in agg_cols_expr:

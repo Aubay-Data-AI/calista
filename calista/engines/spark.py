@@ -203,7 +203,6 @@ class SparkEngine(LazyEngine):
         return is_iban_col == 1
 
     def is_ip_address(self, condition: cond.IsIpAddress) -> Column:
-        """Merci Thomas"""
         ipv6_regex = (
             r"^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,"
             r"6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,"
@@ -222,7 +221,7 @@ class SparkEngine(LazyEngine):
         return dict(val_count)
 
     def compute_percentile(self, rule: R.ComputePercentile) -> float:
-        return self.dataset.approxQuantile(rule.col_name, [rule.percentile], 0)[0]
+        return self.dataset.approxQuantile(rule.col_name, [rule.percentile], 0.001)[0]
 
     def get_col_values_superior_to_constant(
         self, rule: R.GetColValuesSuperiorToConstant

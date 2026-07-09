@@ -19,7 +19,7 @@ dependencies = [
     "overrides>=7.7.0",
     "schema>=0.7.5",
     "python-dotenv>=1.0.1",
-    "polars>=0.20.21,<1.7"
+    "polars>=0.20.21"
 ]
 
 classifiers = [
@@ -39,7 +39,7 @@ Repository = "https://github.com/Aubay-Data-AI/calista"
 pythonpath = [
   "."
 ]
-addopts = "--cov calista-enterprise --cov-report term-missing"
+addopts = "--cov calista --cov-report term-missing"
 
 [tool.pycln]
 all = true

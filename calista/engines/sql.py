@@ -233,9 +233,6 @@ class SqlEngine(Database):
     def rlike(self, condition: cond.Rlike) -> ColumnExpressionArgument:
         raise Exception("rlike() function is not available")
 
-    def rlike(self, condition: cond.Rlike) -> ColumnExpressionArgument:
-        raise Exception("rlike() function is not available")
-
     def compare_year_to_value(
         self, condition: cond.CompareYearToValue
     ) -> ColumnExpressionArgument:

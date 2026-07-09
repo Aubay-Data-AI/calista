@@ -18,9 +18,7 @@ from decimal import Decimal
 from typing import Any, Dict, List
 
 import polars as pl
-import pyarrow.dataset as ds
 from polars import Expr, LazyFrame
-from polars.lazyframe.group_by import LazyGroupBy
 
 import calista.core._conditions as cond
 import calista.core.rules as R
@@ -64,8 +62,7 @@ class Polars_Engine(LazyEngine):
     ) -> None:
         lowered_file_format = file_format.lower()
         if file_format == "parquet":
-            dset = ds.dataset(path)
-            self.dataset = pl.scan_pyarrow_dataset(dset)
+            self.dataset = pl.scan_parquet(path)
         elif file_format == "csv":
             self.dataset = pl.scan_csv(path)
         elif file_format == "json":
@@ -407,7 +404,7 @@ class Polars_AggregateDataset(AggregateDataset):
     @staticmethod
     def aggregate_dataset(
         dataset: LazyFrame, keys: list[str], agg_cols_expr: list[Expr]
-    ) -> LazyGroupBy:
+    ) -> LazyFrame:
         """
         Aggregate a dataset. It will be used for aggregate conditions
 
@@ -417,7 +414,7 @@ class Polars_AggregateDataset(AggregateDataset):
             agg_cols_expr: list[Expr]: The aggregation expressions list.
 
         Returns:
-            LazyGroupBy: The aggregated dataset.
+            LazyFrame: The aggregated dataset.
         """
         return dataset.group_by(*keys).agg(*agg_cols_expr)
 

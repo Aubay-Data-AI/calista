@@ -518,7 +518,7 @@ class CalistaEngine:
             "polars_",
         ]:
             raise Exception(
-                f"Je ne sais pas faire avec le moteur {engine} pour l'instant"
+                f"Unsupported engine: {engine}"
             )
         self._engine = import_engine(engine.lower())(config=config)
 
