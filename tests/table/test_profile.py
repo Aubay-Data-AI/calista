@@ -3,25 +3,19 @@ import pytest
 from calista import CalistaEngine
 from calista.core.profile import QualityWeights, TableProfile
 
+_PROFILE_DATA = {
+    "ID": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    "NAME": ["Alice", "Bob", "Alice", "Charlie", None, "Bob", "Alice", "David", "Eve", "Alice"],
+    "SCORE": [85.0, 92.5, 78.0, 88.0, 95.0, 70.0, 88.0, 92.5, 100.0, 65.0],
+}
+
 
 def _get_pandas_engine():
-    return CalistaEngine("pandas").load_from_dict(
-        {
-            "ID": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-            "NAME": ["Alice", "Bob", "Alice", "Charlie", None, "Bob", "Alice", "David", "Eve", "Alice"],
-            "SCORE": [85.0, 92.5, 78.0, 88.0, 95.0, 70.0, 88.0, 92.5, 100.0, 65.0],
-        }
-    )._engine
+    return CalistaEngine("pandas").load_from_dict(_PROFILE_DATA)._engine
 
 
 def _get_polars_engine():
-    return CalistaEngine("polars").load_from_dict(
-        {
-            "ID": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-            "NAME": ["Alice", "Bob", "Alice", "Charlie", None, "Bob", "Alice", "David", "Eve", "Alice"],
-            "SCORE": [85.0, 92.5, 78.0, 88.0, 95.0, 70.0, 88.0, 92.5, 100.0, 65.0],
-        }
-    )._engine
+    return CalistaEngine("polars").load_from_dict(_PROFILE_DATA)._engine
 
 
 @pytest.fixture(params=[_get_pandas_engine, _get_polars_engine], ids=["pandas", "polars"])
@@ -69,13 +63,7 @@ class TestProfileBasics:
 
 class TestProfileViaTable:
     def _make_table(self, engine_name):
-        return CalistaEngine(engine_name).load_from_dict(
-            {
-                "ID": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-                "NAME": ["Alice", "Bob", "Alice", "Charlie", None, "Bob", "Alice", "David", "Eve", "Alice"],
-                "SCORE": [85.0, 92.5, 78.0, 88.0, 95.0, 70.0, 88.0, 92.5, 100.0, 65.0],
-            }
-        )
+        return CalistaEngine(engine_name).load_from_dict(_PROFILE_DATA)
 
     @pytest.mark.parametrize("engine_name", ["pandas", "polars"])
     def test_profile_returns_table_profile(self, engine_name):
@@ -91,7 +79,7 @@ class TestProfileViaTable:
         result = table.profile()
         name_col = next(c for c in result.columns if c.col_name == "NAME")
         assert name_col.null_count == 1
-        assert name_col.null_ratio == 10.0
+        assert name_col.null_ratio == 0.1
         assert name_col.count == 10
 
     @pytest.mark.parametrize("engine_name", ["pandas", "polars"])

@@ -489,7 +489,7 @@ class CalistaTable:
         self,
         columns: list[str] | None = None,
         top_n: int = 5,
-        weights=None,
+        weights: "QualityWeights | None" = None,
     ):
         """
         Profile the dataset and return a structured report with per-column
@@ -506,6 +506,7 @@ class CalistaTable:
                          and overall quality score.
         """
         from calista.core.profile import ColumnProfile, QualityWeights, TableProfile
+        from calista.core.rules import GetOutliersForContinuousVar
 
         if weights is None:
             weights = QualityWeights()
@@ -537,24 +538,46 @@ class CalistaTable:
             except NotImplementedError:
                 top_values = {}
 
-            null_count = stats.get("null_count", 0)
+            try:
+                null_count = self._engine.get_null_count(col_name)
+            except NotImplementedError:
+                null_count = stats.get("null_count", 0)
+
+            try:
+                std_dev = self._engine.get_std_dev(col_name)
+            except NotImplementedError:
+                std_dev = stats.get("std_dev")
+
+            outliers = []
+            col_type = schema.get(col_name)
+            if col_type in ("integer", "float", "INTEGER", "FLOAT", "Integer", "Float"):
+                try:
+                    outliers = self._engine.get_outliers_for_continuous_var(
+                        GetOutliersForContinuousVar(
+                            col_name=col_name,
+                            first_quartile=0.25,
+                            third_quartile=0.75,
+                        )
+                    )
+                except NotImplementedError:
+                    pass
 
             cp = ColumnProfile(
                 col_name=col_name,
-                col_type=str(schema.get(col_name)) if col_name in schema else None,
+                col_type=str(col_type) if col_type else None,
                 count=total_count,
                 null_count=null_count,
                 null_ratio=round(
-                    null_count / max(total_count, 1) * 100, 2
+                    null_count / max(total_count, 1), 4
                 ),
                 distinct_count=stats.get("distinct_count"),
                 min=stats.get("min"),
                 max=stats.get("max"),
                 mean=stats.get("mean"),
                 median=stats.get("median"),
-                std_dev=stats.get("std_dev"),
+                std_dev=std_dev,
                 top_values=top_values,
-                outliers=[],
+                outliers=outliers,
             )
             cp.compute_quality_score(weights)
             col_profiles.append(cp)

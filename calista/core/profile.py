@@ -52,18 +52,6 @@ class ColumnProfile(BaseModel):
         return self.quality_score
 
 
-def _to_serializable(val: Any) -> Any:
-    import numpy as np
-
-    if isinstance(val, (np.integer,)):
-        return int(val)
-    if isinstance(val, (np.floating,)):
-        return float(val)
-    if isinstance(val, np.ndarray):
-        return val.tolist()
-    return val
-
-
 class TableProfile(BaseModel):
     table_name: str = ""
     engine: str = ""
