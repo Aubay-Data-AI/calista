@@ -9,6 +9,8 @@ __pycache__/
 # IDEs and editors
 .idea/
 .vscode/
+.opencode/
+AGENTS.md
 
 # Distribution / packaging
 .Python
@@ -165,6 +167,8 @@ cython_debug/
 
 demo/
 examples/
+.scratch/
+docs/agents/
 tests/table/parameters.py
 tests/table/*.json
 
