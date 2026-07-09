@@ -688,6 +688,64 @@ class LazyEngine(ABC):
         """
         ...
 
+    def get_column_statistics(self, col_name: str) -> dict:
+        """
+        Return statistics for a single column.
+
+        Args:
+            col_name (str): The name of the column.
+
+        Returns:
+            dict: A dictionary with keys: count, null_count, distinct_count,
+                  min, max, mean, median, std_dev.
+        """
+        raise NotImplementedError(
+            f"get_column_statistics is not implemented for {self.__name__}"
+        )
+
+    def get_top_values(self, col_name: str, n: int = 5) -> dict[Any, int]:
+        """
+        Return the top N most frequent values for a column.
+
+        Args:
+            col_name (str): The name of the column.
+            n (int): Number of top values to return.
+
+        Returns:
+            dict[Any, int]: A mapping of value to frequency count.
+        """
+        raise NotImplementedError(
+            f"get_top_values is not implemented for {self.__name__}"
+        )
+
+    def get_null_count(self, col_name: str) -> int:
+        """
+        Return the number of null values in a column.
+
+        Args:
+            col_name (str): The name of the column.
+
+        Returns:
+            int: The count of null values.
+        """
+        raise NotImplementedError(
+            f"get_null_count is not implemented for {self.__name__}"
+        )
+
+    def get_std_dev(self, col_name: str) -> float:
+        """
+        Return the standard deviation of a numeric column.
+
+        Args:
+            col_name (str): The name of the column.
+
+        Returns:
+            float: The standard deviation.
+        """
+        raise NotImplementedError(
+            f"get_std_dev is not implemented for {self.__name__}"
+        )
+
     # @abstractmethod
     # def aggregate_dataset(
     #     self, keys: list[str], agg_cols_expr: list[GenericAggExpr]

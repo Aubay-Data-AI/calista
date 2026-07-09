@@ -485,6 +485,89 @@ class CalistaTable:
 
         return type_format
 
+    def profile(
+        self,
+        columns: list[str] | None = None,
+        top_n: int = 5,
+        weights=None,
+    ):
+        """
+        Profile the dataset and return a structured report with per-column
+        statistics and a quality score.
+
+        Args:
+            columns: Optional list of column names to profile. Defaults to all.
+            top_n: Number of most frequent values to include. Defaults to 5.
+            weights: QualityWeights for scoring. Defaults to completeness=40,
+                     uniqueness=20, type_conformity=40.
+
+        Returns:
+            TableProfile: Structured profile report with per-column profiles
+                         and overall quality score.
+        """
+        from calista.core.profile import ColumnProfile, QualityWeights, TableProfile
+
+        if weights is None:
+            weights = QualityWeights()
+
+        schema = self._engine.get_schema()
+        total_count = self._engine.count_records()
+
+        if columns is None:
+            columns = list(schema.keys())
+
+        col_profiles = []
+        for col_name in columns:
+            try:
+                stats = self._engine.get_column_statistics(col_name)
+            except NotImplementedError:
+                stats = {
+                    "count": total_count,
+                    "null_count": 0,
+                    "distinct_count": None,
+                    "min": None,
+                    "max": None,
+                    "mean": None,
+                    "median": None,
+                    "std_dev": None,
+                }
+
+            try:
+                top_values = self._engine.get_top_values(col_name, top_n)
+            except NotImplementedError:
+                top_values = {}
+
+            null_count = stats.get("null_count", 0)
+
+            cp = ColumnProfile(
+                col_name=col_name,
+                col_type=str(schema.get(col_name)) if col_name in schema else None,
+                count=total_count,
+                null_count=null_count,
+                null_ratio=round(
+                    null_count / max(total_count, 1) * 100, 2
+                ),
+                distinct_count=stats.get("distinct_count"),
+                min=stats.get("min"),
+                max=stats.get("max"),
+                mean=stats.get("mean"),
+                median=stats.get("median"),
+                std_dev=stats.get("std_dev"),
+                top_values=top_values,
+                outliers=[],
+            )
+            cp.compute_quality_score(weights)
+            col_profiles.append(cp)
+
+        profile_report = TableProfile(
+            engine=self._engine.__name__.rstrip("_"),
+            total_row_count=total_count,
+            total_column_count=len(columns),
+            columns=col_profiles,
+        )
+        profile_report.compute_overall_score()
+        return profile_report
+
 
 class CalistaEngine:
     """

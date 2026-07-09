@@ -390,6 +390,45 @@ class Pandas_Engine(LazyEngine):
             & self.dataset[condition.col_name].notna()
         )
 
+    def get_column_statistics(self, col_name: str) -> dict:
+        col = self.dataset[col_name]
+        non_null = col.dropna()
+        stats = {
+            "count": int(col.count()),
+            "null_count": int(col.isna().sum()),
+            "distinct_count": int(non_null.nunique()),
+            "min": None,
+            "max": None,
+            "mean": None,
+            "median": None,
+            "std_dev": None,
+        }
+        if pd.api.types.is_numeric_dtype(col):
+            stats["min"] = float(col.min())
+            stats["max"] = float(col.max())
+            if stats["count"] > stats["null_count"]:
+                stats["mean"] = float(col.mean())
+                stats["median"] = float(col.median())
+                stats["std_dev"] = float(col.std())
+        else:
+            if len(non_null) > 0:
+                stats["min"] = str(non_null.min())
+                stats["max"] = str(non_null.max())
+        return stats
+
+    def get_top_values(self, col_name: str, n: int = 5) -> dict[Any, int]:
+        top = self.dataset[col_name].value_counts(dropna=True).head(n)
+        return {str(k): int(v) for k, v in top.items()}
+
+    def get_null_count(self, col_name: str) -> int:
+        return int(self.dataset[col_name].isna().sum())
+
+    def get_std_dev(self, col_name: str) -> float:
+        col = self.dataset[col_name]
+        if pd.api.types.is_numeric_dtype(col):
+            return float(col.std())
+        return 0.0
+
 
 class Pandas_AggregateDataset(AggregateDataset):
     @staticmethod

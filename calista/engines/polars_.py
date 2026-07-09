@@ -348,6 +348,82 @@ class Polars_Engine(LazyEngine):
     def is_positive(self, condition: cond.IsPositive) -> Expr:
         return pl.col(condition.col_name).str.contains(r"^[+]?[0-9]\d*(\.\d+)?$")
 
+    def get_column_statistics(self, col_name: str) -> dict:
+        col_counts = (
+            self.dataset.select(
+                pl.col(col_name).count().alias("count"),
+                pl.col(col_name).null_count().alias("null_count"),
+                pl.col(col_name).drop_nulls().n_unique().alias("distinct_count"),
+            )
+            .collect()
+        )
+
+        stats = {
+            "count": col_counts["count"][0],
+            "null_count": col_counts["null_count"][0],
+            "distinct_count": col_counts["distinct_count"][0],
+            "min": None,
+            "max": None,
+            "mean": None,
+            "median": None,
+            "std_dev": None,
+        }
+
+        schema = dict(self.dataset.collect_schema())
+        dtype = schema.get(col_name)
+        is_numeric = dtype is not None and dtype.is_numeric()
+
+        if is_numeric:
+            agg_stats = (
+                self.dataset.select(
+                    pl.col(col_name).min().alias("min"),
+                    pl.col(col_name).max().alias("max"),
+                    pl.col(col_name).mean().alias("mean"),
+                    pl.col(col_name).median().alias("median"),
+                    pl.col(col_name).std().alias("std_dev"),
+                )
+                .collect()
+            )
+            stats["min"] = float(agg_stats["min"][0]) if agg_stats["min"][0] is not None else None
+            stats["max"] = float(agg_stats["max"][0]) if agg_stats["max"][0] is not None else None
+            stats["mean"] = float(agg_stats["mean"][0]) if agg_stats["mean"][0] is not None else None
+            stats["median"] = float(agg_stats["median"][0]) if agg_stats["median"][0] is not None else None
+            stats["std_dev"] = float(agg_stats["std_dev"][0]) if agg_stats["std_dev"][0] is not None else None
+        else:
+            agg_stats = (
+                self.dataset.select(
+                    pl.col(col_name).min().alias("min"),
+                    pl.col(col_name).max().alias("max"),
+                )
+                .collect()
+            )
+            stats["min"] = agg_stats["min"][0]
+            stats["max"] = agg_stats["max"][0]
+
+        return stats
+
+    def get_top_values(self, col_name: str, n: int = 5) -> dict[Any, int]:
+        top = (
+            self.dataset.drop_nulls(col_name)
+            .group_by(col_name)
+            .len()
+            .sort("len", descending=True)
+            .head(n)
+            .collect()
+        )
+        return dict(zip(top[col_name].to_list(), top["len"].to_list()))
+
+    def get_null_count(self, col_name: str) -> int:
+        return self.dataset.select(pl.col(col_name).null_count()).collect().item()
+
+    def get_std_dev(self, col_name: str) -> float:
+        schema = dict(self.dataset.collect_schema())
+        dtype = schema.get(col_name)
+        if dtype is not None and dtype.is_numeric():
+            val = self.dataset.select(pl.col(col_name).std()).collect().item()
+            return float(val) if val is not None else 0.0
+        return 0.0
+
 
 class Polars_AggregateDataset(AggregateDataset):
     @staticmethod
